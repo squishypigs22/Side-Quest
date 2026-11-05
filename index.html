@@ -125,44 +125,33 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 @media(max-width:520px){.trick-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:350px){.trick-list{grid-template-columns:1fr!important}}
 
-/* Unified blue theme with consistently rounded surfaces; category text colours stay distinct */
+/* Original dark colours with blue outlines and rounded corners */
 :root{
- --bg:#101a29;
- --surface:#17263a;
- --surface2:#20344d;
- --line:#385778;
- --accent:#8bbaff;
+ --bg:#111214;
+ --surface:#1a1d24;
+ --surface2:#252a34;
+ --line:#52749b;
+ --accent:#83baff;
  --radius:16px;
 }
-body{background:var(--bg)}
 .metric,.activity-row,.category-link,.target-panel,.month-card,.log-row,
 .log-summary,.trick-stat,.trick-row,.target-card,.overview-category-grid .category-block,
 .trick-overview,.trick-card,.trick-filter,.trick-search,.music-switch,
 .year-nav button,.quiet-btn,.icon-btn,.modal,.modal-actions button{
- background:var(--surface)!important;
- border-color:var(--line)!important;
+ border-color:#52749b!important;
  border-radius:16px!important;
 }
-.metric,.overview-category-grid .category-block,.trick-overview{background:#1b2d45!important}
 .activity-icon,.trick-card select,.target-edit input,.log-actions button{
- background:var(--surface2)!important;
- border-color:var(--line)!important;
+ border-color:#52749b!important;
  border-radius:11px!important;
 }
-.target-edit button,.trick-filter.active,.bottom-nav button.active{
- background:#8bbaff24!important;
- border-color:#8bbaff88!important;
- color:var(--accent)!important;
-}
-.bottom-nav{background:#142238f5!important;border-color:var(--line)!important}
+.bottom-nav{border-color:#52749b!important}
 .bottom-nav button{border-radius:12px!important}
-.topbar{border-color:var(--line)}
+.topbar{border-color:#52749b}
 .brand-mark{border-color:#8bbaff88;border-radius:11px}
-.progress-track,.target-progress,.trick-progress-track{background:#30445d}
+.progress-track,.target-progress,.trick-progress-track{background:#343941}
 .progress-fill,.target-progress span,.trick-progress-track span{background:#8bbaff!important}
 .date-cell{border-radius:11px}
-.date-cell.today:not(.done){border-color:var(--calendar-accent,var(--accent))}
-.modal{background:var(--surface)!important}
 .toast{border-radius:14px}
 
 </style>
