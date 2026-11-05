@@ -38,10 +38,15 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .date-cell{font-size:11px}
 @media(max-width:650px){.log-actions button{padding:6px 7px;font-size:11px}.bottom-nav button{font-size:11px}}
 
-/* Content cards size to their contents instead of filling the available width */
-.metric,.activity-row,.category-link,.target-panel,.log-row,.log-summary,.trick-stat,.trick-row,.target-card{width:fit-content;max-width:100%;height:fit-content;min-height:0;align-self:start}
-.log-list,.target-list{justify-items:start}
-.activity-row{width:fit-content}
+/* Consistent responsive card grids: fill each grid cell and use screen width efficiently */
+.metric,.activity-row,.category-link,.target-panel,.month-card,.log-row,.log-summary,.trick-stat,.trick-row,.target-card{width:100%;max-width:100%;height:fit-content;min-height:0;align-self:stretch}
+.log-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.target-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.track-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.track-panel .log-list,.track-panel .target-list{grid-template-columns:minmax(0,1fr)}
+.trick-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.log-list,.target-list{grid-template-columns:minmax(0,1fr)}.track-grid{grid-template-columns:minmax(0,1fr);gap:16px}}
+
 
 </style>
 </head>
@@ -51,7 +56,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.4.5</div>
+<div class="version-tag">v1.4.6</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
