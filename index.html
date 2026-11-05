@@ -48,6 +48,32 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 @media(max-width:760px){.log-list,.target-list{grid-template-columns:minmax(0,1fr)}.track-grid{grid-template-columns:minmax(0,1fr);gap:16px}}
 
 
+
+/* Vibrant, balanced overview and consistent component spacing */
+:root{--fitness:#70e0aa;--music:#c09aff;--skate:#ffad70;--accent:#83baff;--surface:#1a1d24;--surface2:#252a34;--line:#353d49;--muted:#a4adbb}
+.page-head h1{font-size:clamp(34px,5vw,46px);line-height:1.04;margin:6px 0}
+.week-summary{gap:12px;margin-bottom:18px}
+.metric{padding:18px 18px 16px;border-radius:16px;background:linear-gradient(145deg,#252b36,#1a1d24);border-color:#3a4351}
+.metric-value{font-size:clamp(30px,3.5vw,40px);line-height:1.05;margin-top:8px}
+.metric-label{font-size:11px;font-weight:750;color:#c3ccda}
+.metric-note{font-size:11px;margin-top:5px}
+.overview-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.overview-category-grid .category-block{padding:15px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(155deg,#202630,#171a20);min-width:0}
+.overview-category-grid .category-top{align-items:flex-start;flex-direction:column;gap:5px;margin-bottom:13px}
+.overview-category-grid .category-title{font-family:"Baloo 2","Nunito",sans-serif;font-size:20px;line-height:1.1}
+.overview-category-grid .category-meta{font-size:11px}
+.overview-category-grid .activity-list{grid-template-columns:minmax(0,1fr);gap:8px}
+.overview-category-grid .activity-row{padding:12px;border-radius:12px;background:#ffffff08;border-color:#ffffff12}
+.overview-category-grid .activity-name{font-size:13px;font-weight:800}
+.overview-category-grid .activity-meta{font-size:10px}
+.overview-category-grid .activity-icon{width:36px;height:36px;border-radius:11px}
+.cat-fitness .category-title{color:var(--fitness)}.cat-music .category-title{color:var(--music)}.cat-skateboarding .category-title{color:var(--skate)}
+.cat-fitness.overview-category-grid .category-block{border-top-color:#70e0aa}.overview-category-grid .cat-fitness{border-color:#70e0aa55;background:linear-gradient(155deg,#20372f,#191e22)}
+.overview-category-grid .cat-music{border-color:#c09aff55;background:linear-gradient(155deg,#30263e,#1d1b25)}
+.overview-category-grid .cat-skateboarding{border-color:#ffad7055;background:linear-gradient(155deg,#3b2b22,#211d1a)}
+.week-summary .metric:nth-child(1){border-color:#83baff66}.week-summary .metric:nth-child(2){border-color:#70e0aa66}.week-summary .metric:nth-child(3){border-color:#c09aff66}
+@media(max-width:900px){.overview-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.overview-category-grid{grid-template-columns:minmax(0,1fr);gap:9px}.overview-category-grid .category-block{padding:13px}.metric{padding:13px 11px}.metric-value{font-size:25px}.metric-label,.metric-note{font-size:9px}}
 </style>
 </head>
 <body>
@@ -56,7 +82,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.4.6</div>
+<div class="version-tag">v1.5.0</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -134,7 +160,7 @@ function categorySummary(c){
  return '<div class="category-block cat-'+c.id+'"><div class="category-top"><span class="category-title">'+c.name+'</span><span class="category-meta">'+sum+' / '+target+' sessions this month</span></div><div class="activity-list">'+list.map(activityCard).join("")+'</div></div>';
 }
 function dashboard(){
- return '<div class="page-head"><div class="eyebrow">PERSONAL TRACKER · '+today.getFullYear()+'</div><h1>Overview</h1><p>Your progress, at a glance.</p></div>'+weeklySummary()+'<section class="section"><div class="section-head"><h2>Your categories</h2><small>Open a category to explore</small></div>'+categories.map(categorySummary).join("")+'</section>';
+ return '<div class="overview-page"><div class="page-head"><div class="eyebrow">YOUR 2027 SIDE QUEST</div><h1>Overview</h1><p>Your progress, at a glance.</p></div>'+weeklySummary()+'<section class="section overview-categories"><div class="section-head"><h2>Your categories</h2><small>Pick an activity to jump in</small></div><div class="overview-category-grid">'+categories.map(categorySummary).join("")+'</div></section></div>';
 }
 function categoriesPage(){
  return '<div class="page-head"><div class="eyebrow">YOUR TRACKING</div><h1>Categories</h1><p>Choose an area to view its activities.</p></div>'+categories.map(c=>{
