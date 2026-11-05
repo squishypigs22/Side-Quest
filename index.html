@@ -51,7 +51,8 @@ const A=[
 const tricks=["Ollie","Fakie Ollie","Nollie","Switch Ollie","Shuvit","Pop Shuvit","Fakie Shuvit","Frontside 180","Backside 180","Fakie 180","Nollie 180","Kickflip","Heelflip","Fakie Kickflip","Fakie Heelflip","Varial Kickflip","Varial Heelflip","Hardflip","Inward Heelflip","Frontside Pop Shuvit","Backside Pop Shuvit","Bigspin","360 Shuvit","Fakie Bigspin","Frontside Bigspin","Backside Bigspin","Tre Flip","Laser Flip","360 Flip","Fakie 360 Flip","Nollie Kickflip","Nollie Heelflip","Switch Kickflip","Switch Heelflip","Frontside Flip","Backside Flip","Half Cab","Half Cab Flip","Half Cab Heelflip","No Comply","Boneless","Manual","Nose Manual","Boardslide","50-50 Grind","5-0 Grind","Smith Grind","Feeble Grind","Crooked Grind","Nosegrind"];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.getDate()),monthKey=(y,m)=>y+"-"+String(m+1).padStart(2,"0"),key=(y,m,d)=>y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+const monthKey=(y,m)=>y+"-"+String(m+1).padStart(2,"0"),key=(y,m,d)=>y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.getDate());
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
 data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear();
