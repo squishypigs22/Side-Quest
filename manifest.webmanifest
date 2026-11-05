@@ -4,7 +4,7 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0b0d0b",
-  "theme_color": "#0b0d0b",
-  "description": "A calm, focused space to make your 2027 count."
+  "background_color": "#111214",
+  "theme_color": "#111214",
+  "description": "A focused personal progress tracker."
 }
