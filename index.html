@@ -96,6 +96,34 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 @media(max-width:760px){.trick-tools{grid-template-columns:1fr}.trick-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:390px){.trick-stats{gap:6px}.trick-stat{padding:11px}.trick-stat strong{font-size:22px}.trick-list{gap:7px}.trick-card{padding:10px}.trick-card>strong{font-size:12px}}
 
+
+/* Solid-colour visual system: gradients are reserved for progress indicators */
+*{background-image:none!important}
+.progress-fill,.target-progress span,.trick-progress-track span{
+ background-image:linear-gradient(90deg,#ef5350 0%,#f5d547 50%,#43c978 100%)!important;
+}
+.date-cell.done{background:#43c978!important;color:#10271d;border-color:#8df0b6;box-shadow:none}
+.month-card,.metric,.overview-category-grid .category-block,.trick-overview,
+.trick-card,.trick-card.is-learnt,.trick-card.is-learning,.trick-card.is-rolling{
+ box-shadow:none!important;
+}
+.month-card{background:#1a1d24!important}
+.metric{background:#252b36!important}
+.overview-category-grid .category-block{background:#202630!important}
+.trick-overview{background:#30251e!important}
+.trick-card,.trick-card.is-learnt,.trick-card.is-learning,.trick-card.is-rolling{background:var(--surface)!important}
+.trick-card.is-learnt{border-color:#62d69b80!important}
+.trick-card.is-learning{border-color:#b69aff80!important}
+.trick-card.is-rolling{border-color:#a78bfa!important;background:#282238!important}
+.trick-card.is-rolling .trick-state{color:#c4b5fd;background:#8b5cf620}
+.trick-card.is-rolling select{border-color:#8b5cf680}
+.trick-list{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:10px}
+@media(max-width:1150px){.trick-list{grid-template-columns:repeat(5,minmax(0,1fr))!important}}
+@media(max-width:920px){.trick-list{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+@media(max-width:720px){.trick-list{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:520px){.trick-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:350px){.trick-list{grid-template-columns:1fr!important}}
+
 </style>
 </head>
 <body>
@@ -233,13 +261,13 @@ function trackPage(){
 function tricksPage(){
   const statusOf=t=>{const v=data.tricks[t]||"Not learnt";return v==="Rolling"?"Learnt (rolling)":v==="Learnt"?"Learnt (flat)":v};
   const learnt=tricks.filter(t=>statusOf(t).startsWith("Learnt (")).length,flat=tricks.filter(t=>statusOf(t)==="Learnt (flat)").length,rolling=tricks.filter(t=>statusOf(t)==="Learnt (rolling)").length,learning=tricks.filter(t=>statusOf(t)==="Learning").length,remaining=tricks.length-learnt-learning,pct=Math.round(learnt/tricks.length*100);
-  const visible=tricks.map((t,i)=>({t,i,status:statusOf(t)})).filter(x=>(trickFilter==="All"||(trickFilter==="To learn"&&x.status==="Not learnt")||(trickFilter==="Learning"&&x.status==="Learning")||(trickFilter==="Learnt"&&x.status.startsWith("Learnt (")))&&x.t.toLowerCase().includes(trickSearch.toLowerCase()));
+  const order={"Not learnt":0,"Learning":1,"Learnt (flat)":2,"Learnt (rolling)":3};\n  const visible=tricks.map((t,i)=>({t,i,status:statusOf(t)})).filter(x=>(trickFilter==="All"||(trickFilter==="To learn"&&x.status==="Not learnt")||(trickFilter==="Learning"&&x.status==="Learning")||(trickFilter==="Learnt"&&x.status.startsWith("Learnt (")))&&x.t.toLowerCase().includes(trickSearch.toLowerCase())).sort((a,b)=>order[a.status]-order[b.status]||a.t.localeCompare(b.t));
   const filters=["All","To learn","Learning","Learnt"].map(v=>'<button class="trick-filter '+(trickFilter===v?"active":"")+'" data-trick-filter="'+v+'">'+v+' <span>'+(v==="All"?tricks.length:v==="To learn"?remaining:v==="Learning"?learning:learnt)+'</span></button>').join("");
   return '<div class="page-head category-page-head cat-skateboarding"><div class="eyebrow">SKATEBOARDING</div><h1>Trick Progress</h1><p>Your trick list, progress and landing status.</p></div>'+
   '<section class="trick-overview"><div class="trick-overview-top"><div><div class="trick-kicker">TOTAL PROGRESS</div><div class="trick-progress-number">'+learnt+' <span>/ '+tricks.length+' learnt</span></div></div><div class="trick-progress-pct">'+pct+'%</div></div><div class="trick-progress-track"><span style="width:'+pct+'%"></span></div><div class="trick-overview-foot"><span>'+flat+' landed flat</span><span>'+rolling+' landed rolling</span></div></section>'+
   '<div class="trick-stats"><div class="trick-stat stat-learnt"><strong>'+learnt+'</strong><small>Learnt</small></div><div class="trick-stat stat-learning"><strong>'+learning+'</strong><small>Learning</small></div><div class="trick-stat stat-todo"><strong>'+remaining+'</strong><small>To learn</small></div></div>'+
   '<section class="section trick-library"><div class="section-head"><h2>Your tricks</h2><small>'+visible.length+' of '+tricks.length+'</small></div><div class="trick-tools"><div class="trick-filters">'+filters+'</div><input class="trick-search" type="search" placeholder="Find a trick..." value="'+esc(trickSearch)+'" aria-label="Find a trick" data-trick-search></div>'+
-  '<div class="trick-list">'+(visible.length?visible.map(x=>'<article class="trick-card '+(x.status.startsWith("Learnt (")?"is-learnt":x.status==="Learning"?"is-learning":"")+'"><div class="trick-card-top"><span class="trick-number">'+String(x.i+1).padStart(2,"0")+'</span><span class="trick-state">'+(x.status.startsWith("Learnt (")?"Learnt":x.status==="Learning"?"Learning":"Not learnt")+'</span></div><strong>'+esc(x.t)+'</strong><label class="trick-select-label" for="trick-'+x.i+'">Landing status</label><select id="trick-'+x.i+'" data-trick="'+esc(x.t)+'"><option '+(x.status==="Not learnt"?"selected":"")+'>Not learnt</option><option '+(x.status==="Learning"?"selected":"")+'>Learning</option><option '+(x.status==="Learnt (flat)"?"selected":"")+'>Learnt (flat)</option><option '+(x.status==="Learnt (rolling)"?"selected":"")+'>Learnt (rolling)</option></select></article>').join(""):'<div class="trick-empty">No tricks match this filter.</div>')+'</div></section>';
+  '<div class="trick-list">'+(visible.length?visible.map(x=>'<article class="trick-card '+(x.status==="Learnt (rolling)"?"is-rolling":x.status==="Learnt (flat)"?"is-learnt":x.status==="Learning"?"is-learning":"")+'"><div class="trick-card-top"><span class="trick-number">'+String(x.i+1).padStart(2,"0")+'</span><span class="trick-state">'+(x.status==="Learnt (rolling)"?"Rolling":x.status==="Learnt (flat)"?"Learnt":x.status==="Learning"?"Learning":"Not learnt")+'</span></div><strong>'+esc(x.t)+'</strong><label class="trick-select-label" for="trick-'+x.i+'">Landing status</label><select id="trick-'+x.i+'" data-trick="'+esc(x.t)+'"><option '+(x.status==="Not learnt"?"selected":"")+'>Not learnt</option><option '+(x.status==="Learning"?"selected":"")+'>Learning</option><option '+(x.status==="Learnt (flat)"?"selected":"")+'>Learnt (flat)</option><option '+(x.status==="Learnt (rolling)"?"selected":"")+'>Learnt (rolling)</option></select></article>').join(""):'<div class="trick-empty">No tricks match this filter.</div>')+'</div></section>';
 }
 function render(){
  const labels=[["Home","⌂","Overview"],["Fit","✳","cat:fitness"],["Music","♫","cat:music"],["Skate",'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.5h18l-1.8 2.2H4.8z"/><circle cx="7" cy="19" r="1.2"/><circle cx="17" cy="19" r="1.2"/></svg>',"cat:skateboarding"],["Track","⇄","Track"],["Tricks","↗","Tricks"]];
