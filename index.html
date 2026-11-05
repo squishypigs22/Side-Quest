@@ -29,7 +29,13 @@ main{min-width:0;padding:0 44px 70px;max-width:1200px;width:100%;margin:auto}.to
 </aside>
 <main>
 <div class="topbar"><div class="mobile-brand"><div class="brand-mark">↗</div>Side Quest<span style="color:var(--lime)">.</span></div><div class="crumb" id="crumb">Workspace / <strong>Overview</strong></div><div class="top-actions"><div class="date-pill" id="today"></div><button class="icon-btn" id="exportBtn" title="Export backup" aria-label="Export backup">↓</button><button class="icon-btn" id="importBtn" title="Import backup" aria-label="Import backup">↑</button><input class="file-input" id="importFile" type="file" accept="application/json"></div></div>
-<div id="view" aria-live="polite"></div>
+<div id="view" aria-live="polite"><section class="card"><h1>Side Quest</h1><p class="muted">Loading your dashboard…</p></section></div>
+<script>
+window.addEventListener("error",function(event){
+ const view=document.getElementById("view");
+ if(view)view.innerHTML='<section class="card"><h1>Side Quest couldn’t start</h1><p class="muted">A script error stopped the dashboard loading.</p><p style="color:var(--red);overflow-wrap:anywhere;font-size:12px">'+String(event.message||"Unknown error").replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})+'</p></section>';
+});
+</script>
 <footer>Built for progress, not perfection · Your data stays on this device</footer>
 </main>
 </div>
