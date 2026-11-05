@@ -31,7 +31,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.1.0</div>
+<div class="version-tag">v1.1.1</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -81,9 +81,21 @@ function weeklySummary(){
  const prevStart=new Date(start);prevStart.setDate(prevStart.getDate()-7);
  const prevEnd=new Date(start);prevEnd.setDate(prevEnd.getDate()-1);
  let thisWeek=0,lastWeek=0,monthlyDone=0,monthlyTarget=0;
- A.forEach(a=>{thisWeek+=countWeek(a.id,dateKey(start),dateKey(end));lastWeek+=countWeek(a.id,dateKey(prevStart),dateKey(prevEnd));monthlyDone+=sessionCount(a.id,today.getFullYear(),today.getMonth());monthlyTarget+=targetFor(a.id,today.getFullYear(),today.getMonth())});
+ A.forEach(a=>{
+  thisWeek+=countWeek(a.id,dateKey(start),dateKey(end));
+  lastWeek+=countWeek(a.id,dateKey(prevStart),dateKey(prevEnd));
+  monthlyDone+=sessionCount(a.id,today.getFullYear(),today.getMonth());
+  monthlyTarget+=targetFor(a.id,today.getFullYear(),today.getMonth());
+ });
  const delta=thisWeek-lastWeek;
- return '<section class="section"><div class="section-head"><h2>This week</h2><small>'+start.toLocaleDateString(undefined,{day:"numeric",month:"short"})+' – '+end.toLocaleDateString(undefined,{day:"numeric",month:"short"})+'</small></div><div class="week-summary"><div class="metric"><div class="metric-label">Sessions this week</div><div class="metric-value">'+thisWeek+'</div><div class="metric-note">Across all activities</div></div><div class="metric"><div class="metric-label">Monthly targets</div><div class="metric-value">'+monthlyDone+'<span style="font-size:13px;color:var(--muted)"> / '+monthlyTarget+'</span></div><div class="metric-note">Sessions logged this month</div></div><div class="metric"><div class="metric-label">Vs previous week</div><div class="metric-value">'+(delta>0?"+":"")+delta+'</div><div class="metric-note">'+(delta>0?"More":delta<0?"Fewer":"Same number of")+" sessions</div></div></div></section>';
+ const comparison=delta>0?"More":delta<0?"Fewer":"Same number of";
+ const range=start.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" – "+end.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+ return '<section class="section"><div class="section-head"><h2>This week</h2><small>'+range+'</small></div>'+
+ '<div class="week-summary">'+
+ '<div class="metric"><div class="metric-label">Sessions this week</div><div class="metric-value">'+thisWeek+'</div><div class="metric-note">Across all activities</div></div>'+
+ '<div class="metric"><div class="metric-label">Monthly targets</div><div class="metric-value">'+monthlyDone+' / '+monthlyTarget+'</div><div class="metric-note">Sessions logged this month</div></div>'+
+ '<div class="metric"><div class="metric-label">Vs previous week</div><div class="metric-value">'+(delta>0?"+":"")+delta+'</div><div class="metric-note">'+comparison+' sessions</div></div>'+
+ '</div></section>';
 }
 function activityCard(a){
  const done=totalSessions(a.id),target=targetFor(a.id,today.getFullYear(),today.getMonth()),month=sessionCount(a.id,today.getFullYear(),today.getMonth());
