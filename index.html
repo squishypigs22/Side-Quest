@@ -59,7 +59,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .metric-note{font-size:11px;margin-top:5px}
 .overview-category-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
 .overview-category-grid .category-block{padding:15px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(155deg,#202630,#171a20);min-width:0}
-.overview-category-grid .category-top{align-items:flex-start;flex-direction:column;gap:5px;margin-bottom:13px}
+.overview-category-grid .category-top{align-items:center;flex-direction:row;justify-content:space-between;gap:8px;margin-bottom:13px}
 .overview-category-grid .category-title{font-family:"Baloo 2","Nunito",sans-serif;font-size:20px;line-height:1.1}
 .overview-category-grid .category-meta{font-size:11px}
 .overview-category-grid .activity-list{grid-template-columns:minmax(0,1fr);gap:8px}
@@ -157,7 +157,7 @@ function activityCard(a){
 }
 function categorySummary(c){
  const list=c.activities.map(id=>A.find(a=>a.id===id)),sum=list.reduce((n,a)=>n+sessionCount(a.id,today.getFullYear(),today.getMonth()),0),target=list.reduce((n,a)=>n+targetFor(a.id,today.getFullYear(),today.getMonth()),0);
- return '<div class="category-block cat-'+c.id+'"><div class="category-top"><span class="category-title">'+c.name+'</span><span class="category-meta">'+sum+' / '+target+' sessions this month</span></div><div class="activity-list">'+list.map(activityCard).join("")+'</div></div>';
+ return '<div class="category-block cat-'+c.id+'"><div class="category-top"><span class="category-title">'+c.name+'</span><span class="category-meta">'+sum+'/'+target+'</span></div><div class="activity-list">'+list.map(activityCard).join("")+'</div></div>';
 }
 function dashboard(){
  return '<div class="overview-page"><div class="page-head"><div class="eyebrow">YOUR 2027 SIDE QUEST</div><h1>Overview</h1><p>Your progress, at a glance.</p></div>'+weeklySummary()+'<section class="section overview-categories"><div class="section-head"><h2>Your categories</h2><small>Pick an activity to jump in</small></div><div class="overview-category-grid">'+categories.map(categorySummary).join("")+'</div></section></div>';
