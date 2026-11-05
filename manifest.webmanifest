@@ -1,1 +1,10 @@
-{"name":"Side Quest — 2027","short_name":"Side Quest","start_url":"./","display":"standalone","background_color":"#0c0e0b","theme_color":"#10120d","description":"Your personal 2027 progress dashboard."}
+{
+  "name": "Side Quest — 2027",
+  "short_name": "Side Quest",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0d0b",
+  "theme_color": "#0b0d0b",
+  "description": "A calm, focused space to make your 2027 count."
+}
