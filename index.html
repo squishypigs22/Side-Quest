@@ -129,8 +129,8 @@ function monthCard(id,y,m){
  const count=sessionCount(id,y,m),target=targetFor(id,y,m),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),parts=[];
  for(let i=0;i<first;i++)parts.push('<span class="date-empty"></span>');
  for(let d=1;d<=days;d++){
-  const k=key(y,m,d),v=getStatus(id,k),future=k>todayKey;
-  parts.push('<button class="date-cell '+(v===1?"done":v===-1?"missed":"")+' '+(k===todayKey?"today":"")+'" data-date="'+k+'" '+(future?"disabled":"")+' aria-label="'+k+' '+(v===1?"completed":v===-1?"missed":"unmarked")+'">'+d+'</button>');
+  const k=key(y,m,d),raw=getStatus(id,k),v=raw===1?1:0,future=k>todayKey;
+  parts.push('<button class="date-cell '+(v===1?"done":v===-1?"missed":"")+' '+(k===todayKey?"today":"")+'" data-date="'+k+'" '+(future?"disabled":"")+' aria-label="'+k+' '+(v===1?"completed":"unmarked")+'">'+d+'</button>');
  }
  return '<section class="month-card"><div class="month-heading"><strong>'+new Date(y,m,1).toLocaleDateString(undefined,{month:"short"})+'</strong><small>'+count+'/'+target+'</small></div><div class="weekdays"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="month-days">'+parts.join("")+'</div><div class="month-foot">sessions / target</div></section>';
 }
@@ -150,7 +150,7 @@ function logPage(){
  return '<div class="page-head"><div class="eyebrow">DAILY CHECK-IN</div><h1>Log</h1><p>'+dateLabel+'</p></div><div class="log-summary"><strong>'+done+' / '+A.length+'</strong><small>activities completed today</small></div><div class="log-list">'+A.map(a=>{
   const status=getStatus(a.id,todayKey);
   const tone=a.category==="fitness"?"fitness":a.category==="music"?"music":"skate";
-  return '<section class="log-row"><div class="log-activity"><span class="activity-icon" style="color:var(--'+tone+')">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+(status===1?"Completed":"Not logged")+'</small></span></div><div class="log-actions"><button data-log-activity="'+a.id+'" data-log-value="1" class="'+(status===1?"active":"")+'" aria-pressed="'+(status===1)+'">Done</button><button data-log-activity="'+a.id+'" data-log-value="-1" class="'+(status===-1?"active":"")+'" aria-pressed="'+(status===-1)+'">Missed</button><button data-log-activity="'+a.id+'" data-log-value="0" class="'+(status===0?"active":"")+'" aria-pressed="'+(status===0)+'">Clear</button></div></section>';
+  return '<section class="log-row"><div class="log-activity"><span class="activity-icon" style="color:var(--'+tone+')">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+(status===1?"Completed":"Not logged")+'</small></span></div><div class="log-actions"><button data-log-activity="'+a.id+'" data-log-value="1" class="'+(status===1?"active":"")+'" aria-pressed="'+(status===1)+'">Done</button><button data-log-activity="'+a.id+'" data-log-value="0" class="'+(status===0?"active":"")+'" aria-pressed="'+(status===0)+'">Clear</button></div></section>';
  }).join("")+'</div>';
 }
 function tricksPage(){
@@ -164,7 +164,7 @@ function render(){
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 function openModal(date){
- const current=getStatus(activityId,date);
+ 
  $("modalRoot").innerHTML='<div class="modal-backdrop" data-close-modal><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Choose how to record this day.</p><div class="modal-actions"><button data-value="1">✓ &nbsp; Completed</button><button data-value="0">Clear entry</button></div></section></div>';
  $("modalRoot").querySelectorAll("[data-value]").forEach(btn=>btn.addEventListener("click",()=>{
   data.activityDays[activityId]=data.activityDays[activityId]||{};
