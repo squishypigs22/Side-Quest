@@ -31,7 +31,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.2.0</div>
+<div class="version-tag">v1.2.1</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -139,9 +139,9 @@ function tricksPage(){
  return '<div class="page-head"><div class="eyebrow">SKATEBOARDING</div><h1>Tricks</h1><p>Track what you have learnt.</p></div><div class="trick-summary"><div class="trick-stat"><strong>'+learnt+'</strong><small>Learnt</small></div><div class="trick-stat"><strong>'+learning+'</strong><small>Learning</small></div><div class="trick-stat"><strong>'+(50-learnt-learning)+'</strong><small>Not learnt</small></div></div><div class="trick-list">'+tricks.map((t,i)=>'<div class="trick-row"><span class="num">'+String(i+1).padStart(2,"0")+'</span><strong>'+esc(t)+'</strong><select data-trick="'+esc(t)+'"><option '+((data.tricks[t]||"Not learnt")==="Not learnt"?"selected":"")+'>Not learnt</option><option '+(data.tricks[t]==="Learning"?"selected":"")+'>Learning</option><option '+(data.tricks[t]==="Learnt"?"selected":"")+'>Learnt</option></select></div>').join("")+'</div>';
 }
 function render(){
- const labels=[["Overview","⌂"],["Categories","▦"],["Tricks","↗"]];
- $("bottomNav").innerHTML=labels.map(([name,icon])=>'<button data-page="'+name+'" class="'+((page===name||(page==="Category"&&name==="Categories")||(page==="Activity"&&name==="Categories"))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Categories"?categoriesPage():page==="Category"?categoryPage():page==="Activity"?activityPage():tricksPage();
+ const labels=[["Overview","⌂","Overview"],["Fitness","✳","cat:fitness"],["Music","♫","cat:music"],["Skate","▱","cat:skateboarding"],["Tricks","↗","Tricks"]];
+ $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&((page==="Category"||page==="Activity")&&categoryId===target.slice(4))))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
+ $("view").innerHTML=page==="Overview"?dashboard():page==="Category"?categoryPage():page==="Activity"?activityPage():page==="Tricks"?tricksPage():dashboard();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 function openModal(date){
