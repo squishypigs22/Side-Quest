@@ -392,7 +392,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.17</div>
+<div class="version-tag">v0.1.18</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -661,7 +661,7 @@ function categoryPage(){
  return '<div class="page-head category-page-head cat-'+c.id+'"><div class="eyebrow">YOUR ACTIVITIES</div><h1>'+c.name+'</h1><p>'+list.length+' activities</p></div><div class="activity-list">'+list.map(activityCard).join("")+'</div>';
 }
 function monthCard(y,m){
- const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),parts=[];
+ const first=(new Date(y,m,1).getDay()+6)%7,days=new Date(y,m+1,0).getDate(),parts=[];
  const monthDone=A.reduce((n,a)=>n+sessionCount(a.id,y,m),0);
  for(let i=0;i<first;i++)parts.push('<span class="date-empty"></span>');
  for(let d=1;d<=days;d++){
@@ -670,7 +670,7 @@ function monthCard(y,m){
   const completed=A.filter(a=>getStatus(a.id,k)===1).map(a=>a.name).join(", ");
   parts.push('<button class="date-cell '+(completed?"has-activity":"")+' '+(k===todayKey?"today":"")+'" data-date="'+k+'" '+(future?"disabled":"")+' aria-label="'+k+(completed?" completed: "+completed:" no activities logged")+'"><span class="date-number">'+d+'</span><span class="calendar-activity-icons">'+icons+'</span></button>');
  }
- return '<section class="month-card"><div class="month-heading"><strong>'+new Date(y,m,1).toLocaleDateString(undefined,{month:"short"})+'</strong><small>'+monthDone+' sessions</small></div><div class="weekdays"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div><div class="month-days">'+parts.join("")+'</div></section>';
+ return '<section class="month-card"><div class="month-heading"><strong>'+new Date(y,m,1).toLocaleDateString(undefined,{month:"short"})+'</strong><small>'+monthDone+' sessions</small></div><div class="weekdays"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="month-days">'+parts.join("")+'</div></section>';
 }
 function calendarPage(){
  const displayMonth=viewYear===today.getFullYear()?today.getMonth():0;
