@@ -193,9 +193,37 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .calendar-log-name{font-weight:700}
 @media(max-width:650px){.calendar-screen{min-height:calc(100dvh - 170px)}.months-grid.current-month .month-card{min-height:0;padding:10px}.months-grid.current-month .month-days{gap:4px}.months-grid.current-month .date-cell,.months-grid.current-month .date-empty{height:auto;min-height:0;font-size:12px}.calendar-modal{width:100%;max-height:85dvh}.calendar-log-row{min-height:52px}}
 
-/* Keep every calendar month square or landscape, never portrait. */
+/* Keep the all-month overview compact; current month is sized to the viewport below. */
 .months-grid .month-card{width:100%;height:auto;aspect-ratio:1/1}
-.months-grid.current-month .month-card{height:auto;aspect-ratio:1/1}
+
+/* Fit the current-month calendar into the visible app area without page scrolling. */
+.calendar-screen{height:calc(100dvh - 190px);min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:0}
+.calendar-screen .page-head{flex:0 0 auto;margin:0 0 8px}
+.calendar-screen .calendar-legend{flex:0 0 auto;margin:0 0 8px;gap:8px}
+.calendar-screen .year-nav{flex:0 0 auto;margin:0 0 8px}
+.months-grid.current-month{display:flex;flex:1 1 auto;min-height:0;width:100%;max-width:none;align-items:stretch;justify-content:center;overflow:hidden}
+.months-grid.current-month .month-card{width:100%;height:100%;max-height:min(calc(100dvh - 300px),calc((100vw - 28px)/1.12));min-height:0;aspect-ratio:auto;flex:1 1 auto;padding:clamp(8px,1.2vw,16px);display:flex;flex-direction:column}
+.months-grid.current-month .month-heading{flex:0 0 auto;margin-bottom:clamp(5px,1vh,10px)}
+.months-grid.current-month .weekdays{flex:0 0 auto;margin-bottom:clamp(4px,.8vh,8px)}
+.months-grid.current-month .month-days{flex:1 1 auto;min-height:0;grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(2px,.5vw,6px)}
+.months-grid.current-month .date-cell,.months-grid.current-month .date-empty{height:100%;min-height:0;aspect-ratio:auto;font-size:clamp(10px,1.25vw,15px);border-radius:clamp(5px,1vw,11px)}
+.months-grid.current-month .date-cell{grid-template-rows:1fr auto;align-content:center;gap:1px}
+.months-grid.current-month .calendar-activity-icons{min-height:clamp(11px,1.5vw,17px);gap:2px}
+.months-grid.current-month .calendar-activity-icon{width:clamp(10px,1.3vw,15px);height:clamp(10px,1.3vw,15px);flex-basis:clamp(10px,1.3vw,15px)}
+.months-grid.current-month .calendar-activity-icon .sq-icon{width:100%;height:100%}
+@media(max-width:650px){
+ .calendar-screen{height:calc(100dvh - 165px)}
+ .calendar-screen .page-head{margin-bottom:6px}
+ .calendar-screen .calendar-legend{margin-bottom:6px;gap:7px}
+ .calendar-screen .year-nav{margin-bottom:6px}
+ .months-grid.current-month .month-card{max-height:min(calc(100dvh - 270px),calc((100vw - 28px)/1.12));padding:8px}
+ .months-grid.current-month .month-heading strong{font-size:14px}
+ .months-grid.current-month .month-heading small{font-size:8px;padding:2px 6px}
+ .months-grid.current-month .weekdays{font-size:8px}
+ .months-grid.current-month .date-cell,.months-grid.current-month .date-empty{font-size:10px}
+ .months-grid.current-month .calendar-activity-icons{min-height:11px}
+}
+
 </style>
 </head>
 <body>
@@ -204,7 +232,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.12</div>
+<div class="version-tag">v0.1.13</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
