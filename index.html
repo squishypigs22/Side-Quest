@@ -174,7 +174,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.8</div>
+<div class="version-tag">v0.1.9</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -509,7 +509,7 @@ document.addEventListener("click",e=>{
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
  const music=e.target.closest("[data-music-activity]");if(music){activityId=music.dataset.musicActivity;categoryId="music";viewYear=today.getFullYear();page="Activity";render();return}
- const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=targetrender();window.scrollTo(0,0);return}
+ const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
  const calendarLog=e.target.closest("[data-calendar-log]");if(calendarLog){const id=calendarLog.dataset.calendarLog,k=calendarLog.dataset.date;data.activityDays[id]=data.activityDays[id]||{};if(getStatus(id,k)===1)delete data.activityDays[id][k];else data.activityDays[id][k]=1;save();openModal(k);render();return}\n const date=e.target.closest("[data-date]");if(date&&!date.disabled){openModal(date.dataset.date);return}
