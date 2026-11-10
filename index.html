@@ -154,15 +154,15 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .date-cell{border-radius:11px}
 .toast{border-radius:14px}
 
-\n/* Final visual refinements */\n.trick-card.is-learning{border-color:#ffad7080!important;background:#30251e!important}\n.trick-card.is-learning .trick-state{color:#ffad70!important;background:#ffad7018!important}\n.stat-learning strong{color:#ffad70!important}\n</style>
+\n/* Final visual refinements */\n.trick-card.is-learning{border-color:#ffad7080!important;background:#30251e!important}\n.trick-card.is-learning .trick-state{color:#ffad70!important;background:#ffad7018!important}\n.stat-learning strong{color:#ffad70!important}\n.sync-modal{width:min(100%,390px);padding:22px}.sync-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#8bbaff18;color:var(--accent);font-size:23px;margin:0 0 13px}.sync-modal h2{font-size:20px;margin:0 32px 5px 0}.sync-modal p{font-size:12px;line-height:1.55;margin:0 0 17px}.sync-modal p strong{color:var(--text)}.sync-actions{display:grid;gap:8px}.sync-actions button{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:750;text-align:center}.sync-actions button.sync-primary{background:#8bbaff;color:#101722;border-color:#8bbaff}.sync-actions button:disabled{opacity:.6}.sync-help{margin:14px 0 0!important;font-size:10px!important}.sync-code-input{width:100%;padding:14px 12px;border:1px solid #8bbaff80;border-radius:11px;background:#11151b;color:var(--text);font:800 19px/1.2 "Nunito",sans-serif;letter-spacing:4px;text-align:center;text-transform:uppercase;outline:none}.sync-code-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8bbaff20}.sync-error{min-height:18px;color:#ff9b9b;font-size:11px;margin:7px 0}.pair-code{padding:17px 10px;border:1px dashed #8bbaff80;border-radius:12px;background:#8bbaff0c;color:var(--accent);font-size:27px;font-weight:900;letter-spacing:5px;text-align:center;font-variant-numeric:tabular-nums;user-select:all}.pair-expiry{font-size:10px;color:var(--muted);text-align:center;margin:9px 0 15px}</style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="icon-btn" id="syncBtn" aria-label="Sync devices" title="Sync devices">↔</button><button class="icon-btn" id="exportBtn" aria-label="Export backup" title="Export backup">↓</button><button class="icon-btn" id="importBtn" aria-label="Import backup" title="Import backup">↑</button><input class="file-input" id="importFile" type="file" accept="application/json"></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="icon-btn" id="syncBtn" aria-label="Sync devices" title="Sync devices">↔</button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.5.2</div>
+<div class="version-tag">v1.5.3</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -245,43 +245,71 @@ async function syncPull(){
  finally{syncBusy=false;}
 }
 function save(){localStorage.setItem("sq27",JSON.stringify(data));scheduleSync()}
-async function createPairCode(){
- const result=await syncRequest("pair");
- alert("Pairing code: "+result.code+"\n\nEnter this on your other device within 10 minutes.\n\nKeep the code private.");
+function showSyncModal(content){
+ const root=$("modalRoot");
+ root.innerHTML='<div class="modal-backdrop" data-close-modal><section class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button>'+content+'</section></div>';
+}
+function syncDeviceName(){return /Android/i.test(navigator.userAgent)?"Android device":"PC"}
+function showPairCode(code,heading){
+ showSyncModal('<div class="sync-mark">↔</div><h2 id="syncTitle">'+heading+'</h2><p>On your other device, open Side Quest, tap the sync icon and choose <strong>Join an existing space</strong>. Enter this one-time code.</p><div class="pair-code" id="pairCode">'+code+'</div><div class="pair-expiry">This code expires in 10 minutes and can only be used once.</div><div class="sync-actions"><button class="sync-primary" id="copyPairCode">Copy code</button><button id="syncDone">Done</button></div>');
+ $("copyPairCode").addEventListener("click",async()=>{
+  try{await navigator.clipboard.writeText(code);toast("Pairing code copied")}
+  catch(e){const el=$("pairCode"),range=document.createRange();range.selectNodeContents(el);const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);toast("Select and copy the code")}
+ });
+ $("syncDone").addEventListener("click",()=>$("modalRoot").innerHTML="");
+}
+async function createSharedSpace(){
+ const vaultId=crypto.randomUUID();
+ const result=await syncRequest("create",{vault_id:vaultId,data,device_name:syncDeviceName()},null);
+ syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
+ localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
+ syncReady=true;syncDirty=false;localStorage.removeItem("sq27_sync_dirty");
+ const pairResult=await syncRequest("pair");
+ showPairCode(pairResult.code,"Your shared space is ready");
+ toast("Cloud sync enabled");
+}
+async function joinSharedSpace(){
+ const input=$("pairCodeInput"),code=(input?.value||"").replace(/\\s/g,"").toUpperCase();
+ if(!/^[A-Z0-9]{8}$/.test(code)){toast("Enter the 8-character code");input?.focus();return}
+ const joinButton=$("joinSpace");
+ joinButton.disabled=true;joinButton.textContent="Pairing…";
+ try{
+  const result=await syncRequest("redeem",{code,device_name:syncDeviceName()},null);
+  const localData=data;
+  data=mergeProgress(result.data,localData);
+  syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
+  localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
+  syncReady=true;syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");
+  localStorage.setItem("sq27",JSON.stringify(data));
+  await syncPush();render();$("modalRoot").innerHTML="";toast("Device paired and synced");
+ }catch(e){
+  joinButton.disabled=false;joinButton.textContent="Join shared space";
+  const error=$("pairError");if(error)error.textContent=e.message||"Check the code and try again";
+ }
 }
 async function handleSync(){
  if(syncBusy){toast("Sync is already running");return}
- try{
-  if(syncConfig){
-   if(confirm("Create a one-time pairing code for another device? Choose Cancel to sync this device now.")){
-    const result=await syncRequest("pair");
-    alert("Pairing code: "+result.code+"\n\nEnter this on your other device within 10 minutes. Keep it private.");
-   }else{await syncPull();toast("Sync checked")}
-   return;
-  }
-  const pair=confirm("Are you pairing this device to an existing Side Quest space?\n\nOK = enter a pairing code\nCancel = create a new shared space on this device");
-  if(pair){
-   const code=prompt("Enter the 8-character pairing code from your other device:");
-   if(!code)return;
-   const result=await syncRequest("redeem",{code:code.trim().toUpperCase(),device_name:/Android/i.test(navigator.userAgent)?"Android device":"PC"});
-   const localData=data;
-   data=mergeProgress(result.data,localData);
-   syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
-   localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
-   syncReady=true;syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");
-   localStorage.setItem("sq27",JSON.stringify(data));
-   await syncPush();render();toast("Device paired and synced");
-  }else{
-   const vaultId=crypto.randomUUID();
-   const result=await syncRequest("create",{vault_id:vaultId,data,device_name:/Android/i.test(navigator.userAgent)?"Android device":"PC"},null);
-   syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
-   localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
-   syncReady=true;syncDirty=false;localStorage.removeItem("sq27_sync_dirty");
-   const pairResult=await syncRequest("pair");
-   alert("Shared Side Quest space created.\n\nPairing code: "+pairResult.code+"\n\nEnter this on your other device within 10 minutes. Keep it private.");
-   toast("Cloud sync enabled");
-  }
- }catch(e){alert("Sync couldn't be completed: "+e.message)}
+ if(!navigator.onLine){toast("Connect to the internet to sync");return}
+ if(syncConfig){
+  showSyncModal('<div class="sync-mark">✓</div><h2 id="syncTitle">Side Quest is connected</h2><p>This device is linked to your shared space. Changes sync automatically when you are online.</p><div class="sync-actions"><button class="sync-primary" id="addDevice">Add another device</button><button id="syncNow">Sync now</button></div>');
+  $("addDevice").addEventListener("click",async()=>{
+   try{const result=await syncRequest("pair");showPairCode(result.code,"Pair another device")}
+   catch(e){toast("Couldn't create a pairing code: "+e.message)}
+  });
+  $("syncNow").addEventListener("click",async()=>{await syncPull();$("modalRoot").innerHTML="";toast("Sync checked")});
+  return;
+ }
+ showSyncModal('<div class="sync-mark">↔</div><h2 id="syncTitle">Sync your devices</h2><p>Connect your PC and Android so your progress stays up to date on both.</p><div class="sync-actions"><button class="sync-primary" id="joinSpaceStart">Join an existing space</button><button id="createSpace">Create a new shared space</button></div><p class="sync-help">Already set up Side Quest on your other device? Choose join and enter its pairing code.</p>');
+ $("joinSpaceStart").addEventListener("click",()=>{
+  showSyncModal('<div class="sync-mark">↔</div><h2 id="syncTitle">Enter pairing code</h2><p>On your other device, open the sync menu and choose Add another device. Enter the 8-character code shown there.</p><input class="sync-code-input" id="pairCodeInput" type="text" maxlength="8" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="8-CHARACTER CODE"><div class="sync-error" id="pairError" role="status"></div><div class="sync-actions"><button class="sync-primary" id="joinSpace">Join shared space</button><button data-close-modal>Cancel</button></div>');
+  const input=$("pairCodeInput");input.addEventListener("input",()=>{input.value=input.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,8)});input.focus();
+  $("joinSpace").addEventListener("click",joinSharedSpace);
+ });
+ $("createSpace").addEventListener("click",async()=>{
+  const button=$("createSpace");button.disabled=true;button.textContent="Creating…";
+  try{await createSharedSpace()}
+  catch(e){button.disabled=false;button.textContent="Create a new shared space";toast("Couldn't create shared space: "+e.message)}
+ });
 }
 
 function getStatus(id,k){return Number(data.activityDays[id]?.[k]||0)}
@@ -427,12 +455,6 @@ document.addEventListener("click",e=>{
 document.addEventListener("input",e=>{if(e.target.matches("[data-trick-search]")){const pos=e.target.selectionStart;trickSearch=e.target.value;const view=$("view");const input=e.target;const cards=view.querySelectorAll(".trick-card");const q=trickSearch.toLowerCase();cards.forEach(card=>card.hidden=!card.querySelector("strong").textContent.toLowerCase().includes(q));const count=view.querySelector(".trick-library .section-head small");if(count)count.textContent=view.querySelectorAll(".trick-card:not([hidden])").length+" of "+tricks.length;}});
 document.addEventListener("change",e=>{
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
-});
-$("exportBtn").addEventListener("click",()=>{const blob=new Blob([JSON.stringify({version:3,data},null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="side-quest-backup.json";a.click();URL.revokeObjectURL(url);toast("Backup exported")});
-$("importBtn").addEventListener("click",()=>$("importFile").click());
-$("importFile").addEventListener("change",async e=>{
- const file=e.target.files[0];if(!file)return;
- try{const parsed=JSON.parse(await file.text()),incoming=parsed.data||parsed;if(!incoming||typeof incoming!=="object"||!confirm("Restore this backup and replace your current progress?"))return;data.activityDays=incoming.activityDays||{};data.tricks=incoming.tricks||{};data.targets=incoming.targets||data.targets;data.startedMonth=incoming.startedMonth||data.startedMonth;save();render();toast("Backup restored")}catch(err){alert("That file is not a valid Side Quest backup.")}e.target.value="";
 });
 $("syncBtn").addEventListener("click",handleSync);
 render();
