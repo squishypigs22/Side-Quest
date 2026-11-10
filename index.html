@@ -174,7 +174,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.6</div>
+<div class="version-tag">v0.1.7</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -182,16 +182,16 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 (function(){
 "use strict";
 function appIcon(name){
- if(name==="skate")return '<svg class="sq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.1 11.5h15.8c1.2 0 1.8.8 1.4 1.8l-.5 1.2c-.2.5-.7.8-1.2.8H4.4c-.5 0-1-.3-1.2-.8l-.5-1.2c-.4-1 .2-1.8 1.4-1.8Z"/><path d="M7 15.4v1.1m10-1.1v1.1"/><circle cx="7" cy="18.5" r="1.6"/><circle cx="17" cy="18.5" r="1.6"/></svg>';
+ const skateboard='<svg class="sq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.1 11.5h15.8c1.2 0 1.8.8 1.4 1.8l-.5 1.2c-.2.5-.7.8-1.2.8H4.4c-.5 0-1-.3-1.2-.8l-.5-1.2c-.4-1 .2-1.8 1.4-1.8Z"/><path d="M7 15.4v1.1m10-1.1v1.1"/><circle cx="7" cy="18.5" r="1.6"/><circle cx="17" cy="18.5" r="1.6"/></svg>';
+ if(name==="skate"||name==="skating")return skateboard;
+ if(name==="music")return '<svg class="sq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17V5l11-2v12"/><path d="M9 8l11-2"/><ellipse cx="5.5" cy="18" rx="3.5" ry="2.5" transform="rotate(-18 5.5 18)"/><ellipse cx="16.5" cy="15" rx="3.5" ry="2.5" transform="rotate(-18 16.5 15)"/></svg>';
  const icons={
   mark:"shield-check",
   fit:"biceps-flexed",
-  workouts:"clipboard-list",
+  workouts:"biceps-flexed",
   drums:"drum",
   guitar:"guitar-electric",
-  skating:"person-standing",
   home:"house",
-  music:"music-2",
   track:"list-checks",
   tricks:"trophy"
  };
