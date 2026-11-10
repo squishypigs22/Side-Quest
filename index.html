@@ -172,6 +172,26 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .device-error{color:#f19aa1}
 .device-actions{margin-top:4px}
  .sq-icon{width:18px;height:18px;display:block;flex:0 0 auto}.brand-mark .sq-icon{width:17px;height:17px}.sync-action-btn .sq-icon{width:16px;height:16px}
+
+/* Calendar uses the available viewport instead of a narrow fixed-width card. */
+.calendar-screen{min-height:calc(100dvh - 190px);display:flex;flex-direction:column}
+.calendar-screen .page-head{margin-bottom:12px}
+.calendar-screen .calendar-legend{margin:0 0 12px}
+.calendar-screen .year-nav{flex:0 0 auto}
+.months-grid.current-month{width:100%;max-width:none;flex:1;min-height:0}
+.months-grid.current-month .month-card{width:100%;height:100%;min-height:390px;display:flex;flex-direction:column;padding:clamp(12px,2vw,22px)}
+.months-grid.current-month .month-heading{margin-bottom:14px}
+.months-grid.current-month .weekdays{margin-bottom:10px}
+.months-grid.current-month .month-days{flex:1;grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(4px,1vw,10px)}
+.months-grid.current-month .date-cell,.months-grid.current-month .date-empty{height:auto;min-height:0;aspect-ratio:auto;font-size:clamp(12px,1.5vw,16px);border-radius:12px}
+.months-grid.current-month .calendar-dots{gap:4px;min-height:8px}
+.months-grid.current-month .calendar-dot{width:6px;height:6px;flex-basis:6px}
+.calendar-modal{width:min(100%,460px);max-height:min(80dvh,620px);overflow-y:auto}
+.calendar-log-list{gap:9px}
+.calendar-log-row{min-height:54px;padding:11px 13px;cursor:pointer}
+.calendar-log-row:active{transform:scale(.99)}
+.calendar-log-name{font-weight:700}
+@media(max-width:650px){.calendar-screen{min-height:calc(100dvh - 170px)}.months-grid.current-month .month-card{min-height:0;padding:10px}.months-grid.current-month .month-days{gap:4px}.months-grid.current-month .date-cell,.months-grid.current-month .date-empty{height:auto;min-height:0;font-size:12px}.calendar-modal{width:100%;max-height:85dvh}.calendar-log-row{min-height:52px}}
 </style>
 </head>
 <body>
@@ -180,7 +200,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.10</div>
+<div class="version-tag">v0.1.11</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -464,12 +484,12 @@ function calendarPage(){
  const displayMonth=viewYear===today.getFullYear()?today.getMonth():0;
  const months=showAllMonths?Array.from({length:12},(_,m)=>monthCard(viewYear,m)).join(""):monthCard(viewYear,displayMonth);
  const legend=A.map(a=>'<span class="calendar-legend-item"><i class="calendar-dot dot-'+a.category+'"></i>'+a.name+'</span>').join("");
- return '<div class="page-head"><h1>Calendar</h1><p>All your activity in one place. Tap a date to update it.</p></div><div class="calendar-legend">'+legend+'</div><div class="year-nav"><button data-year="-1" aria-label="Previous year" '+(viewYear<=2026?"disabled":"")+'>‹</button><strong>'+viewYear+'</strong><button data-year="1" aria-label="Next year" '+(viewYear>=today.getFullYear()?"disabled":"") +'>›</button><button class="quiet-btn" data-toggle-months>'+(showAllMonths?"Current month":"View all")+'</button></div><div class="months-grid '+(showAllMonths?"":"current-month")+'">'+months+'</div>';
+ return '<div class="calendar-screen"><div class="page-head"><h1>Calendar</h1><p>All your activity in one place. Tap a date to update it.</p></div><div class="calendar-legend">'+legend+'</div><div class="year-nav"><button data-year="-1" aria-label="Previous year" '+(viewYear<=2026?"disabled":"")+'>‹</button><strong>'+viewYear+'</strong><button data-year="1" aria-label="Next year" '+(viewYear>=today.getFullYear()?"disabled":"") +'>›</button><button class="quiet-btn" data-toggle-months>'+(showAllMonths?"Current month":"View all")+'</button></div><div class="months-grid '+(showAllMonths?"":"current-month")+'">'+months+'</div>';
 }
 function openModal(date){
  const rows=A.map(a=>{
   const done=getStatus(a.id,date)===1;
-  return '<button class="calendar-log-row '+(done?"is-done":"")+'" data-calendar-log="'+a.id+'" data-date="'+date+'"><span class="calendar-log-icon">'+a.icon+'</span><span>'+a.name+'</span><strong>'+(done?"Completed":"Not logged")+'</strong></button>';
+  return '<button type="button" class="calendar-log-row '+(done?"is-done":"")+'" data-calendar-log="'+a.id+'" data-date="'+date+'" aria-pressed="'+done+'"><span class="calendar-log-icon">'+a.icon+'</span><span class="calendar-log-name">'+a.name+'</span><strong>'+(done?"Completed":"Not logged")+'</strong></button>';
  }).join("");
  $("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal calendar-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Tap an activity to mark it completed or clear it.</p><div class="calendar-log-list">'+rows+'</div></section></div>';
 }
@@ -511,14 +531,14 @@ function render(){
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("click",e=>{
- const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return}
+ const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return} if(e.target.classList?.contains("modal-backdrop")){$("modalRoot").innerHTML="";return}
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
  const music=e.target.closest("[data-music-activity]");if(music){activityId=music.dataset.musicActivity;categoryId="music";viewYear=today.getFullYear();page="Activity";render();return}
  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
- const calendarLog=e.target.closest("[data-calendar-log]");if(calendarLog){const id=calendarLog.dataset.calendarLog,k=calendarLog.dataset.date;data.activityDays[id]=data.activityDays[id]||{};if(getStatus(id,k)===1)delete data.activityDays[id][k];else data.activityDays[id][k]=1;save();openModal(k);render();return}
+ const calendarLog=e.target.closest("[data-calendar-log]");if(calendarLog){e.preventDefault();const id=calendarLog.dataset.calendarLog,k=calendarLog.dataset.date;data.activityDays[id]=data.activityDays[id]||{};if(getStatus(id,k)===1)delete data.activityDays[id][k];else data.activityDays[id][k]=1;save();render();openModal(k);if(window.lucide?.createIcons)window.lucide.createIcons();return}
  const date=e.target.closest("[data-date]");if(date&&!date.disabled){openModal(date.dataset.date);return}
  const toggle=e.target.closest("[data-toggle-months]");if(toggle){showAllMonths=!showAllMonths;render();return}
  const tf=e.target.closest("[data-trick-filter]");if(tf){trickFilter=tf.dataset.trickFilter;render();return}
