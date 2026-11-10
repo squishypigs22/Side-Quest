@@ -503,15 +503,6 @@ function render(){
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
-function openModal(date){
- 
- $("modalRoot").innerHTML='<div class="modal-backdrop" data-close-modal><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Choose how to record this day.</p><div class="modal-actions"><button data-value="1">✓ &nbsp; Completed</button><button data-value="0">Clear entry</button></div></section></div>';
- $("modalRoot").querySelectorAll("[data-value]").forEach(btn=>btn.addEventListener("click",()=>{
-  data.activityDays[activityId]=data.activityDays[activityId]||{};
-  if(Number(btn.dataset.value)===0)delete data.activityDays[activityId][date];else data.activityDays[activityId][date]=Number(btn.dataset.value);
-  save();$("modalRoot").innerHTML="";render();
- }));
-}
 document.addEventListener("click",e=>{
  const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return}
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
