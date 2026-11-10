@@ -258,7 +258,7 @@ async function syncPull(){
 function save(){localStorage.setItem("sq27",JSON.stringify(data));scheduleSync()}
 function showSyncModal(content){
  const root=$("modalRoot");
- root.innerHTML='<div class="modal-backdrop" data-close-modal><section class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button>'+content+'</section></div>';
+ root.innerHTML='<div class="modal-backdrop"><section class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button>'+content+'</section></div>';
 }
 function syncDeviceName(){return /Android/i.test(navigator.userAgent)?"Android device":"PC"}
 function showPairCode(code,heading){
