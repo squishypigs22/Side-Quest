@@ -384,6 +384,10 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
  .calendar-screen.all-months .month-card{aspect-ratio:1/1}
 }
 
+
+/* Quest system */
+.quest-hero{padding:17px;border:1px solid #40516a;border-radius:15px;background:linear-gradient(145deg,#202a38,#191d24);margin-bottom:18px}.quest-level-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.quest-level{font-size:25px;font-weight:850;letter-spacing:-.8px}.quest-xp{font-size:11px;color:var(--muted);font-weight:750}.quest-xpbar{height:7px;border-radius:10px;background:#343b47;overflow:hidden;margin-top:12px}.quest-xpbar span{display:block;height:100%;background:var(--accent);border-radius:10px}.quest-hero-foot{display:flex;justify-content:space-between;margin-top:7px;color:var(--muted);font-size:10px}.quest-section{margin:0 0 22px}.quest-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.quest-section-head small{color:var(--muted);font-size:10px}.quest-list{display:grid;gap:8px}.quest-card{padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);min-width:0}.quest-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.quest-card strong{font-size:13px}.quest-card p{font-size:11px;color:var(--muted);margin:4px 0 0}.quest-reward{font-size:10px;font-weight:800;color:var(--accent);white-space:nowrap}.quest-progress{height:5px;background:#343941;border-radius:10px;overflow:hidden;margin-top:11px}.quest-progress span{display:block;height:100%;background:var(--accent);border-radius:10px}.quest-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}.quest-card-foot small{font-size:10px;color:var(--muted)}.quest-action{border:1px solid #8bbaff66;background:#8bbaff18;color:var(--accent);border-radius:8px;padding:7px 11px;font-size:10px;font-weight:800}.quest-action:disabled{opacity:.45;cursor:default}.quest-done{border-color:#62d69b66}.quest-done .quest-reward{color:var(--green)}.quest-achievements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quest-achievement{padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface);opacity:.48}.quest-achievement.unlocked{opacity:1;border-color:#8bbaff55}.quest-achievement strong{display:block;font-size:11px}.quest-achievement small{font-size:10px;color:var(--muted)}.quest-achievement-mark{font-size:17px;margin-bottom:4px}.quest-empty{padding:13px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);font-size:11px}
+@media(max-width:420px){.bottom-nav{gap:1px;padding-left:5px;padding-right:5px}.bottom-nav button{font-size:9px}.bottom-nav button span .sq-icon{width:19px;height:19px}.quest-achievements{gap:6px}.quest-achievement{padding:9px}}
 </style>
 </head>
 <body>
@@ -392,7 +396,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.18</div>
+<div class="version-tag">v0.1.19</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -715,15 +719,54 @@ function tricksPage(){
   '<section class="section trick-library"><div class="section-head"><h2>Your tricks</h2><small>'+visible.length+' of '+tricks.length+'</small></div><div class="trick-tools"><div class="trick-filters">'+filters+'</div><input class="trick-search" type="search" placeholder="Find a trick..." value="'+esc(trickSearch)+'" aria-label="Find a trick" data-trick-search></div>'+
   '<div class="trick-list">'+(visible.length?visible.map(x=>'<article class="trick-card '+(x.status==="Learnt (rolling)"?"is-rolling":x.status==="Learnt (flat)"?"is-learnt":x.status==="Learning"?"is-learning":"")+'"><div class="trick-card-top"><span class="trick-state">'+(x.status==="Learnt (rolling)"?"Rolling":x.status==="Learnt (flat)"?"Learnt":x.status==="Learning"?"Learning":"Not learnt")+'</span></div><strong>'+esc(x.t)+'</strong><label class="trick-select-label" for="trick-'+x.i+'">Landing status</label><select id="trick-'+x.i+'" data-trick="'+esc(x.t)+'"><option '+(x.status==="Not learnt"?"selected":"")+'>Not learnt</option><option '+(x.status==="Learning"?"selected":"")+'>Learning</option><option '+(x.status==="Learnt (flat)"?"selected":"")+'>Learnt (flat)</option><option '+(x.status==="Learnt (rolling)"?"selected":"")+'>Learnt (rolling)</option></select></article>').join(""):'<div class="trick-empty">No tricks match this filter.</div>')+'</div></section>';
 }
+
+function questPage(){
+ const ym=monthKey(today.getFullYear(),today.getMonth());
+ data.questClaims=data.questClaims||{};
+ data.sideQuestClaims=data.sideQuestClaims||{};
+ const xp=Object.values(data.questClaims).reduce((n,v)=>n+(Number(v)||0),0)+Object.values(data.sideQuestClaims).reduce((n,v)=>n+(Number(v)||0),0);
+ const level=1+Math.floor(xp/250),levelXp=xp%250;
+ const main=A.map(a=>{const done=sessionCount(a.id,today.getFullYear(),today.getMonth()),target=targetFor(a.id,today.getFullYear(),today.getMonth()),claim="main:"+ym+":"+a.id,claimed=!!data.questClaims[claim],complete=done>=target;return {id:claim,title:"Monthly "+a.name+" target",desc:"Complete "+target+" "+a.name.toLowerCase()+" sessions this month.",done:Math.min(done,target),target,reward:100,claimed,complete};});
+ const daily=[
+  {id:"daily:any",title:"Get moving",desc:"Complete any tracked activity today.",done:A.some(a=>getStatus(a.id,todayKey)===1)?1:0,target:1,reward:20},
+  {id:"daily:music",title:"Make some music",desc:"Complete a drums or guitar session today.",done:["drums","guitar"].some(id=>getStatus(id,todayKey)===1)?1:0,target:1,reward:20},
+  {id:"daily:skate",title:"Get on the board",desc:"Complete a skating session today.",done:getStatus("skate",todayKey)===1?1:0,target:1,reward:20}
+ ].map(q=>({...q,claim:q.id+":"+todayKey,claimed:!!data.questClaims[q.id+":"+todayKey]}));
+ const monthSessions=A.reduce((n,a)=>n+sessionCount(a.id,today.getFullYear(),today.getMonth()),0);
+ const learnt=tricks.filter(t=>{const v=data.tricks[t]||"Not learnt";return v==="Learnt (flat)"||v==="Learnt (rolling)"||v==="Learnt"||v==="Rolling"}).length;
+ const musicSessions=sessionCount("drums",today.getFullYear(),today.getMonth())+sessionCount("guitar",today.getFullYear(),today.getMonth());
+ const side=[
+  {id:"side:ten",title:"Build a routine",desc:"Log 10 activity sessions this month.",done:Math.min(monthSessions,10),target:10,reward:75},
+  {id:"side:music",title:"Make time for music",desc:"Complete 5 music sessions this month.",done:Math.min(musicSessions,5),target:5,reward:75},
+  {id:"side:tricks",title:"Trick collector",desc:"Mark 3 skate tricks as learnt.",done:Math.min(learnt,3),target:3,reward:75}
+ ].map(q=>({...q,claimed:!!data.sideQuestClaims[q.id]}));
+ const card=(q,manual=false)=>{const pct=Math.min(100,Math.round(q.done/q.target*100)),complete=q.done>=q.target,claimed=q.claimed;return '<article class="quest-card '+(claimed?"quest-done":"")+'"><div class="quest-card-top"><div><strong>'+q.title+'</strong><p>'+q.desc+'</p></div><span class="quest-reward">+'+q.reward+' XP</span></div><div class="quest-progress"><span style="width:'+pct+'%"></span></div><div class="quest-card-foot"><small>'+q.done+' / '+q.target+(claimed?" · Reward claimed":complete?" · Complete":" · In progress")+'</small><button class="quest-action" data-quest-claim="'+q.id+'" data-quest-reward="'+q.reward+'" '+(!complete||claimed?"disabled":"")+'>'+(claimed?"Claimed":complete?"Claim XP":"Not yet")+'</button></div></article>'};
+ const achievements=[
+  {title:"First steps",desc:"Log your first activity.",mark:"01",ok:A.some(a=>Object.keys(data.activityDays[a.id]||{}).length>0)},
+  {title:"Getting consistent",desc:"Complete 10 sessions.",mark:"10",ok:monthSessions>=10},
+  {title:"Musician in motion",desc:"Complete 10 music sessions.",mark:"♫",ok:musicSessions>=10},
+  {title:"Skate progress",desc:"Learn 5 tricks.",mark:"▱",ok:learnt>=5},
+  {title:"All-rounder",desc:"Log all 4 activities in one month.",mark:"✦",ok:A.every(a=>sessionCount(a.id,today.getFullYear(),today.getMonth())>0)},
+  {title:"Quest starter",desc:"Claim your first quest reward.",mark:"★",ok:xp>0}
+ ];
+ return '<div class="page-head"><div class="eyebrow">YOUR CHALLENGES</div><h1>Quests</h1><p>Turn the work you do into progress and rewards.</p></div>'+
+ '<section class="quest-hero"><div class="quest-level-row"><div><div class="eyebrow">YOUR LEVEL</div><div class="quest-level">Level '+level+'</div></div><div class="quest-xp">'+xp+' XP total</div></div><div class="quest-xpbar"><span style="width:'+(levelXp/250*100)+'%"></span></div><div class="quest-hero-foot"><span>'+levelXp+' / 250 XP to level '+(level+1)+'</span><span>'+(250-levelXp)+' XP left</span></div></section>'+
+ '<section class="quest-section"><div class="quest-section-head"><h2>Daily quests</h2><small>Resets every day</small></div><div class="quest-list">'+daily.map(q=>card(q)).join("")+'</div></section>'+
+ '<section class="quest-section"><div class="quest-section-head"><h2>Main quests</h2><small>Monthly targets</small></div><div class="quest-list">'+main.map(q=>card(q)).join("")+'</div></section>'+
+ '<section class="quest-section"><div class="quest-section-head"><h2>Side quests</h2><small>Extra challenges</small></div><div class="quest-list">'+side.map(q=>card(q,true)).join("")+'</div></section>'+
+ '<section class="quest-section"><div class="quest-section-head"><h2>Achievements</h2><small>'+achievements.filter(a=>a.ok).length+' / '+achievements.length+' unlocked</small></div><div class="quest-achievements">'+achievements.map(a=>'<article class="quest-achievement '+(a.ok?"unlocked":"")+'"><div class="quest-achievement-mark">'+a.mark+'</div><strong>'+a.title+'</strong><small>'+a.desc+'</small></article>').join("")+'</div></section>';
+}
+
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Calendar",appIcon("calendar"),"Calendar"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"]];
+ const labels=[["Home",appIcon("home"),"Overview"],["Calendar",appIcon("calendar"),"Calendar"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Quests",appIcon("sparkles"),"Quests"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Calendar"?calendarPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():dashboard();
+ $("view").innerHTML=page==="Overview"?dashboard():page==="Calendar"?calendarPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():page==="Quests"?questPage():dashboard();
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("click",e=>{
  const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return} if(e.target.classList?.contains("modal-backdrop")){$("modalRoot").innerHTML="";return}
+ const questClaim=e.target.closest("[data-quest-claim]");if(questClaim&&!questClaim.disabled){const id=questClaim.dataset.questClaim,reward=Number(questClaim.dataset.questReward);if(id.startsWith("side:"))data.sideQuestClaims[id]=reward;else data.questClaims[id]=reward;save();render();toast("Quest reward claimed · +"+reward+" XP");return}
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
  const music=e.target.closest("[data-music-activity]");if(music){activityId=music.dataset.musicActivity;categoryId="music";viewYear=today.getFullYear();page="Activity";render();return}
