@@ -455,6 +455,8 @@ function mergeProgress(cloud,local){
  const merged={...(cloud||{}),...(local||{})};
  merged.activityDays={...(cloud?.activityDays||{})};
  for(const [id,days] of Object.entries(local?.activityDays||{}))merged.activityDays[id]={...(merged.activityDays[id]||{}),...days};
+ merged.questClaims={...(cloud?.questClaims||{}),...(local?.questClaims||{})};
+ merged.sideQuestClaims={...(cloud?.sideQuestClaims||{}),...(local?.sideQuestClaims||{})};
  merged.tricks={...(cloud?.tricks||{}),...(local?.tricks||{})};
  const rank={"Not learnt":0,"Learning":1,"Learnt":2,"Learnt (flat)":2,"Rolling":3,"Learnt (rolling)":3};
  for(const [trick,value] of Object.entries(merged.tricks)){
