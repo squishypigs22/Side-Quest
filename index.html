@@ -13,7 +13,7 @@
 <style>
 :root{color-scheme:dark;--bg:#111214;--surface:#191b1f;--surface2:#202329;--line:#30343b;--text:#f1f2f4;--muted:#969ba5;--accent:#8bbaff;--green:#62d69b;--red:#e77a83;--fitness:#72d6a5;--music:#b69aff;--skate:#ffb36b;--radius:15px}
 *{box-sizing:border-box} .brand,.page-head h1,h1,h2,h3{font-family:"Baloo 2","Nunito",system-ui,sans-serif;letter-spacing:0} body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Nunito",system-ui,-apple-system,"Segoe UI",sans-serif}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.app{width:100%;max-width:none;min-height:100vh;margin:0;padding:0 clamp(14px,2.4vw,36px) 110px}.topbar{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);margin-bottom:30px}.brand{font-size:18px;font-weight:750;letter-spacing:-.5px}.brand-mark{display:inline-grid;place-items:center;width:27px;height:27px;margin-right:9px;border:1px solid #48505b;border-radius:8px;color:var(--accent);font-size:14px}.top-actions{display:flex;gap:7px}.icon-btn,.quiet-btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 11px}.icon-btn{width:36px;height:36px;padding:0}.page-head{margin:0 0 24px}.eyebrow{font-size:10px;font-weight:750;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase}.page-head h1{font-size:clamp(28px,5vw,38px);letter-spacing:-1.4px;line-height:1.1;margin:5px 0}.page-head p{margin:6px 0 0;color:var(--muted);font-size:12px}
+.app{width:100%;max-width:none;min-height:100vh;margin:0;padding:0 clamp(14px,2.4vw,36px) 110px}.topbar{height:68px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);margin-bottom:30px}.brand{font-size:18px;font-weight:750;letter-spacing:-.5px}.brand-mark{display:inline-grid;place-items:center;width:27px;height:27px;margin-right:9px;border:1px solid #48505b;border-radius:8px;color:var(--accent);font-size:14px}.top-actions{display:flex;gap:7px;align-items:center}.top-action-btn{height:36px;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font-size:11px;font-weight:800}.top-action-btn:active{background:var(--surface2)}.sync-action-btn{color:var(--accent);border-color:#83baff55}.sync-action-btn svg{width:16px;height:16px}.icon-btn,.quiet-btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:9px;padding:8px 11px}.icon-btn{width:36px;height:36px;padding:0}.page-head{margin:0 0 24px}.eyebrow{font-size:10px;font-weight:750;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase}.page-head h1{font-size:clamp(28px,5vw,38px);letter-spacing:-1.4px;line-height:1.1;margin:5px 0}.page-head p{margin:6px 0 0;color:var(--muted);font-size:12px}
 h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.section-head small,.muted{color:var(--muted)}.section-head small{font-size:11px}
 .week-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:24px}.metric{padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--surface);min-width:0}.metric-label{font-size:10px;color:var(--muted);line-height:1.3}.metric-value{font-size:27px;font-weight:750;letter-spacing:-1px;margin-top:5px}.metric-note{font-size:10px;color:var(--muted);margin-top:2px}
 .category-block{padding:16px 0;border-top:1px solid var(--line)}.category-block:first-child{border-top:0}.category-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px}.category-title{font-weight:700;font-size:14px}.category-meta{font-size:10px;color:var(--muted)}.activity-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.activity-row{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:11px 12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;color:var(--text);min-width:0}.activity-row:hover,.category-link:hover{border-color:#59616e}.activity-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:var(--surface2);color:var(--accent);flex-shrink:0}.activity-row[data-category="fitness"] .activity-icon{color:var(--fitness);background:#72d6a516}.activity-row[data-category="music"] .activity-icon{color:var(--music);background:#b69aff18}.activity-row[data-category="skateboarding"] .activity-icon{color:var(--skate);background:#ffb36b18}.category-block.cat-fitness .category-title{color:var(--fitness)}.category-block.cat-music .category-title{color:var(--music)}.category-block.cat-skateboarding .category-title{color:var(--skate)}.category-page-head.cat-fitness h1,.category-page-head.cat-fitness .eyebrow{color:var(--fitness)}.category-page-head.cat-music h1,.category-page-head.cat-music .eyebrow{color:var(--music)}.category-page-head.cat-skateboarding h1,.category-page-head.cat-skateboarding .eyebrow{color:var(--skate)}
@@ -169,11 +169,11 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="icon-btn" id="syncBtn" aria-label="Sync devices" title="Sync devices">↔</button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.4-3"/></svg><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.5.5</div>
+<div class="version-tag">v0.1.0</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -186,9 +186,9 @@ const categories=[
 ];
 const A=[
 {id:"workout",name:"Workouts",category:"fitness",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6m4-9v12m8-12v12m4-9v6M2 12h20"/></svg>'},
-{id:"drums",name:"Drums",category:"music",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="7" rx="8" ry="3"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 13c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>'},
-{id:"guitar",name:"Guitar",category:"music",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4 20 2l2 2-2 6-3 3-4-1-4 4a3 3 0 1 1-4-4l4-4-1-4 2-2z"/><circle cx="7.5" cy="16.5" r="1"/></svg>'},
-{id:"skate",name:"Skating",category:"skateboarding",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15h18l-2 3H5zM6 18v2m12-2v2M8 11l2-3 3 2 3-4"/></svg>'}
+{id:"drums",name:"Drums",category:"music",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 7 7M20 3l-8 8"/><path d="M7 11.5 4.5 14a2 2 0 0 0 0 2.8l2.7 2.7a2 2 0 0 0 2.8 0l2.5-2.5"/><ellipse cx="15.5" cy="16.5" rx="4.5" ry="3"/><path d="M11 16.5v3c0 1.7 2 3 4.5 3s4.5-1.3 4.5-3v-3"/></svg>'},
+{id:"guitar",name:"Guitar",category:"music",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m13.5 3.5 6-2 2 2-2 6-3.3 3.3a4.6 4.6 0 0 1-6.1 6.8 4.6 4.6 0 0 1-6.8-6.1l3.4-3.4-.8-3.5 2.2-2.2 3.5.8z"/><circle cx="9.8" cy="14.2" r="1.2"/><path d="m11 13 7-7M12.5 11.5l1 1M14 10l1 1"/></svg>'},
+{id:"skate",name:"Skating",category:"skateboarding",icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14.5c.7 1.5 2.1 2.5 4 2.5h10c1.9 0 3.3-1 4-2.5"/><path d="M4 14.5h16"/><circle cx="7" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/><path d="M8 14.5 9 12m6 2.5L14 12"/></svg>'}
 ];
 const tricks=["Ollie","Fakie Ollie","Nollie","Switch Ollie","Shuvit","Pop Shuvit","Fakie Shuvit","Frontside 180","Backside 180","Fakie 180","Nollie 180","Kickflip","Heelflip","Fakie Kickflip","Fakie Heelflip","Varial Kickflip","Varial Heelflip","Hardflip","Inward Heelflip","Frontside Pop Shuvit","Backside Pop Shuvit","Bigspin","360 Shuvit","Fakie Bigspin","Frontside Bigspin","Backside Bigspin","Tre Flip","Laser Flip","360 Flip","Fakie 360 Flip","Nollie Kickflip","Nollie Heelflip","Switch Kickflip","Switch Heelflip","Frontside Flip","Backside Flip","Half Cab","Half Cab Flip","Half Cab Heelflip","No Comply","Boneless","Manual","Nose Manual","Boardslide","50-50 Grind","5-0 Grind","Smith Grind","Feeble Grind","Crooked Grind","Nosegrind"];
 const $=id=>document.getElementById(id);
@@ -238,21 +238,22 @@ function scheduleSync(){
  clearTimeout(syncTimer);syncTimer=setTimeout(syncPush,700);
 }
 async function syncPull(){
- if(!syncConfig||syncBusy||!navigator.onLine)return;
+ if(!syncConfig||syncBusy||!navigator.onLine)return false;
  syncBusy=true;
  try{
   const result=await syncRequest("load");
   if(syncDirty){
    data=mergeProgress(result.data,data);
    localStorage.setItem("sq27",JSON.stringify(data));
-   syncBusy=false;await syncPush();return;
+   syncBusy=false;await syncPush();return true;
   }
   data=result.data||{};
   data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};
   data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
   localStorage.setItem("sq27",JSON.stringify(data));
   render();
- }catch(e){toast("Sync unavailable — keeping this device's data")}
+  return true;
+ }catch(e){toast("Sync unavailable — keeping this device's data");return false}
  finally{syncBusy=false;}
 }
 function save(){localStorage.setItem("sq27",JSON.stringify(data));scheduleSync()}
@@ -500,7 +501,16 @@ document.addEventListener("input",e=>{if(e.target.matches("[data-trick-search]")
 document.addEventListener("change",e=>{
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
 });
-$("syncBtn").addEventListener("click",handleSync);
+$("connectBtn").addEventListener("click",handleSync);
+async function manualSync(){
+ if(!syncConfig){toast("Connect devices first");return}
+ if(!navigator.onLine){toast("Connect to the internet to sync");return}
+ if(syncBusy){toast("Sync is already running");return}
+ toast("Syncing…");
+ const ok=await syncPull();
+ if(ok)toast(syncDirty?"Sync pending — will retry":"Sync complete");
+}
+$("syncBtn").addEventListener("click",manualSync);
 render();
 if(syncConfig){syncReady=true;syncPull()}
 window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}});
