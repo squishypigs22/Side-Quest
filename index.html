@@ -388,7 +388,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 /* Quest system */
 .quest-hero{padding:17px;border:1px solid #40516a;border-radius:15px;background:linear-gradient(145deg,#202a38,#191d24);margin-bottom:18px}.quest-level-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.quest-level{font-size:25px;font-weight:850;letter-spacing:-.8px}.quest-xp{font-size:11px;color:var(--muted);font-weight:750}.quest-xpbar{height:7px;border-radius:10px;background:#343b47;overflow:hidden;margin-top:12px}.quest-xpbar span{display:block;height:100%;background:var(--accent);border-radius:10px}.quest-hero-foot{display:flex;justify-content:space-between;margin-top:7px;color:var(--muted);font-size:10px}.quest-section{margin:0 0 22px}.quest-section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.quest-section-head small{color:var(--muted);font-size:10px}.quest-list{display:grid;gap:8px}.quest-card{padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--surface);min-width:0}.quest-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.quest-card strong{font-size:13px}.quest-card p{font-size:11px;color:var(--muted);margin:4px 0 0}.quest-reward{font-size:10px;font-weight:800;color:var(--accent);white-space:nowrap}.quest-progress{height:5px;background:#343941;border-radius:10px;overflow:hidden;margin-top:11px}.quest-progress span{display:block;height:100%;background:var(--accent);border-radius:10px}.quest-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px}.quest-card-foot small{font-size:10px;color:var(--muted)}.quest-action{border:1px solid #8bbaff66;background:#8bbaff18;color:var(--accent);border-radius:8px;padding:7px 11px;font-size:10px;font-weight:800}.quest-action:disabled{opacity:.45;cursor:default}.quest-done{border-color:#62d69b66}.quest-done .quest-reward{color:var(--green)}.quest-achievements{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.quest-achievement{padding:11px;border:1px solid var(--line);border-radius:11px;background:var(--surface);opacity:.48}.quest-achievement.unlocked{opacity:1;border-color:#8bbaff55}.quest-achievement strong{display:block;font-size:11px}.quest-achievement small{font-size:10px;color:var(--muted)}.quest-achievement-mark{font-size:17px;margin-bottom:4px}.quest-empty{padding:13px;border:1px dashed var(--line);border-radius:11px;color:var(--muted);font-size:11px}
 
-.milestone-card .quest-card-foot{margin-top:8px}.milestone-card .quest-card-foot small{font-variant-numeric:tabular-nums}
+.milestone-card .quest-card-foot{margin-top:8px}.milestone-card .quest-card-foot small{font-variant-numeric:tabular-nums}.milestone-card .quest-reward{color:var(--milestone-colour)}.milestone-card .quest-progress span{background:var(--milestone-colour)}.milestone-card .quest-progress{background:color-mix(in srgb,var(--milestone-colour) 18%,#343941)}.milestone-card{border-color:color-mix(in srgb,var(--milestone-colour) 34%,var(--line))}
 @media(max-width:420px){.bottom-nav{gap:1px;padding-left:5px;padding-right:5px}.bottom-nav button{font-size:9px}.bottom-nav button span .sq-icon{width:19px;height:19px}.quest-achievements{gap:6px}.quest-achievement{padding:9px}}
 </style>
 </head>
@@ -398,7 +398,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.21</div>
+<div class="version-tag">v0.1.22</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -751,9 +751,12 @@ function questPage(){
  function milestoneCard(name,count,milestones,description){
   const previous=milestones.filter(n=>count>=n).pop()||0;
   const next=milestones.find(n=>count<n);
-  if(!next)return '<article class="quest-card milestone-card"><div class="quest-card-top"><div><strong>'+name+'</strong><p>'+count.toLocaleString()+' completed sessions · All milestones completed</p></div><span class="quest-reward">Complete</span></div><div class="quest-progress"><span style="width:100%"></span></div><div class="quest-card-foot"><small>'+milestones[milestones.length-1].toLocaleString()+' session milestone reached</small></div></article>';
+  const tier=Math.max(0,next?milestones.indexOf(next):milestones.length-1);
+  const colour=['#9aa6b2','#bd8958','#b9c4d0','#e0b84f','#55b8c8'][tier];
+  const colourStyle='--milestone-colour:'+colour;
+  if(!next)return '<article class="quest-card milestone-card" style="'+colourStyle+'"><div class="quest-card-top"><div><strong>'+name+'</strong><p>'+count.toLocaleString()+' completed sessions · All milestones completed</p></div><span class="quest-reward">Complete</span></div><div class="quest-progress"><span style="width:100%"></span></div><div class="quest-card-foot"><small>'+milestones[milestones.length-1].toLocaleString()+' session milestone reached</small></div></article>';
   const progress=Math.max(0,Math.min(100,(count-previous)/(next-previous)*100));
-  return '<article class="quest-card milestone-card"><div class="quest-card-top"><div><strong>'+name+'</strong><p>'+count.toLocaleString()+' completed sessions</p></div><span class="quest-reward">Next: '+next.toLocaleString()+'</span></div><div class="quest-progress"><span style="width:'+progress+'%"></span></div><div class="quest-card-foot"><small>'+(previous?previous.toLocaleString()+' reached':'Starting milestone')+'</small><small>'+count.toLocaleString()+' / '+next.toLocaleString()+'</small></div></article>';
+  return '<article class="quest-card milestone-card" style="'+colourStyle+'"><div class="quest-card-top"><div><strong>'+name+'</strong><p>'+count.toLocaleString()+' completed sessions</p></div><span class="quest-reward">Next: '+next.toLocaleString()+'</span></div><div class="quest-progress"><span style="width:'+progress+'%"></span></div><div class="quest-card-foot"><small>'+(previous?previous.toLocaleString()+' reached':'Starting milestone')+'</small><small>'+count.toLocaleString()+' / '+next.toLocaleString()+'</small></div></article>';
  }
  const totalMilestoneCard=milestoneCard("Total sessions completed",totalCompleted,totalMilestones);
  const achievementCards=A.map(a=>milestoneCard(a.name,totalSessions(a.id),activityMilestones)).join("");
