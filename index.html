@@ -491,7 +491,8 @@ function mergeProgress(cloud,local){
  }
  merged.targets={...(cloud?.targets||{})};
  for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
- merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}\n merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
+ merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}
+ merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
  return merged;
 }
 async function syncPush(){
