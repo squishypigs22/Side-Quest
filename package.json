@@ -1,6 +1,6 @@
 {
   "name": "side-quest",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "private": true,
   "description": "Side Quest personal progress tracker",
   "scripts": {
