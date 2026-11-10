@@ -390,6 +390,32 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 
 .milestone-card .quest-card-foot{margin-top:8px}.milestone-card .quest-card-foot small{font-variant-numeric:tabular-nums}.milestone-card .quest-reward{color:var(--milestone-colour)}.milestone-card .quest-progress span{background:var(--milestone-colour)}.milestone-card .quest-progress{background:color-mix(in srgb,var(--milestone-colour) 18%,#343941)}.milestone-card{border-color:color-mix(in srgb,var(--milestone-colour) 34%,var(--line))}
 @media(max-width:420px){.bottom-nav{gap:1px;padding-left:5px;padding-right:5px}.bottom-nav button{font-size:9px}.bottom-nav button span .sq-icon{width:19px;height:19px}.quest-achievements{gap:6px}.quest-achievement{padding:9px}}
+
+/* Real-life side quests */
+.bottom-nav{grid-template-columns:repeat(6,minmax(0,1fr))}
+.sidequest-create{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:22px}
+.sidequest-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sidequest-form label{display:grid;gap:5px;color:var(--muted);font-size:10px;font-weight:800}
+.sidequest-form input,.sidequest-form textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--text);padding:10px;font:inherit;font-size:12px}
+.sidequest-form textarea{min-height:66px;resize:vertical}
+.sidequest-form .wide{grid-column:1/-1}
+.sidequest-submit{grid-column:1/-1;border:1px solid #83baff66;border-radius:10px;background:#83baff18;color:var(--accent);padding:11px;font-size:12px;font-weight:850}
+.sidequest-group{margin:0 0 22px}
+.sidequest-card{padding:15px;border:1px solid var(--line);border-radius:15px;background:var(--surface);margin-bottom:9px}
+.sidequest-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.sidequest-card h3{font-size:16px;margin:0 0 5px}
+.sidequest-status{font-size:9px;font-weight:850;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);background:#83baff18;border-radius:20px;padding:5px 8px;white-space:nowrap}
+.sidequest-details{display:flex;flex-wrap:wrap;gap:6px 13px;margin:8px 0;color:var(--muted);font-size:10px}
+.sidequest-description{font-size:12px;color:#d1d6df;white-space:pre-wrap;margin:8px 0}
+.sidequest-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.sidequest-actions button{border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--text);padding:8px 11px;font-size:10px;font-weight:800}
+.sidequest-review{border-top:1px solid var(--line);margin-top:12px;padding-top:11px}
+.sidequest-stars{display:flex;gap:5px;margin:7px 0}
+.sidequest-stars button{border:0;background:transparent;color:#657080;padding:2px;font-size:23px;line-height:1}
+.sidequest-stars button.selected{color:#f2c45e}
+.sidequest-review small{color:var(--muted);font-size:10px}
+.sidequest-empty{padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:650px){.sidequest-form{grid-template-columns:1fr}.sidequest-form .wide{grid-column:auto}.sidequest-submit{grid-column:auto}.bottom-nav button{font-size:9px}}
 </style>
 </head>
 <body>
@@ -398,7 +424,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.22</div>
+<div class="version-tag">v0.1.23</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -439,7 +465,7 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 const monthKey=(y,m)=>y+"-"+String(m+1).padStart(2,"0"),key=(y,m,d)=>y+"-"+String(m+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
 const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.getDate());
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
-data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};delete data.questClaims;delete data.sideQuestClaims;data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
+data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="";
 const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
 const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
@@ -465,7 +491,7 @@ function mergeProgress(cloud,local){
  }
  merged.targets={...(cloud?.targets||{})};
  for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
- merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
+ merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}\n merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
  return merged;
 }
 async function syncPush(){
@@ -491,7 +517,7 @@ async function syncPull(){
    syncBusy=false;await syncPush();return true;
   }
   data=result.data||{};
-  data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};delete data.questClaims;delete data.sideQuestClaims;
+  data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;
   data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
   localStorage.setItem("sq27",JSON.stringify(data));
   render();
@@ -770,14 +796,56 @@ function questPage(){
  '<section class="quest-section"><div class="section-head"><h2>This month</h2><small>'+currentDone+' / '+A.length+' targets complete</small></div><div class="quest-list">'+A.map(a=>{const done=sessionCount(a.id,today.getFullYear(),today.getMonth()),target=targetFor(a.id,today.getFullYear(),today.getMonth()),complete=done>=target;return '<article class="quest-card"><div class="quest-card-top"><div><strong>'+a.name+'</strong><p>'+done+' / '+target+' sessions</p></div><span class="quest-reward">'+(complete?"+25 XP":"25 XP available")+'</span></div><div class="quest-progress"><span style="width:'+Math.min(100,Math.round(done/target*100))+'%"></span></div></article>'}).join("")+'</div></section>'+
  '<section class="quest-section"><div class="section-head"><h2>Session milestones</h2><small>No XP awarded</small></div><div class="quest-list">'+totalMilestoneCard+achievementCards+'</div></section>';
 }
+function sideQuestsPage(){
+ const quests=[...(data.sideQuests||[])].sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"));
+ const card=q=>{
+  const date=q.date?new Date(q.date+"T12:00:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}):"Date not set";
+  const people=(q.friends||"").trim();
+  const details=[date,q.location,people?"With "+people:""].filter(Boolean).map(escapeHtml).join(" · ");
+  const status=q.status||"planned";
+  const stars=Array.from({length:5},(_,i)=>'<button type="button" data-quest-rate="'+escapeHtml(q.id)+'" data-rating="'+(i+1)+'" class="'+(i<(q.rating||0)?"selected":"")+'" aria-label="'+(i+1)+' out of 5 stars">★</button>').join("");
+  return '<article class="sidequest-card"><div class="sidequest-card-top"><div><h3>'+escapeHtml(q.title)+'</h3></div><span class="sidequest-status">'+(status==="in-progress"?"In progress":status==="completed"?"Completed":"Planned")+'</span></div>'+
+   (details?'<div class="sidequest-details">'+details+'</div>':"")+
+   (q.description?'<p class="sidequest-description">'+escapeHtml(q.description)+'</p>':"")+
+   (status!=="completed"?'<div class="sidequest-actions">'+(status==="planned"?'<button type="button" data-quest-start="'+escapeHtml(q.id)+'">Start quest</button>':'<button type="button" data-quest-complete="'+escapeHtml(q.id)+'">Mark completed</button>')+'</div>':
+    '<div class="sidequest-review"><small>Your rating</small><div class="sidequest-stars">'+stars+'</div><small>'+(q.rating? q.rating+' / 5 stars':'Tap a star to rate this quest')+'</small></div>');
+ };
+ const planned=quests.filter(q=>(q.status||"planned")!=="completed");
+ const completed=quests.filter(q=>q.status==="completed");
+ return '<div class="page-head"><div class="eyebrow">REAL-LIFE ADVENTURES</div><h1>Side Quests</h1><p>Plan something with your mates, then keep a record of how it went.</p></div>'+
+  '<section class="sidequest-create"><div class="section-head"><h2>Create a quest</h2><small>Plan it before you go</small></div>'+
+  '<form class="sidequest-form" data-sidequest-form>'+
+   '<label class="wide">Quest name<input name="title" maxlength="70" placeholder="e.g. Explore somewhere new" required></label>'+
+   '<label>Planned date<input name="date" type="date" min="'+todayKey+'"></label>'+
+   '<label>Location<input name="location" maxlength="100" placeholder="Where are you going?"></label>'+
+   '<label class="wide">Who's coming?<input name="friends" maxlength="160" placeholder="Names of your mates"></label>'+
+   '<label class="wide">Description<textarea name="description" maxlength="500" placeholder="What's the plan?"></textarea></label>'+
+   '<button class="sidequest-submit" type="submit">Create side quest</button></form></section>'+
+  '<section class="sidequest-group"><div class="section-head"><h2>Upcoming & in progress</h2><small>'+planned.length+' quests</small></div>'+
+  (planned.length?planned.map(card).join(""):'<div class="sidequest-empty">No active quests yet. Create one above.</div>')+'</section>'+
+  '<section class="sidequest-group"><div class="section-head"><h2>Completed</h2><small>'+completed.length+' quests</small></div>'+
+  (completed.length?completed.slice().reverse().map(card).join(""):'<div class="sidequest-empty">Completed adventures will show up here.</div>')+'</section>';
+}
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Calendar",appIcon("calendar"),"Calendar"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["XP",appIcon("sparkles"),"Quests"]];
+ const labels=[["Home",appIcon("home"),"Overview"],["Calendar",appIcon("calendar"),"Calendar"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["XP",appIcon("sparkles"),"Quests"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Calendar"?calendarPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():page==="Quests"?questPage():dashboard();
+ $("view").innerHTML=page==="Overview"?dashboard():page==="Calendar"?calendarPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Quests"?questPage():dashboard();
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+document.addEventListener("submit",e=>{
+ const form=e.target.closest("[data-sidequest-form]");if(!form)return;
+ e.preventDefault();const values=new FormData(form),title=String(values.get("title")||"").trim();
+ if(!title){toast("Give your quest a name first");return}
+ data.sideQuests=data.sideQuests||[];
+ data.sideQuests.push({id:String(Date.now()),title,description:String(values.get("description")||"").trim(),date:String(values.get("date")||""),location:String(values.get("location")||"").trim(),friends:String(values.get("friends")||"").trim(),status:"planned",rating:0,createdAt:new Date().toISOString()});
+ save();render();toast("Side quest created");
+});
 document.addEventListener("click",e=>{
+ const start=e.target.closest("[data-quest-start]");if(start){const q=data.sideQuests.find(x=>x.id===start.dataset.questStart);if(q){q.status="in-progress";q.updatedAt=new Date().toISOString();save();render();toast("Quest started")}return}
+ const complete=e.target.closest("[data-quest-complete]");if(complete){const q=data.sideQuests.find(x=>x.id===complete.dataset.questComplete);if(q){q.status="completed";q.completedAt=new Date().toISOString();q.updatedAt=new Date().toISOString();save();render();toast("Quest completed")}return}
+ const rate=e.target.closest("[data-quest-rate]");if(rate){const q=data.sideQuests.find(x=>x.id===rate.dataset.questRate);if(q){q.rating=Number(rate.dataset.rating);q.updatedAt=new Date().toISOString();save();render()}return}
+
  const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return} if(e.target.classList?.contains("modal-backdrop")){$("modalRoot").innerHTML="";return}
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
