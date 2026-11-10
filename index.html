@@ -192,6 +192,10 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .calendar-log-row:active{transform:scale(.99)}
 .calendar-log-name{font-weight:700}
 @media(max-width:650px){.calendar-screen{min-height:calc(100dvh - 170px)}.months-grid.current-month .month-card{min-height:0;padding:10px}.months-grid.current-month .month-days{gap:4px}.months-grid.current-month .date-cell,.months-grid.current-month .date-empty{height:auto;min-height:0;font-size:12px}.calendar-modal{width:100%;max-height:85dvh}.calendar-log-row{min-height:52px}}
+
+/* Keep every calendar month square or landscape, never portrait. */
+.months-grid .month-card{width:100%;height:auto;aspect-ratio:1/1}
+.months-grid.current-month .month-card{height:auto;aspect-ratio:1/1}
 </style>
 </head>
 <body>
