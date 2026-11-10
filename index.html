@@ -808,7 +808,7 @@ function sideQuestsPage(){
    (details?'<div class="sidequest-details">'+details+'</div>':"")+
    (q.description?'<p class="sidequest-description">'+escapeHtml(q.description)+'</p>':"")+
    (status!=="completed"?'<div class="sidequest-actions">'+(status==="planned"?'<button type="button" data-quest-start="'+escapeHtml(q.id)+'">Start quest</button>':'<button type="button" data-quest-complete="'+escapeHtml(q.id)+'">Mark completed</button>')+'</div>':
-    '<div class="sidequest-review"><small>Your rating</small><div class="sidequest-stars">'+stars+'</div><small>'+(q.rating? q.rating+' / 5 stars':'Tap a star to rate this quest')+'</small></div>');
+    '<div class="sidequest-review"><small>Your rating</small><div class="sidequest-stars">'+stars+'</div><small>'+(q.rating? q.rating+' / 5 stars':'Tap a star to rate this quest')+'</small></div>')+'</article>';
  };
  const planned=quests.filter(q=>(q.status||"planned")!=="completed");
  const completed=quests.filter(q=>q.status==="completed");
