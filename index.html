@@ -173,7 +173,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.2</div>
+<div class="version-tag">v0.1.3</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -182,10 +182,12 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 function appIcon(name){
  const paths={
   mark:'<path d="M12 2.8 20.2 7.5v9L12 21.2l-8.2-4.7v-9L12 2.8Z"/><path d="m8 12.1 2.5 2.5L16.5 8.7"/>',
-  fitness:'<path d="M3 9v6m3-9v12m12-12v12m3-9v6M6 12h12"/><path d="M3 10h3m12 0h3M3 14h3m12 0h3"/>',
-  drums:'<path d="M4 13.5h7v5.2c0 1.3-1.6 2.3-3.5 2.3S4 20 4 18.7v-5.2Z"/><ellipse cx="7.5" cy="13.5" rx="3.5" ry="1.5"/><path d="M14 14h6v4.7c0 1.1-1.3 2-3 2s-3-.9-3-2V14Z"/><ellipse cx="17" cy="14" rx="3" ry="1.3"/><path d="m4 4 4 6m12-6-4 6M2.5 3l5 1m14-1-5 1"/>',
-  guitar:'<path d="M15.4 4.2 19.8 2l2.2 2.2-2.2 4.4-3.1 3.1a4.4 4.4 0 0 1-6 6 4.4 4.4 0 0 1-6-6 4.4 4.4 0 0 1 6-6l1.6-1.5Z"/><circle cx="9.8" cy="14.2" r="1.2"/><path d="m10.8 13.2 8-8M13 10.8l1.2 1.2m1-3.4 1.2 1.2"/>',
-  skate:'<path d="M3 14.2c1.2 2 3.1 3 5.7 3h6.6c2.6 0 4.5-1 5.7-3l-1.3-1.4H4.3L3 14.2Z"/><path d="M6.5 17.4v1.2m11-1.2v1.2"/><circle cx="7" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/><path d="M5.5 12.8 7 10.5h10l1.5 2.3"/>',
+  fit:'<path d="M3 9v6m3-9v12m12-12v12m3-9v6M6 12h12"/>',
+   workouts:'<path d="M8 5h8l2 4v10H6V9l2-4Z"/><path d="M8 5V3h8v2M6 10h12"/>',
+  drums:'<path d="M3.5 12.5h7v6c0 1.4-1.6 2.5-3.5 2.5s-3.5-1.1-3.5-2.5v-6Z"/><ellipse cx="7" cy="12.5" rx="3.5" ry="1.4"/><path d="M13.5 14h7v4.5c0 1.4-1.6 2.5-3.5 2.5s-3.5-1.1-3.5-2.5V14Z"/><ellipse cx="17" cy="14" rx="3.5" ry="1.4"/><path d="m4 3 5 6m11-6-5 6"/>',
+  guitar:'<path d="M14.8 3.2 18 1.8l4.2 4.2-1.4 3.2-3 1.2-2.2-2.2-2.8 2.8a4.8 4.8 0 1 1-3.8-3.8l2.8-2.8-2.2-2.2"/><circle cx="8.8" cy="15.2" r="1.3"/><path d="m10.2 13.8 8-8m-5.7 5.7 1.4 1.4"/>',
+  skate:'<path d="M2.5 15.2c1.2 1.7 3.2 2.6 5.5 2.6h8c2.3 0 4.3-.9 5.5-2.6l-1-1.2H3.5l-1 1.2Z"/><circle cx="7" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>,
+   skating:'<path d="m4 17 2-2h12l2 2"/><path d="M3 20h18"/><circle cx="7" cy="18" r="1.2"/><circle cx="17" cy="18" r="1.2"/><path d="m7 10 3-2 3 2 2-3m-8 3-2 3m8-3 3 2"/>',
   home:'<path d="m3 10 9-7 9 7v10.5a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V10Z"/><path d="M9 21v-7h6v7"/>',
   music:'<path d="M10 18V5l10-2v13"/><circle cx="7" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   track:'<path d="M5 5h14M5 12h14M5 19h14"/><circle cx="9" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="11" cy="19" r="2" fill="currentColor" stroke="none"/>',
@@ -199,10 +201,10 @@ const categories=[
 {id:"skateboarding",name:"Skateboarding",activities:["skate"]}
 ];
 const A=[
-{id:"workout",name:"Workouts",category:"fitness",icon:appIcon("fitness")},
+{id:"workout",name:"Workouts",category:"fitness",icon:appIcon("workouts")},
 {id:"drums",name:"Drums",category:"music",icon:appIcon("drums")},
 {id:"guitar",name:"Guitar",category:"music",icon:appIcon("guitar")},
-{id:"skate",name:"Skating",category:"skateboarding",icon:appIcon("skate")},
+{id:"skate",name:"Skating",category:"skateboarding",icon:appIcon("skating")},
 ];
 const tricks=["Ollie","Fakie Ollie","Nollie","Switch Ollie","Shuvit","Pop Shuvit","Fakie Shuvit","Frontside 180","Backside 180","Fakie 180","Nollie 180","Kickflip","Heelflip","Fakie Kickflip","Fakie Heelflip","Varial Kickflip","Varial Heelflip","Hardflip","Inward Heelflip","Frontside Pop Shuvit","Backside Pop Shuvit","Bigspin","360 Shuvit","Fakie Bigspin","Frontside Bigspin","Backside Bigspin","Tre Flip","Laser Flip","360 Flip","Fakie 360 Flip","Nollie Kickflip","Nollie Heelflip","Switch Kickflip","Switch Heelflip","Frontside Flip","Backside Flip","Half Cab","Half Cab Flip","Half Cab Heelflip","No Comply","Boneless","Manual","Nose Manual","Boardslide","50-50 Grind","5-0 Grind","Smith Grind","Feeble Grind","Crooked Grind","Nosegrind"];
 const $=id=>document.getElementById(id);
@@ -484,7 +486,7 @@ function tricksPage(){
   '<div class="trick-list">'+(visible.length?visible.map(x=>'<article class="trick-card '+(x.status==="Learnt (rolling)"?"is-rolling":x.status==="Learnt (flat)"?"is-learnt":x.status==="Learning"?"is-learning":"")+'"><div class="trick-card-top"><span class="trick-state">'+(x.status==="Learnt (rolling)"?"Rolling":x.status==="Learnt (flat)"?"Learnt":x.status==="Learning"?"Learning":"Not learnt")+'</span></div><strong>'+esc(x.t)+'</strong><label class="trick-select-label" for="trick-'+x.i+'">Landing status</label><select id="trick-'+x.i+'" data-trick="'+esc(x.t)+'"><option '+(x.status==="Not learnt"?"selected":"")+'>Not learnt</option><option '+(x.status==="Learning"?"selected":"")+'>Learning</option><option '+(x.status==="Learnt (flat)"?"selected":"")+'>Learnt (flat)</option><option '+(x.status==="Learnt (rolling)"?"selected":"")+'>Learnt (rolling)</option></select></article>').join(""):'<div class="trick-empty">No tricks match this filter.</div>')+'</div></section>';
 }
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Fit",appIcon("fitness"),"cat:fitness"],["Music",appIcon("music"),"cat:music"],["Skate",appIcon("skate"),"cat:skateboarding"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"]];
+ const labels=[["Home",appIcon("home"),"Overview"],["Fit",appIcon("fit"),"cat:fitness"],["Music",appIcon("music"),"cat:music"],["Skate",appIcon("skate"),"cat:skateboarding"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
  $("view").innerHTML=page==="Overview"?dashboard():page==="Category"?categoryPage():page==="Activity"?activityPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():dashboard();
 }
