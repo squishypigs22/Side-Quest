@@ -154,7 +154,18 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .date-cell{border-radius:11px}
 .toast{border-radius:14px}
 
-\n/* Final visual refinements */\n.trick-card.is-learning{border-color:#ffad7080!important;background:#30251e!important}\n.trick-card.is-learning .trick-state{color:#ffad70!important;background:#ffad7018!important}\n.stat-learning strong{color:#ffad70!important}\n.sync-modal{width:min(100%,390px);padding:22px}.sync-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#8bbaff18;color:var(--accent);font-size:23px;margin:0 0 13px}.sync-modal h2{font-size:20px;margin:0 32px 5px 0}.sync-modal p{font-size:12px;line-height:1.55;margin:0 0 17px}.sync-modal p strong{color:var(--text)}.sync-actions{display:grid;gap:8px}.sync-actions button{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:750;text-align:center}.sync-actions button.sync-primary{background:#8bbaff;color:#101722;border-color:#8bbaff}.sync-actions button:disabled{opacity:.6}.sync-help{margin:14px 0 0!important;font-size:10px!important}.sync-code-input{width:100%;padding:14px 12px;border:1px solid #8bbaff80;border-radius:11px;background:#11151b;color:var(--text);font:800 19px/1.2 "Nunito",sans-serif;letter-spacing:4px;text-align:center;text-transform:uppercase;outline:none}.sync-code-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8bbaff20}.sync-error{min-height:18px;color:#ff9b9b;font-size:11px;margin:7px 0}.pair-code{padding:17px 10px;border:1px dashed #8bbaff80;border-radius:12px;background:#8bbaff0c;color:var(--accent);font-size:27px;font-weight:900;letter-spacing:5px;text-align:center;font-variant-numeric:tabular-nums;user-select:all}.pair-expiry{font-size:10px;color:var(--muted);text-align:center;margin:9px 0 15px}</style>
+\n/* Final visual refinements */\n.trick-card.is-learning{border-color:#ffad7080!important;background:#30251e!important}\n.trick-card.is-learning .trick-state{color:#ffad70!important;background:#ffad7018!important}\n.stat-learning strong{color:#ffad70!important}\n.sync-modal{width:min(100%,390px);padding:22px}.sync-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#8bbaff18;color:var(--accent);font-size:23px;margin:0 0 13px}.sync-modal h2{font-size:20px;margin:0 32px 5px 0}.sync-modal p{font-size:12px;line-height:1.55;margin:0 0 17px}.sync-modal p strong{color:var(--text)}.sync-actions{display:grid;gap:8px}.sync-actions button{width:100%;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface2);color:var(--text);font-size:12px;font-weight:750;text-align:center}.sync-actions button.sync-primary{background:#8bbaff;color:#101722;border-color:#8bbaff}.sync-actions button:disabled{opacity:.6}.sync-help{margin:14px 0 0!important;font-size:10px!important}.sync-code-input{width:100%;padding:14px 12px;border:1px solid #8bbaff80;border-radius:11px;background:#11151b;color:var(--text);font:800 19px/1.2 "Nunito",sans-serif;letter-spacing:4px;text-align:center;text-transform:uppercase;outline:none}.sync-code-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #8bbaff20}.sync-error{min-height:18px;color:#ff9b9b;font-size:11px;margin:7px 0}.pair-code{padding:17px 10px;border:1px dashed #8bbaff80;border-radius:12px;background:#8bbaff0c;color:var(--accent);font-size:27px;font-weight:900;letter-spacing:5px;text-align:center;font-variant-numeric:tabular-nums;user-select:all}.pair-expiry{font-size:10px;color:var(--muted);text-align:center;margin:9px 0 15px}
+.device-list{display:grid;gap:8px;margin:0 0 15px;max-height:260px;overflow:auto}
+.device-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.device-info{min-width:0;display:grid;gap:3px}
+.device-info strong{font-size:12px;overflow-wrap:anywhere}
+.device-info small{font-size:10px;color:var(--muted)}
+.device-disconnect{flex:0 0 auto;border:1px solid #e77a8355;border-radius:8px;padding:7px 9px;background:#e77a8312;color:#f19aa1;font-size:10px;font-weight:750}
+.device-disconnect:disabled{opacity:.55}
+.device-loading{padding:13px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:11px;text-align:center}
+.device-error{color:#f19aa1}
+.device-actions{margin-top:4px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -287,18 +298,51 @@ async function joinSharedSpace(){
   const error=$("pairError");if(error)error.textContent=e.message||"Check the code and try again";
  }
 }
+function escapeHtml(value){
+ return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+async function showDeviceManager(){
+ showSyncModal('<div class="sync-mark">✓</div><h2 id="syncTitle">Connected devices</h2><p>These devices are authorised to sync with this shared space. The date shows when each was linked.</p><div class="device-list" id="deviceList"><div class="device-loading">Loading devices…</div></div><div class="sync-actions device-actions"><button class="sync-primary" id="addDevice">Add another device</button><button id="syncNow">Sync now</button></div>');
+ try{
+  const result=await syncRequest("devices");
+  const devices=result.devices||[];
+  const list=$("deviceList");
+  if(!list)return;
+  list.innerHTML=devices.length?devices.map(d=>{
+   const date=d.created_at?new Date(d.created_at).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}):"Date unavailable";
+   return '<div class="device-row"><div class="device-info"><strong>'+escapeHtml(d.name)+'</strong><small>'+(d.current?"This device · ":"")+ 'Linked '+escapeHtml(date)+'</small></div><button class="device-disconnect" data-revoke-device="'+escapeHtml(d.id)+'" data-current="'+(d.current?"1":"0")+'">'+(d.current?"Disconnect":"Remove")+'</button></div>';
+  }).join(""):'<div class="device-loading">No linked devices found.</div>';
+  list.querySelectorAll("[data-revoke-device]").forEach(button=>button.addEventListener("click",async()=>{
+   const current=button.dataset.current==="1";
+   const message=current?"Disconnect this device from cloud sync? Your local progress will stay on this device.":"Remove this device's access to the shared space?";
+   if(!window.confirm(message))return;
+   button.disabled=true;button.textContent="Removing…";
+   try{
+    const result=await syncRequest("revoke",{device_id:button.dataset.revokeDevice});
+    if(result.revoked_current){
+     localStorage.removeItem("sq27_sync");localStorage.removeItem("sq27_sync_dirty");
+     syncConfig=null;syncReady=false;syncDirty=false;clearTimeout(syncTimer);
+     $("modalRoot").innerHTML="";toast("This device is disconnected");return;
+    }
+    toast("Device disconnected");await showDeviceManager();
+   }catch(e){button.disabled=false;button.textContent=current?"Disconnect":"Remove";toast(e.message||"Couldn't disconnect device")}
+  }));
+  $("addDevice").addEventListener("click",async()=>{
+   const button=$("addDevice");button.disabled=true;button.textContent="Creating code…";
+   try{const pairResult=await syncRequest("pair");showPairCode(pairResult.code,"Pair another device")}
+   catch(e){button.disabled=false;button.textContent="Add another device";toast("Couldn't create a pairing code: "+e.message)}
+  });
+  $("syncNow").addEventListener("click",async()=>{
+   await syncPull();await showDeviceManager();toast("Sync checked");
+  });
+ }catch(e){
+  const list=$("deviceList");if(list)list.innerHTML='<div class="device-loading device-error">Could not load devices. '+escapeHtml(e.message||"Try again.")+'</div>';
+ }
+}
 async function handleSync(){
  if(syncBusy){toast("Sync is already running");return}
- if(!navigator.onLine){toast("Connect to the internet to sync");return}
- if(syncConfig){
-  showSyncModal('<div class="sync-mark">✓</div><h2 id="syncTitle">Side Quest is connected</h2><p>This device is linked to your shared space. Changes sync automatically when you are online.</p><div class="sync-actions"><button class="sync-primary" id="addDevice">Add another device</button><button id="syncNow">Sync now</button></div>');
-  $("addDevice").addEventListener("click",async()=>{
-   try{const result=await syncRequest("pair");showPairCode(result.code,"Pair another device")}
-   catch(e){toast("Couldn't create a pairing code: "+e.message)}
-  });
-  $("syncNow").addEventListener("click",async()=>{await syncPull();$("modalRoot").innerHTML="";toast("Sync checked")});
-  return;
- }
+ if(!navigator.onLine){toast("Connect to the internet to manage sync");return}
+ if(syncConfig){await showDeviceManager();return}
  showSyncModal('<div class="sync-mark">↔</div><h2 id="syncTitle">Sync your devices</h2><p>Connect your PC and Android so your progress stays up to date on both.</p><div class="sync-actions"><button class="sync-primary" id="joinSpaceStart">Join an existing space</button><button id="createSpace">Create a new shared space</button></div><p class="sync-help">Already set up Side Quest on your other device? Choose join and enter its pairing code.</p>');
  $("joinSpaceStart").addEventListener("click",()=>{
   showSyncModal('<div class="sync-mark">↔</div><h2 id="syncTitle">Enter pairing code</h2><p>On your other device, open the sync menu and choose Add another device. Enter the 8-character code shown there.</p><input class="sync-code-input" id="pairCodeInput" type="text" maxlength="8" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="8-CHARACTER CODE"><div class="sync-error" id="pairError" role="status"></div><div class="sync-actions"><button class="sync-primary" id="joinSpace">Join shared space</button><button data-close-modal>Cancel</button></div>');
