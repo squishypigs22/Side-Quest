@@ -165,35 +165,37 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .device-loading{padding:13px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:11px;text-align:center}
 .device-error{color:#f19aa1}
 .device-actions{margin-top:4px}
+ .sq-icon{width:18px;height:18px;display:block;flex:0 0 auto}.brand-mark .sq-icon{width:17px;height:17px}.sync-action-btn .sq-icon{width:16px;height:16px}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><svg class="sq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8 20.2 7.5v9L12 21.2l-8.2-4.7v-9L12 2.8Z"/><path d="m8 12.1 2.5 2.5L16.5 8.7"/></svg></span>Side Quest</div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.4-3"/></svg><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest</div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.4</div>
+<div class="version-tag">v0.1.5</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
+<script src="https://unpkg.com/lucide@1.71.0"></script>
 <script>
 (function(){
 "use strict";
 function appIcon(name){
- const paths={
-  mark:'<path d="M12 2.8 20.2 7.5v9L12 21.2l-8.2-4.7v-9L12 2.8Z"/><path d="m8 12.1 2.5 2.5L16.5 8.7"/>',
-  fit:'<path d="M3 9v6m3-9v12m12-12v12m3-9v6M6 12h12"/>',
-   workouts:'<path d="M8 5h8l2 4v10H6V9l2-4Z"/><path d="M8 5V3h8v2M6 10h12"/>',
-  drums:'<path d="M3.5 12.5h7v6c0 1.4-1.6 2.5-3.5 2.5s-3.5-1.1-3.5-2.5v-6Z"/><ellipse cx="7" cy="12.5" rx="3.5" ry="1.4"/><path d="M13.5 14h7v4.5c0 1.4-1.6 2.5-3.5 2.5s-3.5-1.1-3.5-2.5V14Z"/><ellipse cx="17" cy="14" rx="3.5" ry="1.4"/><path d="m4 3 5 6m11-6-5 6"/>',
-  guitar:'<path d="M14.8 3.2 18 1.8l4.2 4.2-1.4 3.2-3 1.2-2.2-2.2-2.8 2.8a4.8 4.8 0 1 1-3.8-3.8l2.8-2.8-2.2-2.2"/><circle cx="8.8" cy="15.2" r="1.3"/><path d="m10.2 13.8 8-8m-5.7 5.7 1.4 1.4"/>',
-   skate:'<path d="M2.5 15.2c1.2 1.7 3.2 2.6 5.5 2.6h8c2.3 0 4.3-.9 5.5-2.6l-1-1.2H3.5l-1 1.2Z"/><circle cx="7" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>',
-   skating:'<circle cx="12" cy="4" r="2"/><path d="m12 6-2 5 4 2 2-3m-6 1-3 4m7-2 3 2"/><path d="M3 19c1.2 1.2 2.7 1.8 4.5 1.8h9c1.8 0 3.3-.6 4.5-1.8"/><circle cx="7" cy="22" r=".7"/><circle cx="17" cy="22" r=".7"/>',
-  home:'<path d="m3 10 9-7 9 7v10.5a.5.5 0 0 1-.5.5h-17a.5.5 0 0 1-.5-.5V10Z"/><path d="M9 21v-7h6v7"/>',
-  music:'<path d="M10 18V5l10-2v13"/><circle cx="7" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
-  track:'<path d="M5 5h14M5 12h14M5 19h14"/><circle cx="9" cy="5" r="2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="11" cy="19" r="2" fill="currentColor" stroke="none"/>',
-  tricks:'<path d="m12 2.8 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 2.8Z"/>'
+ const icons={
+  mark:"shield-check",
+  fit:"dumbbell",
+  workouts:"clipboard-list",
+  drums:"drum",
+  guitar:"guitar",
+  skate:"footprints",
+  skating:"person-standing",
+  home:"house",
+  music:"music-2",
+  track:"list-checks",
+  tricks:"trophy"
  };
- return '<svg class="sq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.mark)+'</svg>';
+ return '<i class="sq-icon" data-lucide="'+(icons[name]||"circle")+'" aria-hidden="true"></i>';
 }
 const categories=[
 {id:"fitness",name:"Fitness",activities:["workout"]},
@@ -437,7 +439,7 @@ function categoryPage(){
  const c=categories.find(x=>x.id===categoryId);if(!c)return categoriesPage();
  if(c.activities.length===1){activityId=c.activities[0];page="Activity";return activityPage()}
  const list=c.activities.map(id=>A.find(a=>a.id===id));
- return '<div class="page-head category-page-head cat-'+c.id+'"><div class="eyebrow"><button class="quiet-btn" data-page="Overview">‹ Overview</button></div><h1>'+c.name+'</h1><p>'+list.length+' activities</p></div><div class="activity-list">'+list.map(activityCard).join("")+'</div>';
+ return '<div class="page-head category-page-head cat-'+c.id+'"><div class="eyebrow">YOUR ACTIVITIES</div><h1>'+c.name+'</h1><p>'+list.length+' activities</p></div><div class="activity-list">'+list.map(activityCard).join("")+'</div>';
 }
 function monthCard(id,y,m){
  const count=sessionCount(id,y,m),target=targetFor(id,y,m),first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate(),parts=[];
@@ -453,7 +455,7 @@ function activityPage(){
  const count=sessionCount(a.id,today.getFullYear(),today.getMonth()),target=targetFor(a.id,today.getFullYear(),today.getMonth()),pct=Math.min(100,Math.round(count/target*100));
  const displayMonth=viewYear===today.getFullYear()?today.getMonth():0;const months=showAllMonths?Array.from({length:12},(_,m)=>monthCard(a.id,viewYear,m)).join(""):monthCard(a.id,viewYear,displayMonth);
  const musicSwitch=a.category==="music"?'<div class="music-switch" role="group" aria-label="Music activity"><button data-music-activity="drums" class="'+(a.id==="drums"?"active":"")+'" aria-pressed="'+(a.id==="drums")+'">Drums</button><button data-music-activity="guitar" class="'+(a.id==="guitar"?"active":"")+'" aria-pressed="'+(a.id==="guitar")+'">Guitar</button></div>':"";
- return '<div class="page-head activity-page-head cat-'+a.category+'"><div class="eyebrow"><button class="quiet-btn" data-page="Overview">‹ Overview</button></div><h1>'+a.name+'</h1></div>'+musicSwitch+'<section class="target-panel"><div><div class="target-title">Monthly target · '+today.toLocaleDateString(undefined,{month:"long"})+'</div><div class="target-number">'+count+' <span style="font-size:13px;color:var(--muted);font-weight:500">/ '+target+' sessions</span></div></div><div class="target-side"><strong>'+pct+'%</strong><small>of target</small></div><div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div><div class="target-caption"><span>'+(count>=target?"Target reached":target-count+" to go")+'</span></div></section><div class="year-nav"><button data-year="-1" aria-label="Previous year" '+(viewYear<=2026?"disabled":"")+'>‹</button><strong>'+viewYear+'</strong><button data-year="1" aria-label="Next year" '+(viewYear>=today.getFullYear()?"disabled":"") +'>›</button><button class="quiet-btn" data-toggle-months>'+(showAllMonths?"Current month":"View all") +'</button></div><div class="months-grid calendar-'+a.category+' '+(showAllMonths?"":"current-month")+'">'+months+'</div>';
+ return '<div class="page-head activity-page-head cat-'+a.category+'"><h1>'+a.name+'</h1></div>'+musicSwitch+'<section class="target-panel"><div><div class="target-title">Monthly target · '+today.toLocaleDateString(undefined,{month:"long"})+'</div><div class="target-number">'+count+' <span style="font-size:13px;color:var(--muted);font-weight:500">/ '+target+' sessions</span></div></div><div class="target-side"><strong>'+pct+'%</strong><small>of target</small></div><div class="progress-track"><div class="progress-fill" style="width:'+pct+'%"></div></div><div class="target-caption"><span>'+(count>=target?"Target reached":target-count+" to go")+'</span></div></section><div class="year-nav"><button data-year="-1" aria-label="Previous year" '+(viewYear<=2026?"disabled":"")+'>‹</button><strong>'+viewYear+'</strong><button data-year="1" aria-label="Next year" '+(viewYear>=today.getFullYear()?"disabled":"") +'>›</button><button class="quiet-btn" data-toggle-months>'+(showAllMonths?"Current month":"View all") +'</button></div><div class="months-grid calendar-'+a.category+' '+(showAllMonths?"":"current-month")+'">'+months+'</div>';
 }
 function targetsPage(){
  return '<div class="page-head"><div class="eyebrow">MONTHLY GOALS</div><h1>Targets</h1><p>Set how many sessions you want to complete each month.</p></div><div class="target-list">'+A.map(a=>{const target=targetFor(a.id,today.getFullYear(),today.getMonth()),done=sessionCount(a.id,today.getFullYear(),today.getMonth()),pct=Math.min(100,Math.round(done/target*100));return '<section class="target-card" data-category="'+a.category+'"><div class="target-card-top"><span class="activity-icon">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+done+' of '+target+' sessions this month</small></span></div><div class="target-edit"><label for="target-'+a.id+'">Monthly target</label><input id="target-'+a.id+'" type="number" min="1" max="100" step="1" value="'+target+'" data-target-input="'+a.id+'"><button data-save-target="'+a.id+'">Save</button></div><div class="target-progress"><span style="width:'+pct+'%"></span></div></section>'}).join("")+'</div>';
@@ -489,6 +491,7 @@ function render(){
  const labels=[["Home",appIcon("home"),"Overview"],["Fit",appIcon("fit"),"cat:fitness"],["Music",appIcon("music"),"cat:music"],["Skate",appIcon("skate"),"cat:skateboarding"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
  $("view").innerHTML=page==="Overview"?dashboard():page==="Category"?categoryPage():page==="Activity"?activityPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():dashboard();
+ if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 function openModal(date){
