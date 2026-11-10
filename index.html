@@ -158,11 +158,11 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="icon-btn" id="exportBtn" aria-label="Export backup" title="Export backup">↓</button><button class="icon-btn" id="importBtn" aria-label="Import backup" title="Import backup">↑</button><input class="file-input" id="importFile" type="file" accept="application/json"></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark">SQ</span>Side Quest</div><div class="top-actions"><button class="icon-btn" id="syncBtn" aria-label="Sync devices" title="Sync devices">↔</button><button class="icon-btn" id="exportBtn" aria-label="Export backup" title="Export backup">↓</button><button class="icon-btn" id="importBtn" aria-label="Import backup" title="Import backup">↑</button><input class="file-input" id="importFile" type="file" accept="application/json"></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v1.5.0</div>
+<div class="version-tag">v1.5.1</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -187,7 +187,103 @@ const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.g
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
 data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="";
-function save(){localStorage.setItem("sq27",JSON.stringify(data))}
+const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
+const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
+let syncConfig=null;try{syncConfig=JSON.parse(localStorage.getItem("sq27_sync")||"null")}catch(e){}
+let syncReady=false,syncDirty=localStorage.getItem("sq27_sync_dirty")==="1",syncTimer=null,syncBusy=false;
+async function syncRequest(action,extra={},config=syncConfig){
+ const headers={"Content-Type":"application/json","apikey":SYNC_KEY};
+ if(config?.deviceToken)headers.Authorization="Bearer "+config.deviceToken;
+ const response=await fetch(SYNC_URL,{method:"POST",headers,body:JSON.stringify({action,vault_id:config?.vaultId||extra.vault_id,...extra})});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok)throw new Error(result.error||"Sync request failed");
+ return result;
+}
+function mergeProgress(cloud,local){
+ const merged={...(cloud||{}),...(local||{})};
+ merged.activityDays={...(cloud?.activityDays||{})};
+ for(const [id,days] of Object.entries(local?.activityDays||{}))merged.activityDays[id]={...(merged.activityDays[id]||{}),...days};
+ merged.tricks={...(cloud?.tricks||{}),...(local?.tricks||{})};
+ const rank={"Not learnt":0,"Learning":1,"Learnt":2,"Learnt (flat)":2,"Rolling":3,"Learnt (rolling)":3};
+ for(const [trick,value] of Object.entries(merged.tricks)){
+  const a=cloud?.tricks?.[trick],b=local?.tricks?.[trick];
+  if(a&&b)merged.tricks[trick]=(rank[b]??0)>=(rank[a]??0)?b:a;
+ }
+ merged.targets={...(cloud?.targets||{})};
+ for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
+ merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
+ return merged;
+}
+async function syncPush(){
+ if(!syncConfig||!syncReady||syncBusy||!navigator.onLine)return;
+ syncBusy=true;
+ try{await syncRequest("save",{data});syncDirty=false;localStorage.removeItem("sq27_sync_dirty");}
+ catch(e){syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");}
+ finally{syncBusy=false;}
+}
+function scheduleSync(){
+ if(!syncConfig||!syncReady)return;
+ syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");
+ clearTimeout(syncTimer);syncTimer=setTimeout(syncPush,700);
+}
+async function syncPull(){
+ if(!syncConfig||syncBusy||!navigator.onLine)return;
+ syncBusy=true;
+ try{
+  const result=await syncRequest("load");
+  if(syncDirty){
+   data=mergeProgress(result.data,data);
+   localStorage.setItem("sq27",JSON.stringify(data));
+   syncBusy=false;await syncPush();return;
+  }
+  data=result.data||{};
+  data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};
+  data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
+  localStorage.setItem("sq27",JSON.stringify(data));
+  render();
+ }catch(e){toast("Sync unavailable — keeping this device's data")}
+ finally{syncBusy=false;}
+}
+function save(){localStorage.setItem("sq27",JSON.stringify(data));scheduleSync()}
+async function createPairCode(){
+ const result=await syncRequest("pair");
+ alert("Pairing code: "+result.code+"\n\nEnter this on your other device within 10 minutes.\n\nKeep the code private.");
+}
+async function handleSync(){
+ if(syncBusy){toast("Sync is already running");return}
+ try{
+  if(syncConfig){
+   if(confirm("Create a one-time pairing code for another device? Choose Cancel to sync this device now.")){
+    const result=await syncRequest("pair");
+    alert("Pairing code: "+result.code+"\n\nEnter this on your other device within 10 minutes. Keep it private.");
+   }else{await syncPull();toast("Sync checked")}
+   return;
+  }
+  const pair=confirm("Are you pairing this device to an existing Side Quest space?\n\nOK = enter a pairing code\nCancel = create a new shared space on this device");
+  if(pair){
+   const code=prompt("Enter the 8-character pairing code from your other device:");
+   if(!code)return;
+   const result=await syncRequest("redeem",{code:code.trim().toUpperCase(),device_name:/Android/i.test(navigator.userAgent)?"Android device":"PC"});
+   const localData=data;
+   data=mergeProgress(result.data,localData);
+   syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
+   localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
+   syncReady=true;syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");
+   localStorage.setItem("sq27",JSON.stringify(data));
+   await syncPush();render();toast("Device paired and synced");
+  }else{
+   const vaultId=crypto.randomUUID();
+   const result=await syncRequest("create",{vault_id:vaultId,data,device_name:/Android/i.test(navigator.userAgent)?"Android device":"PC"},null);
+   syncConfig={vaultId:result.vault_id,deviceToken:result.device_token};
+   localStorage.setItem("sq27_sync",JSON.stringify(syncConfig));
+   syncReady=true;syncDirty=false;localStorage.removeItem("sq27_sync_dirty");
+   const pairResult=await syncRequest("pair");
+   alert("Shared Side Quest space created.\n\nPairing code: "+pairResult.code+"\n\nEnter this on your other device within 10 minutes. Keep it private.");
+   toast("Cloud sync enabled");
+  }
+ }catch(e){alert("Sync couldn't be completed: "+e.message)}
+}
+
 function getStatus(id,k){return Number(data.activityDays[id]?.[k]||0)}
 function sessionCount(id,y,m){const prefix=monthKey(y,m)+"-";return Object.entries(data.activityDays[id]||{}).filter(([k,v])=>k.startsWith(prefix)&&v===1).length}
 function totalSessions(id){return Object.values(data.activityDays[id]||{}).filter(v=>v===1).length}
@@ -338,7 +434,10 @@ $("importFile").addEventListener("change",async e=>{
  const file=e.target.files[0];if(!file)return;
  try{const parsed=JSON.parse(await file.text()),incoming=parsed.data||parsed;if(!incoming||typeof incoming!=="object"||!confirm("Restore this backup and replace your current progress?"))return;data.activityDays=incoming.activityDays||{};data.tricks=incoming.tricks||{};data.targets=incoming.targets||data.targets;data.startedMonth=incoming.startedMonth||data.startedMonth;save();render();toast("Backup restored")}catch(err){alert("That file is not a valid Side Quest backup.")}e.target.value="";
 });
+$("syncBtn").addEventListener("click",handleSync);
 render();
+if(syncConfig){syncReady=true;syncPull()}
+window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{});
 })();
 </script>
