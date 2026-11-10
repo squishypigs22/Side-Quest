@@ -173,7 +173,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.3</div>
+<div class="version-tag">v0.1.4</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script>
@@ -518,13 +518,35 @@ document.addEventListener("change",e=>{
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
 });
 $("connectBtn").addEventListener("click",handleSync);
+async function checkForUpdates(){
+ try{
+  const registration=await navigator.serviceWorker?.getRegistration();
+  if(registration)await registration.update().catch(()=>{});
+  const url=new URL("./",location.href);
+  url.searchParams.set("update_check",String(Date.now()));
+  const response=await fetch(url.href,{cache:"no-store",headers:{"Cache-Control":"no-cache"}});
+  if(!response.ok)return false;
+  const latestHtml=await response.text();
+  const latestDoc=new DOMParser().parseFromString(latestHtml,"text/html");
+  const latestVersion=latestDoc.querySelector(".version-tag")?.textContent?.trim();
+  const currentVersion=document.querySelector(".version-tag")?.textContent?.trim();
+  return Boolean(latestVersion&&currentVersion&&latestVersion!==currentVersion);
+ }catch(e){return false}
+}
 async function manualSync(){
- if(!syncConfig){toast("Connect devices first");return}
- if(!navigator.onLine){toast("Connect to the internet to sync");return}
+ if(!navigator.onLine){toast("Connect to the internet to check for updates");return}
  if(syncBusy){toast("Sync is already running");return}
- toast("Syncing…");
- const ok=await syncPull();
+ toast("Checking for updates…");
+ const syncTask=syncConfig?syncPull():Promise.resolve(null);
+ const [ok,updateAvailable]=await Promise.all([syncTask,checkForUpdates()]);
+ if(updateAvailable){
+  toast("Update found — refreshing Side Quest…");
+  setTimeout(()=>{const url=new URL("./",location.href);url.searchParams.set("refresh",String(Date.now()));location.replace(url.href)},700);
+  return;
+ }
+ if(!syncConfig){toast("You're up to date — connect devices to sync progress");return}
  if(ok)toast(syncDirty?"Sync pending — will retry":"Sync complete");
+ else toast("Update check complete — sync unavailable");
 }
 $("syncBtn").addEventListener("click",manualSync);
 render();
