@@ -449,7 +449,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.44</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.51</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -873,7 +873,7 @@ function profilePage(){
 function mainQuestsPage(){
  const progressData=data.mainQuestProgress||{};
  const groups=[
-  {name:"Appearance & Grooming",quests:[["skincare","Skincare routine"],["haircare","Hair care routine"]]},
+  {name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},
   {name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},
   {name:"Style",quests:[["wardrobe","Build a wardrobe I like"]]},
   {name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"],]},
