@@ -877,7 +877,7 @@ function mainQuestsPage(){
   {name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},
   {name:"Style",quests:[["wardrobe","Build a wardrobe I like"]]},
   {name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"],]},
-  {name:"Confidence",quests:[["social-skills","Improve my social skills"],["role-model","Become someone people look up to"]]}
+  {name:"Confidence",quests:[,["role-model","Become someone people look up to"]]}
  ];
  const all=groups.flatMap(g=>g.quests);
  const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
