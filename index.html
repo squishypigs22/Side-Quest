@@ -879,10 +879,10 @@ function mainQuestsPage(){
  ];
  const all=groups.flatMap(g=>g.quests);
  const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
- const possible=all.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).length,0);
+ const possible=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
  return '<div class="page-head"><div class="eyebrow">PERSONAL DEVELOPMENT</div><h1>Main Quests</h1><p>Long-term goals, broken down into milestones.</p></div>'+groups.map(g=>{
-  const done=g.quests.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).filter(m=>m.done).length,0);
-  const count=g.quests.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).length,0);
+  const done=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
+  const count=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
   return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+g.name+'</h2><small>'+done+' / '+count+' milestones</small></div><div class="mainquest-grid">'+g.quests.map(([id,name])=>{
    const milestones=progressData[id]?.milestones||[];const complete=milestones.filter(m=>m.done).length;const pct=milestones.length?Math.round(complete/milestones.length*100):0;
    return '<article class="mainquest-card"><div class="mainquest-card-top"><h3>'+name+'</h3><span class="mainquest-count">'+complete+'/'+milestones.length+'</span></div><div class="mainquest-bar"><span style="width:'+pct+'%"></span></div>'+(milestones.length?'<div class="mainquest-milestones">'+milestones.map((m,i)=>'<label class="mainquest-milestone"><input type="checkbox" data-main-milestone="'+id+'" data-milestone-index="'+i+'" '+(m.done?'checked':'')+'><span>'+escapeHtml(m.title)+'</span></label>').join('')+'</div>':'<div class="mainquest-empty">No milestones added yet.</div>')+'<button type="button" class="mainquest-add" data-add-main-milestone="'+id+'">+ Add milestone</button></article>';
