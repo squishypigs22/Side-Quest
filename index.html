@@ -450,7 +450,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.57</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.58</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -530,6 +530,14 @@ function mergeProgress(cloud,local){
  merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}
  merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
  merged.mainQuestProgress={...(cloud?.mainQuestProgress||{}),...(local?.mainQuestProgress||{})};
+ merged.wardrobeCategories=[...new Set([...(cloud?.wardrobeCategories||[]),...(local?.wardrobeCategories||[])])];
+ merged.wardrobeTags=[...new Set([...(cloud?.wardrobeTags||[]),...(local?.wardrobeTags||[])])];
+ merged.wardrobe=[...(cloud?.wardrobe||[])];for(const item of (local?.wardrobe||[])){const index=merged.wardrobe.findIndex(x=>x.id===item.id);if(index<0)merged.wardrobe.push(item);else merged.wardrobe[index]=item;}
+ merged.questPhotos={...(cloud?.questPhotos||{})};for(const [id,items] of Object.entries(local?.questPhotos||{})){const combined=[...(merged.questPhotos[id]||[])];for(const item of items){if(!combined.some(x=>x.date===item.date&&x.src===item.src))combined.push(item)}merged.questPhotos[id]=combined;}
+ merged.sleepLogs={...(cloud?.sleepLogs||{}),...(local?.sleepLogs||{})};
+ const mergeRecords=(a,b)=>{const out=[...(a||[])];for(const item of (b||[])){if(!out.some(x=>JSON.stringify(x)===JSON.stringify(item)))out.push(item)}return out};
+ merged.strengthLogs=mergeRecords(cloud?.strengthLogs,local?.strengthLogs);
+ merged.questEvidence=mergeRecords(cloud?.questEvidence,local?.questEvidence);
  return merged;
 }
 async function syncPush(){
@@ -883,7 +891,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.57</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.58</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
