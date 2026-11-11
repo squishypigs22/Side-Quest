@@ -526,6 +526,7 @@ function mergeProgress(cloud,local){
  for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
  merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}
  merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
+ merged.mainQuestProgress={...(cloud?.mainQuestProgress||{}),...(local?.mainQuestProgress||{})};
  return merged;
 }
 async function syncPush(){
@@ -553,6 +554,7 @@ async function syncPull(){
   data=result.data||{};
   data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;
   data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
+  data.mainQuestProgress=data.mainQuestProgress||{};
   localStorage.setItem("sq27",JSON.stringify(data));
   render();
   return true;
@@ -867,6 +869,7 @@ function sideQuestsPage(){
 }
 
 function mainQuestsPage(){
+ const progressData=data.mainQuestProgress||{};
  const groups=[
   {name:"Appearance & Grooming",quests:[["skincare","Skincare routine"],["haircare","Hair care routine"],["dental","Dental hygiene"]]},
   {name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},
@@ -875,13 +878,13 @@ function mainQuestsPage(){
   {name:"Confidence",quests:[["social-skills","Improve my social skills"],["role-model","Become someone people look up to"]]}
  ];
  const all=groups.flatMap(g=>g.quests);
- const total=all.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).filter(m=>m.done).length,0);
+ const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
  const possible=all.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).length,0);
  return '<div class="page-head"><div class="eyebrow">PERSONAL DEVELOPMENT</div><h1>Main Quests</h1><p>Long-term goals, broken down into milestones.</p></div>'+groups.map(g=>{
   const done=g.quests.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).filter(m=>m.done).length,0);
   const count=g.quests.reduce((n,[id])=>n+(data.mainQuestProgress[id]?.milestones||[]).length,0);
   return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+g.name+'</h2><small>'+done+' / '+count+' milestones</small></div><div class="mainquest-grid">'+g.quests.map(([id,name])=>{
-   const milestones=data.mainQuestProgress[id]?.milestones||[];const complete=milestones.filter(m=>m.done).length;const pct=milestones.length?Math.round(complete/milestones.length*100):0;
+   const milestones=progressData[id]?.milestones||[];const complete=milestones.filter(m=>m.done).length;const pct=milestones.length?Math.round(complete/milestones.length*100):0;
    return '<article class="mainquest-card"><div class="mainquest-card-top"><h3>'+name+'</h3><span class="mainquest-count">'+complete+'/'+milestones.length+'</span></div><div class="mainquest-bar"><span style="width:'+pct+'%"></span></div>'+(milestones.length?'<div class="mainquest-milestones">'+milestones.map((m,i)=>'<label class="mainquest-milestone"><input type="checkbox" data-main-milestone="'+id+'" data-milestone-index="'+i+'" '+(m.done?'checked':'')+'><span>'+escapeHtml(m.title)+'</span></label>').join('')+'</div>':'<div class="mainquest-empty">No milestones added yet.</div>')+'<button type="button" class="mainquest-add" data-add-main-milestone="'+id+'">+ Add milestone</button></article>';
   }).join('')+'</div></section>';
  }).join('');
