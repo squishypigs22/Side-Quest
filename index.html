@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.35</div>
+<div class="version-tag">v0.1.36</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -476,7 +476,8 @@ function appIcon(name){
   calendar:"calendar-days",
   compass:"compass",
   milestones:"award",
-  target:"target"
+  target:"target",
+  profile:"user-round"
  };
  return '<i class="sq-icon" data-lucide="'+(icons[name]||"circle")+'" aria-hidden="true"></i>';
 }
@@ -498,7 +499,7 @@ const monthKey=(y,m)=>y+"-"+String(m+1).padStart(2,"0"),key=(y,m,d)=>y+"-"+Strin
 const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.getDate());
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
 data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
-data.mainQuestProgress=data.mainQuestProgress||{};
+data.mainQuestProgress=data.mainQuestProgress||{};data.profile=data.profile||{};
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="";
 const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
 const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
@@ -778,7 +779,7 @@ function tricksPage(){
   const order={"Not learnt":0,"Learning":1,"Learnt (flat)":2,"Learnt (rolling)":3};
   const visible=tricks.map((t,i)=>({t,i,status:statusOf(t)})).filter(x=>(trickFilter==="All"||(trickFilter==="To learn"&&x.status==="Not learnt")||(trickFilter==="Learning"&&x.status==="Learning")||(trickFilter==="Learnt"&&x.status.startsWith("Learnt (")))&&x.t.toLowerCase().includes(trickSearch.toLowerCase())).sort((a,b)=>order[a.status]-order[b.status]||a.t.localeCompare(b.t));
   const filters=["All","To learn","Learning","Learnt"].map(v=>'<button class="trick-filter '+(trickFilter===v?"active":"")+'" data-trick-filter="'+v+'">'+v+' <span>'+(v==="All"?tricks.length:v==="To learn"?remaining:v==="Learning"?learning:learnt)+'</span></button>').join("");
-  return '<div class="page-head category-page-head cat-skateboarding"><h1>Trick Progress</h1></div>'+
+  return '<div class="page-head category-page-head cat-skateboarding"><h1>My Tricks</h1></div>'+
   '<section class="trick-overview"><div class="trick-overview-top"><div><div class="trick-kicker">TOTAL PROGRESS</div><div class="trick-progress-number">'+learnt+' <span>/ '+tricks.length+' learnt</span></div></div><div class="trick-progress-pct">'+pct+'%</div></div><div class="trick-progress-track"><span style="width:'+pct+'%"></span></div><div class="trick-overview-foot"><span>'+flat+' landed flat</span><span>'+rolling+' landed rolling</span></div></section>'+
   '<div class="trick-stats"><div class="trick-stat stat-learnt"><strong>'+learnt+'</strong><small>Learnt</small></div><div class="trick-stat stat-learning"><strong>'+learning+'</strong><small>Learning</small></div><div class="trick-stat stat-todo"><strong>'+remaining+'</strong><small>To learn</small></div></div>'+
   '<section class="section trick-library"><div class="section-head"><h2>Your tricks</h2><small>'+visible.length+' of '+tricks.length+'</small></div><div class="trick-tools"><div class="trick-filters">'+filters+'</div><input class="trick-search" type="search" placeholder="Find a trick..." value="'+esc(trickSearch)+'" aria-label="Find a trick" data-trick-search></div>'+
@@ -841,6 +842,27 @@ function sideQuestsPage(){
   (cancelled.length?cancelled.slice().reverse().map(card).join(""):'<div class="sidequest-empty">Cancelled quests will show up here.</div>')+'</section>';
 }
 
+
+function profilePage(){
+ const profile=data.profile||{};
+ const displayName=(profile.name||"").trim();
+ const totalGoals=14;
+ const totalMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).length,0);
+ const completedMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).filter(m=>m.done).length,0);
+ const trickCount=tricks.length;
+ const learntTricks=tricks.filter(t=>["Learnt (flat)","Learnt (rolling)","Learnt","Rolling"].includes(data.tricks[t])).length;
+ const initials=displayName?displayName.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase():"";
+ return '<div class="page-head"><div class="eyebrow">YOUR SPACE</div><h1>Profile</h1><p>Your personal goals, progress and app settings.</p></div>'+
+ '<section class="profile-identity"><div class="profile-avatar">'+(initials?esc(initials):'<i class="sq-icon" data-lucide="user-round"></i>')+'</div><div class="profile-identity-copy"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><small>'+(profile.focus?esc(profile.focus):"Set up your profile details below")+'</small></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>My profile information</h2><small>Only stored in your Side Quest data</small></div><form class="profile-form" data-profile-form><label>Display name<input name="name" maxlength="40" placeholder="Your name" value="'+esc(profile.name||"")+'"></label><label>About me<textarea name="about" rows="2" maxlength="180" placeholder="A little about yourself...">'+esc(profile.about||"")+'</textarea></label><label>Current focus<input name="focus" maxlength="70" placeholder="What are you focusing on?" value="'+esc(profile.focus||"")+'"></label><button class="profile-save" type="submit">Save profile</button></form></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
+ '<button class="profile-link" data-page="Goals"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>'+completedMilestones+' / '+totalMilestones+' milestones completed across '+totalGoals+' goals</small></span><span class="profile-chevron">›</span></button>'+
+ '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>View your session achievements and progress</small></span><span class="profile-chevron">›</span></button>'+
+ '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
+ '</div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.36</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
+}
+
 function mainQuestsPage(){
  const progressData=data.mainQuestProgress||{};
  const groups=[
@@ -853,7 +875,7 @@ function mainQuestsPage(){
  const all=groups.flatMap(g=>g.quests);
  const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
  const possible=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
- return '<div class="page-head"><div class="eyebrow">PERSONAL DEVELOPMENT</div><h1>Main Quests</h1><p>Long-term goals, broken down into milestones.</p></div>'+groups.map(g=>{
+ return '<div class="page-head"><div class="eyebrow">PERSONAL DEVELOPMENT</div><h1>Goals</h1><p>Your long-term goals, broken down into milestones.</p></div>'+groups.map(g=>{
   const done=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
   const count=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
   return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+g.name+'</h2><small>'+done+' / '+count+' milestones</small></div><div class="mainquest-grid">'+g.quests.map(([id,name])=>{
@@ -864,13 +886,22 @@ function mainQuestsPage(){
 }
 
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["Milestones",appIcon("milestones"),"Milestones"],["Main Quests",appIcon("target"),"MainQuests"]];
- $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Milestones"?milestonesPage():page==="MainQuests"?mainQuestsPage():dashboard();
+ const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Side Quests",appIcon("compass"),"SideQuests"],["Profile",appIcon("profile"),"Profile"]];
+ const profileSection=["Goals","Milestones","Tricks"].includes(page);
+ $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
+ let content=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Milestones"?milestonesPage():page==="Goals"?mainQuestsPage():page==="Profile"?profilePage():dashboard();
+ if(profileSection)content='<button type="button" class="profile-back" data-page="Profile">← Back to profile</button>'+content;
+ $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("submit",e=>{
+ const profileForm=e.target.closest("[data-profile-form]");
+ if(profileForm){
+  e.preventDefault();const values=new FormData(profileForm);
+  data.profile={name:String(values.get("name")||"").trim(),about:String(values.get("about")||"").trim(),focus:String(values.get("focus")||"").trim()};
+  save();render();toast("Profile saved");return;
+ }
  const form=e.target.closest("[data-sidequest-form]");if(!form)return;
  e.preventDefault();const values=new FormData(form),title=String(values.get("title")||"").trim();
  if(!title){toast("Give your quest a name first");return}
@@ -891,6 +922,7 @@ document.addEventListener("click",e=>{
  const saveTarget=e.target.closest("[data-save-target]");if(saveTarget){const id=saveTarget.dataset.saveTarget,input=document.querySelector("[data-target-input=\""+id+"\"]"),value=Math.floor(Number(input?.value));if(!Number.isFinite(value)||value<1||value>100){toast("Choose a target from 1 to 100");return}data.targets[id]=data.targets[id]||{};data.targets[id].months=data.targets[id].months||{};data.targets[id].months[monthKey(today.getFullYear(),today.getMonth())]=value;save();render();toast("Target updated");return}
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
  const music=e.target.closest("[data-music-activity]");if(music){activityId=music.dataset.musicActivity;categoryId="music";viewYear=today.getFullYear();page="Activity";render();return}
+ const profileAction=e.target.closest("[data-profile-action]");if(profileAction){if(profileAction.dataset.profileAction==="connect")$("connectBtn").click();else $("syncBtn").click();return}
  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
@@ -947,4 +979,30 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 <style>
 /* Track now contains the calendar as well as daily logging and targets */
 .track-calendar{margin-top:26px}.track-calendar .calendar-screen{width:100%}.track-calendar .calendar-screen .year-nav{margin-top:4px}.track-calendar .calendar-screen .months-grid{max-width:none}
+</style>
+
+<style>
+/* Profile hub */
+.bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.profile-identity{display:flex;align-items:center;gap:13px;padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--surface);margin-bottom:18px}
+.profile-avatar{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:50%;background:#8bbaff1b;color:var(--accent);font-size:16px;font-weight:850}
+.profile-avatar .sq-icon{width:21px;height:21px}
+.profile-identity-copy{display:grid;gap:3px;min-width:0}.profile-identity-copy strong{font-size:15px}.profile-identity-copy small,.profile-section .section-head small{font-size:10px;color:var(--muted)}
+.profile-section{margin:18px 0 22px}.profile-section>.section-head{margin-bottom:10px}
+.profile-form{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.profile-form label{display:grid;gap:5px;color:var(--muted);font-size:10px;font-weight:750}
+.profile-form input,.profile-form textarea{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:8px;background:#11151b;color:var(--text);padding:10px;font:inherit;font-size:12px;resize:vertical}
+.profile-form input:focus,.profile-form textarea:focus{outline:1px solid var(--accent);border-color:var(--accent)}
+.profile-save{border:0;border-radius:8px;padding:10px;background:var(--accent);color:#101722;font-size:11px;font-weight:850}
+.profile-links,.profile-settings{display:grid;gap:8px}
+.profile-link{display:flex;align-items:center;gap:11px;width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--text);text-align:left}
+.profile-link-icon{width:34px;height:34px;display:grid;place-items:center;flex:0 0 34px;border-radius:9px;background:#8bbaff12;color:var(--accent)}
+.profile-link-icon .sq-icon{width:19px;height:19px}
+.profile-link>span:nth-child(2),.profile-setting-row>span{display:grid;gap:3px;flex:1;min-width:0}
+.profile-link strong,.profile-setting-row strong{font-size:12px}.profile-link small,.profile-setting-row small{font-size:10px;color:var(--muted);line-height:1.35}
+.profile-chevron{font-size:22px;color:var(--muted)}
+.profile-setting-row{display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.profile-setting-row button{border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--text);padding:7px 11px;font-size:10px;font-weight:800}
+.profile-back{margin:-8px 0 16px;border:0;background:transparent;color:var(--accent);font-size:11px;font-weight:800;padding:5px 0}
+@media(min-width:760px){.profile-section,.profile-identity{max-width:760px}}
 </style>
