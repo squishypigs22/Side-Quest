@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.36</div>
+<div class="version-tag">v0.1.37</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -706,13 +706,14 @@ function weeklySummary(){
  '<div class="metric"><div class="metric-label">Vs previous week</div><div class="metric-value">'+(delta>0?"+":"")+delta+'</div><div class="metric-note">'+comparison+' sessions</div></div>'+
  '</div></section>';
 }
-function activityCard(a){
- const done=totalSessions(a.id),target=targetFor(a.id,today.getFullYear(),today.getMonth()),month=sessionCount(a.id,today.getFullYear(),today.getMonth());
- return '<button class="activity-row" data-category="'+a.category+'" data-open-activity="'+a.id+'"><span class="activity-icon">'+a.icon+'</span><span class="activity-copy"><span class="activity-name">'+a.name+'</span></span><span class="activity-meta">'+month+'/'+target+'</span></button>';
+function activityCard(a,interactive=true){
+ const target=targetFor(a.id,today.getFullYear(),today.getMonth()),month=sessionCount(a.id,today.getFullYear(),today.getMonth());
+ const inner='<span class="activity-icon">'+a.icon+'</span><span class="activity-copy"><span class="activity-name">'+a.name+'</span></span><span class="activity-meta">'+month+'/'+target+'</span>';
+ return interactive?'<button class="activity-row" data-category="'+a.category+'" data-open-activity="'+a.id+'">'+inner+'</button>':'<div class="activity-row" data-category="'+a.category+'">'+inner+'</div>';
 }
 function categorySummary(c){
  const list=c.activities.map(id=>A.find(a=>a.id===id)),sum=list.reduce((n,a)=>n+sessionCount(a.id,today.getFullYear(),today.getMonth()),0),target=list.reduce((n,a)=>n+targetFor(a.id,today.getFullYear(),today.getMonth()),0);
- return '<div class="category-block cat-'+c.id+'"><div class="category-top"><span class="category-title">'+c.name+'</span><span class="category-meta">'+sum+'/'+target+'</span></div><div class="activity-list">'+list.map(activityCard).join("")+'</div></div>';
+ return '<div class="category-block cat-'+c.id+'"><div class="category-top"><span class="category-title">'+c.name+'</span><span class="category-meta">'+sum+'/'+target+'</span></div><div class="activity-list">'+list.map(a=>activityCard(a,false)).join("")+'</div></div>';
 }
 function dashboard(){
  return '<div class="overview-page"><div class="page-head"><h1>Overview</h1></div>'+weeklySummary()+'<section class="section overview-categories"><div class="section-head"><h2>Your categories</h2></div><div class="overview-category-grid">'+categories.map(categorySummary).join("")+'</div></section></div>';
@@ -860,7 +861,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>View your session achievements and progress</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.36</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.37</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
 }
 
 function mainQuestsPage(){
