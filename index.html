@@ -449,7 +449,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.40</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.41</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -860,15 +860,14 @@ function profilePage(){
  const avatar=profile.avatar?'<img src="'+profile.avatar+'" alt="Profile picture">':'<i class="sq-icon" data-lucide="user-round"></i>';
  return '<div class="page-head"><div class="eyebrow">YOUR SPACE</div><h1>Profile</h1><p>Your personal progress and app settings.</p></div>'+
  '<div class="profile-layout"><div class="profile-column">'+
- '<section class="profile-identity"><div class="profile-avatar">'+avatar+'</div><div class="profile-identity-copy"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><small>Profile picture and display name</small></div><label class="profile-picture-button">Change picture<input type="file" accept="image/*" data-profile-picture hidden></label></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Profile information</h2><small>Only stored in your Side Quest data</small></div><form class="profile-form" data-profile-form><label>Display name<input name="name" maxlength="40" placeholder="Your name" value="'+esc(profile.name||"")+'"></label><button class="profile-save" type="submit">Save name</button></form></section>'+
+ '<section class="profile-identity"><div class="profile-avatar">'+avatar+'</div><div class="profile-identity-copy"><div class="profile-name-line"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><button type="button" class="profile-name-edit" data-edit-profile-name aria-label="Edit display name" title="Edit display name"><i class="sq-icon" data-lucide="pencil"></i></button></div><small>Profile picture and display name</small></div><label class="profile-picture-button">Change picture<input type="file" accept="image/*" data-profile-picture hidden></label></section>'+
  '</div><div class="profile-column">'+
  '<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
  '<button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.40</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.41</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
@@ -919,6 +918,12 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
+ const editName=e.target.closest("[data-edit-profile-name]");
+ if(editName){const current=(data.profile?.name||"").trim();const next=window.prompt("Display name",current);if(next===null)return;data.profile=data.profile||{};data.profile.name=next.trim().slice(0,40);save();render();toast("Display name updated");return}
+ if(e.target.closest("[data-crop-close]")){$("modalRoot").innerHTML="";cropImage=null;return}
+ if(e.target.closest("[data-crop-save]")&&cropImage){
+  const canvas=$("profileCropCanvas");data.profile=data.profile||{};data.profile.avatar=canvas.toDataURL("image/jpeg",0.86);save();$("modalRoot").innerHTML="";cropImage=null;render();toast("Profile picture updated");return
+ }
  const addMain=e.target.closest("[data-add-main-milestone]");if(addMain){const id=addMain.dataset.addMainMilestone;const title=window.prompt("Milestone name");if(title&&title.trim()){data.mainQuestProgress[id]=data.mainQuestProgress[id]||{milestones:[]};data.mainQuestProgress[id].milestones.push({title:title.trim(),done:false,type:"permanent"});save();render();toast("Milestone added")}return}
  const mainToggle=e.target.closest("[data-main-milestone]");if(mainToggle){const id=mainToggle.dataset.mainMilestone,index=Number(mainToggle.dataset.milestoneIndex);const list=data.mainQuestProgress[id]?.milestones||[];if(list[index]){list[index].done=mainToggle.checked;save();render()}return}
  const start=e.target.closest("[data-quest-start]");if(start){const q=data.sideQuests.find(x=>x.id===start.dataset.questStart);if(q){q.status="in-progress";q.updatedAt=new Date().toISOString();save();render();toast("Quest started")}return}
@@ -944,15 +949,35 @@ document.addEventListener("click",e=>{
  const y=e.target.closest("[data-year]");if(y){viewYear=Math.max(2026,Math.min(today.getFullYear(),viewYear+Number(y.dataset.year)));showAllMonths=false;render()}
 });
 document.addEventListener("input",e=>{if(e.target.matches("[data-trick-search]")){const pos=e.target.selectionStart;trickSearch=e.target.value;const view=$("view");const input=e.target;const cards=view.querySelectorAll(".trick-card");const q=trickSearch.toLowerCase();cards.forEach(card=>card.hidden=!card.querySelector("strong").textContent.toLowerCase().includes(q));const count=view.querySelector(".trick-library .section-head small");if(count)count.textContent=view.querySelectorAll(".trick-card:not([hidden])").length+" of "+tricks.length;}});
+let cropImage=null,cropZoom=1,cropX=50,cropY=50;
+function drawProfileCrop(){
+ const canvas=$("profileCropCanvas");if(!canvas||!cropImage)return;
+ const size=320,scale=Math.max(size/cropImage.naturalWidth,size/cropImage.naturalHeight)*cropZoom;
+ const w=cropImage.naturalWidth*scale,hh=cropImage.naturalHeight*scale;
+ const x=(size-w)*(cropX/100),y=(size-hh)*(cropY/100);
+ const ctx=canvas.getContext("2d");ctx.clearRect(0,0,size,size);ctx.drawImage(cropImage,x,y,w,hh);
+}
+function openProfileCrop(src){
+ cropImage=new Image();cropImage.onload=()=>{
+  cropZoom=1;cropX=50;cropY=50;
+  $("modalRoot").innerHTML='<div class="crop-backdrop"><section class="crop-dialog"><div class="crop-heading"><h2>Crop profile picture</h2><button type="button" data-crop-close aria-label="Close">×</button></div><p>Adjust the image until it fits the square.</p><canvas id="profileCropCanvas" width="320" height="320"></canvas><label>Zoom<input type="range" min="1" max="3" step="0.01" value="1" data-crop-zoom></label><label>Horizontal position<input type="range" min="0" max="100" value="50" data-crop-x></label><label>Vertical position<input type="range" min="0" max="100" value="50" data-crop-y></label><div class="crop-actions"><button type="button" data-crop-close>Cancel</button><button type="button" class="primary" data-crop-save>Save picture</button></div></section></div>';
+  drawProfileCrop();
+ };cropImage.onerror=()=>toast("Could not load that image");cropImage.src=src;
+}
 document.addEventListener("change",e=>{
  const picture=e.target.closest("[data-profile-picture]");
  if(picture&&picture.files?.[0]){
   const file=picture.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
-  const reader=new FileReader();
-  reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,512/Math.max(img.width,img.height));canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);data.profile=data.profile||{};data.profile.avatar=canvas.toDataURL("image/jpeg",0.82);save();render();toast("Profile picture updated")};img.onerror=()=>toast("Could not load that image");img.src=reader.result};
-  reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
+  if(file.size>12*1024*1024){toast("Choose an image under 12 MB");picture.value="";return}
+  const reader=new FileReader();reader.onload=()=>openProfileCrop(reader.result);reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
  }
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
+});
+document.addEventListener("input",e=>{
+ if(e.target.matches("[data-crop-zoom]"))cropZoom=Number(e.target.value);
+ if(e.target.matches("[data-crop-x]"))cropX=Number(e.target.value);
+ if(e.target.matches("[data-crop-y]"))cropY=Number(e.target.value);
+ if(e.target.matches("[data-crop-zoom],[data-crop-x],[data-crop-y]"))drawProfileCrop();
 });
 $("connectBtn").addEventListener("click",handleSync);
 async function checkForUpdates(){
@@ -965,8 +990,8 @@ async function checkForUpdates(){
   if(!response.ok)return false;
   const latestHtml=await response.text();
   const latestDoc=new DOMParser().parseFromString(latestHtml,"text/html");
-  const latestVersion=latestDoc.querySelector(".version-tag")?.textContent?.trim();
-  const currentVersion=document.querySelector(".version-tag")?.textContent?.trim();
+  const latestVersion=latestDoc.querySelector(".brand-version")?.textContent?.trim();
+  const currentVersion=document.querySelector(".brand-version")?.textContent?.trim();
   return Boolean(latestVersion&&currentVersion&&latestVersion!==currentVersion);
  }catch(e){return false}
 }
@@ -1037,4 +1062,8 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 .profile-avatar{overflow:hidden}.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .profile-identity{flex-wrap:wrap}.profile-picture-button{margin-left:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--text);padding:8px 11px;font-size:10px;font-weight:800;cursor:pointer}
 @media(min-width:900px){.profile-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.profile-column .profile-section,.profile-column .profile-identity{max-width:none}}
+</style>
+<style>
+.profile-name-line{display:flex;align-items:center;gap:7px}.profile-name-edit{display:inline-flex;align-items:center;justify-content:center;width:25px;height:25px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--muted);padding:4px;cursor:pointer}.profile-name-edit .sq-icon{width:13px;height:13px}
+.crop-backdrop{position:fixed;inset:0;z-index:1000;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px}.crop-dialog{width:min(100%,390px);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 18px 60px #0008}.crop-heading{display:flex;align-items:center;justify-content:space-between}.crop-heading h2{margin:0;font-size:17px}.crop-heading button{border:0;background:transparent;color:var(--text);font-size:24px}.crop-dialog p{font-size:12px;color:var(--muted)}#profileCropCanvas{display:block;width:min(100%,320px);aspect-ratio:1;margin:14px auto;border-radius:50%;background:#252a33;object-fit:contain}.crop-dialog label{display:grid;gap:6px;margin:12px 0;font-size:12px;color:var(--muted)}.crop-dialog input[type=range]{width:100%;accent-color:var(--accent)}.crop-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.crop-actions button{border:1px solid var(--line);border-radius:8px;padding:9px 13px;background:var(--surface2);color:var(--text);font-weight:700}.crop-actions button.primary{background:var(--accent);color:#10151d;border-color:var(--accent)}
 </style>
