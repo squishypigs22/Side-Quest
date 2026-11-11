@@ -449,11 +449,11 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest</div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.40</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.39</div>
+
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -853,23 +853,24 @@ function questsPage(){
 function profilePage(){
  const profile=data.profile||{};
  const displayName=(profile.name||"").trim();
- const totalGoals=A.length;
  const totalMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).length,0);
  const completedMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).filter(m=>m.done).length,0);
  const trickCount=tricks.length;
  const learntTricks=tricks.filter(t=>["Learnt (flat)","Learnt (rolling)","Learnt","Rolling"].includes(data.tricks[t])).length;
- const initials=displayName?displayName.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase():"";
- return '<div class="page-head"><div class="eyebrow">YOUR SPACE</div><h1>Profile</h1><p>Your personal goals, progress and app settings.</p></div>'+
- '<section class="profile-identity"><div class="profile-avatar">'+(initials?esc(initials):'<i class="sq-icon" data-lucide="user-round"></i>')+'</div><div class="profile-identity-copy"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><small>'+(profile.focus?esc(profile.focus):"Set up your profile details below")+'</small></div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>My profile information</h2><small>Only stored in your Side Quest data</small></div><form class="profile-form" data-profile-form><label>Display name<input name="name" maxlength="40" placeholder="Your name" value="'+esc(profile.name||"")+'"></label><label>About me<textarea name="about" rows="2" maxlength="180" placeholder="A little about yourself...">'+esc(profile.about||"")+'</textarea></label><label>Current focus<input name="focus" maxlength="70" placeholder="What are you focusing on?" value="'+esc(profile.focus||"")+'"></label><button class="profile-save" type="submit">Save profile</button></form></section>'+
+ const avatar=profile.avatar?'<img src="'+profile.avatar+'" alt="Profile picture">':'<i class="sq-icon" data-lucide="user-round"></i>';
+ return '<div class="page-head"><div class="eyebrow">YOUR SPACE</div><h1>Profile</h1><p>Your personal progress and app settings.</p></div>'+
+ '<div class="profile-layout"><div class="profile-column">'+
+ '<section class="profile-identity"><div class="profile-avatar">'+avatar+'</div><div class="profile-identity-copy"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><small>Profile picture and display name</small></div><label class="profile-picture-button">Change picture<input type="file" accept="image/*" data-profile-picture hidden></label></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Profile information</h2><small>Only stored in your Side Quest data</small></div><form class="profile-form" data-profile-form><label>Display name<input name="name" maxlength="40" placeholder="Your name" value="'+esc(profile.name||"")+'"></label><button class="profile-save" type="submit">Save name</button></form></section>'+
+ '</div><div class="profile-column">'+
  '<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
  '<button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
- '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>View your session achievements and progress</small></span><span class="profile-chevron">›</span></button>'+
+ '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.39</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.40</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '</div></div>';
 }
-
 function mainQuestsPage(){
  const progressData=data.mainQuestProgress||{};
  const groups=[
@@ -907,7 +908,7 @@ document.addEventListener("submit",e=>{
  const profileForm=e.target.closest("[data-profile-form]");
  if(profileForm){
   e.preventDefault();const values=new FormData(profileForm);
-  data.profile={name:String(values.get("name")||"").trim(),about:String(values.get("about")||"").trim(),focus:String(values.get("focus")||"").trim()};
+  data.profile={...(data.profile||{}),name:String(values.get("name")||"").trim()};
   save();render();toast("Profile saved");return;
  }
  const form=e.target.closest("[data-sidequest-form]");if(!form)return;
@@ -944,6 +945,13 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("input",e=>{if(e.target.matches("[data-trick-search]")){const pos=e.target.selectionStart;trickSearch=e.target.value;const view=$("view");const input=e.target;const cards=view.querySelectorAll(".trick-card");const q=trickSearch.toLowerCase();cards.forEach(card=>card.hidden=!card.querySelector("strong").textContent.toLowerCase().includes(q));const count=view.querySelector(".trick-library .section-head small");if(count)count.textContent=view.querySelectorAll(".trick-card:not([hidden])").length+" of "+tricks.length;}});
 document.addEventListener("change",e=>{
+ const picture=e.target.closest("[data-profile-picture]");
+ if(picture&&picture.files?.[0]){
+  const file=picture.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
+  const reader=new FileReader();
+  reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,512/Math.max(img.width,img.height));canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);data.profile=data.profile||{};data.profile.avatar=canvas.toDataURL("image/jpeg",0.82);save();render();toast("Profile picture updated")};img.onerror=()=>toast("Could not load that image");img.src=reader.result};
+  reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
+ }
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
 });
 $("connectBtn").addEventListener("click",handleSync);
@@ -1021,4 +1029,12 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 .quest-section-switch{display:flex;gap:6px;padding:4px;margin:0 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:11px;width:max-content;max-width:100%}
 .quest-section-switch button{border:0;border-radius:8px;padding:9px 15px;background:transparent;color:var(--muted);font-size:12px;font-weight:750}
 .quest-section-switch button.active{background:#8bbaff1b;color:var(--accent)}
+</style>
+
+<style>
+.brand{display:flex;align-items:center;gap:8px}.brand-version{font:700 10px/1 "Nunito",system-ui,sans-serif;color:var(--muted);letter-spacing:.2px;padding:5px 7px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}
+.profile-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;align-items:start}.profile-column{min-width:0}
+.profile-avatar{overflow:hidden}.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.profile-identity{flex-wrap:wrap}.profile-picture-button{margin-left:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--text);padding:8px 11px;font-size:10px;font-weight:800;cursor:pointer}
+@media(min-width:900px){.profile-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}.profile-column .profile-section,.profile-column .profile-identity{max-width:none}}
 </style>
