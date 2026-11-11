@@ -845,7 +845,7 @@ function sideQuestsPage(){
 
 function questsPage(){
  const personal=questSection==="Personal";
- return '<div class="page-head"><div class="eyebrow">YOUR QUESTS</div><h1>Quests</h1><p>Personal goals and real-life adventures, all in one place.</p></div>'+
+ return '<div class="page-head"><div class="eyebrow">YOUR QUESTS</div><h1>Quests</h1></div>'+
  '<div class="quest-section-switch"><button type="button" data-quest-section="Personal" class="'+(personal?"active":"")+'">Main Quests</button><button type="button" data-quest-section="Side" class="'+(!personal?"active":"")+'">Side quests</button></div>'+
  (personal?mainQuestsPage():sideQuestsPage());
 }
@@ -882,7 +882,7 @@ function mainQuestsPage(){
  const all=groups.flatMap(g=>g.quests);
  const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
  const possible=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
- return '<div class="page-head"><div class="eyebrow">PERSONAL DEVELOPMENT</div><h1>Goals</h1><p>Your long-term goals, broken down into milestones.</p></div>'+groups.map(g=>{
+ return groups.map(g=>{
   const done=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
   const count=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
   return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+g.name+'</h2><small>'+done+' / '+count+' milestones</small></div><div class="mainquest-grid">'+g.quests.map(([id,name])=>{
