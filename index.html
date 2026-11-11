@@ -450,7 +450,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.54</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.55</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -851,6 +851,21 @@ function questsPage(){
  (personal?mainQuestsPage():sideQuestsPage());
 }
 
+function wardrobePage(){
+ const defaults=["T-shirts","Hoodies","Jumpers","Jeans","Trousers","Shorts","Shirts","Jackets & Coats","Shoes","Accessories"];
+ data.wardrobeCategories=Array.isArray(data.wardrobeCategories)?data.wardrobeCategories:defaults.slice();
+ data.wardrobeTags=Array.isArray(data.wardrobeTags)?data.wardrobeTags:["Band T-shirt","Plain","Smart"];
+ data.wardrobe=Array.isArray(data.wardrobe)?data.wardrobe:[];
+ const active=window.wardrobeCategory||data.wardrobeCategories.find(c=>data.wardrobe.some(x=>x.category===c))||"";
+ const visible=data.wardrobeCategories.filter(c=>data.wardrobe.some(x=>x.category===c));
+ const items=data.wardrobe.filter(x=>x.category===active).filter(x=>(!window.wardrobeStatus||window.wardrobeStatus==="All"||x.status===window.wardrobeStatus)&&(!window.wardrobeTag||window.wardrobeTag==="All"||x.tag===window.wardrobeTag));
+ const categoryTabs=visible.map(c=>'<button type="button" class="wardrobe-tab '+(active===c?"active":"")+'" data-wardrobe-category="'+escapeHtml(c)+'">'+escapeHtml(c)+'</button>').join("");
+ return '<div class="page-head"><div class="eyebrow">YOUR CLOTHES</div><h1>Wardrobe</h1><p>Keep track of what you own and what is in the wash.</p></div>'+
+ '<div class="wardrobe-toolbar"><div class="wardrobe-tabs">'+categoryTabs+'</div><div class="wardrobe-controls"><select data-wardrobe-status><option>All</option><option '+(window.wardrobeStatus==="In wardrobe"?"selected":"")+'>In wardrobe</option><option '+(window.wardrobeStatus==="Dirty"?"selected":"")+'>Dirty</option></select><select data-wardrobe-tag><option>All</option>'+data.wardrobeTags.map(t=>'<option '+(window.wardrobeTag===t?"selected":"")+'>'+escapeHtml(t)+'</option>').join("")+'</select></div></div>'+
+ (active?'<div class="wardrobe-grid">'+(items.length?items.map(x=>'<button type="button" class="wardrobe-item" data-wardrobe-open="'+escapeHtml(x.id)+'"><img src="'+x.photo+'" alt="Clothing item"><span>'+escapeHtml(x.tag||"Untagged")+'</span><small>'+escapeHtml(x.status||"In wardrobe")+'</small></button>').join(""):'<p class="quest-muted">No items match these filters.</p>')+'</div>':'<p class="quest-muted">Add your first clothing item to get started. Categories only appear here once they contain an item.</p>')+
+ '<div class="wardrobe-actions"><label class="quest-action">Add clothing item<input type="file" accept="image/*" data-wardrobe-add hidden '+(!active?"disabled":"")+'></label><button type="button" class="quest-action" data-wardrobe-category-add>Add category</button><button type="button" class="quest-action" data-wardrobe-tag-add>Add tag</button></div>'+
+ '<p class="wardrobe-note">One photo and one tag per item. Your wardrobe is separate from Main Quest progress.</p>';
+}
 function profilePage(){
  const profile=data.profile||{};
  const displayName=(profile.name||"").trim();
@@ -864,11 +879,11 @@ function profilePage(){
  '<section class="profile-identity"><div class="profile-avatar">'+avatar+'</div><div class="profile-identity-copy"><div class="profile-name-line"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><button type="button" class="profile-name-edit" data-edit-profile-name aria-label="Edit display name" title="Edit display name"><i class="sq-icon" data-lucide="pencil"></i></button></div><small>Profile picture and display name</small></div><label class="profile-picture-button">Change picture<input type="file" accept="image/*" data-profile-picture hidden></label></section>'+
  '</div><div class="profile-column">'+
  '<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
- '<button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
+ '<button class="profile-link" data-page="Wardrobe"><span class="profile-link-icon"><i class="sq-icon" data-lucide="shirt"></i></span><span><strong>Wardrobe</strong><small>Manage clothing, tags and wash status</small></span><span class="profile-chevron">›</span></button><button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.54</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.55</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
@@ -915,10 +930,10 @@ function mainQuestsPage(){
 }
 function render(){
  const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
- const profileSection=["Targets","Milestones","Tricks"].includes(page);
+ const profileSection=["Targets","Milestones","Tricks","Wardrobe"].includes(page);
  const questsSection=page==="Quests"||page==="SideQuests"||page==="Goals";
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||target==="Quests"&&questsSection||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- let content=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="Quests"||page==="SideQuests"||page==="Goals"?questsPage():page==="Milestones"?milestonesPage():page==="Targets"?targetsPage():page==="Profile"?profilePage():dashboard();
+ let content=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="Quests"||page==="SideQuests"||page==="Goals"?questsPage():page==="Milestones"?milestonesPage():page==="Targets"?targetsPage():page==="Profile"?profilePage():page==="Wardrobe"?wardrobePage():dashboard();
  if(profileSection)content='<button type="button" class="profile-back" data-page="Profile">← Back to profile</button>'+content;
  $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
@@ -939,6 +954,10 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
+ const wardrobeCategory=e.target.closest("[data-wardrobe-category]");if(wardrobeCategory){window.wardrobeCategory=wardrobeCategory.dataset.wardrobeCategory;window.wardrobeStatus="All";window.wardrobeTag="All";render();return}
+ const wardrobeCategoryAdd=e.target.closest("[data-wardrobe-category-add]");if(wardrobeCategoryAdd){const name=window.prompt("New clothing category");if(!name?.trim())return;data.wardrobeCategories=data.wardrobeCategories||[];if(data.wardrobeCategories.some(x=>x.toLowerCase()===name.trim().toLowerCase())){toast("That category already exists");return}data.wardrobeCategories.push(name.trim().slice(0,40));window.wardrobeCategory=name.trim().slice(0,40);save();render();toast("Category added");return}
+ const wardrobeTagAdd=e.target.closest("[data-wardrobe-tag-add]");if(wardrobeTagAdd){const tag=window.prompt("New clothing tag");if(!tag?.trim())return;data.wardrobeTags=data.wardrobeTags||["Band T-shirt","Plain","Smart"];if(data.wardrobeTags.some(x=>x.toLowerCase()===tag.trim().toLowerCase())){toast("That tag already exists");return}data.wardrobeTags.push(tag.trim().slice(0,40));save();render();toast("Tag added");return}
+ const wardrobeOpen=e.target.closest("[data-wardrobe-open]");if(wardrobeOpen){const item=data.wardrobe.find(x=>x.id===wardrobeOpen.dataset.wardrobeOpen);if(!item)return;const edit=window.confirm("Edit this item? Choose Cancel to close the item.");if(edit){const tag=window.prompt("Tag",item.tag||"");if(tag===null)return;const status=window.prompt("Status: In wardrobe or Dirty",item.status||"In wardrobe");if(status===null)return;if(!["In wardrobe","Dirty"].includes(status.trim())){toast("Choose In wardrobe or Dirty");return}item.tag=tag.trim();item.status=status.trim();save();render();toast("Clothing item updated")}else if(window.confirm("Delete this clothing item?")){data.wardrobe=data.wardrobe.filter(x=>x.id!==item.id);save();render();toast("Clothing item deleted")}return}
  const editName=e.target.closest("[data-edit-profile-name]");
  if(editName){const current=(data.profile?.name||"").trim();const next=window.prompt("Display name",current);if(next===null)return;data.profile=data.profile||{};data.profile.name=next.trim().slice(0,40);save();render();toast("Display name updated");return}
  if(e.target.closest("[data-crop-close]")){$("modalRoot").innerHTML="";cropImage=null;return}
@@ -989,6 +1008,15 @@ function openProfileCrop(src){
  };cropImage.onerror=()=>toast("Could not load that image");cropImage.src=src;
 }
 document.addEventListener("change",e=>{
+ const wardrobeUpload=e.target.closest("[data-wardrobe-add]");
+ if(wardrobeUpload&&wardrobeUpload.files?.[0]){
+  const file=wardrobeUpload.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
+  if(file.size>12*1024*1024){toast("Choose an image under 12 MB");wardrobeUpload.value="";return}
+  const category=window.wardrobeCategory;if(!category){toast("Choose a category first");return}
+  const tags=data.wardrobeTags||["Band T-shirt","Plain","Smart"];const tag=window.prompt("Choose one tag: "+tags.join(", "));if(tag===null)return;
+  const status=window.prompt("Status: In wardrobe or Dirty","In wardrobe");if(status===null)return;if(!["In wardrobe","Dirty"].includes(status.trim())){toast("Choose In wardrobe or Dirty");return}
+  const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,700/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);const photo=canvas.toDataURL("image/jpeg",0.68);data.wardrobe=data.wardrobe||[];data.wardrobe.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),category,tag:tag.trim(),status:status.trim(),photo});save();render();toast("Clothing item added")};img.onerror=()=>toast("Could not read that image");img.src=reader.result};reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
+ }
  const questPhoto=e.target.closest("[data-quest-photo]");
  if(questPhoto&&questPhoto.files?.[0]){
   const file=questPhoto.files[0],questId=questPhoto.dataset.questPhoto;
@@ -1048,7 +1076,9 @@ window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}}
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{});
 })();
 </script>
-</body>
+<style>
+.wardrobe-toolbar{display:grid;gap:10px;margin:0 0 14px}.wardrobe-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px}.wardrobe-tab{flex:0 0 auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);padding:8px 11px;font-size:10px;font-weight:750}.wardrobe-tab.active{border-color:#8bbaff88;background:#8bbaff18;color:var(--accent)}.wardrobe-controls{display:flex;gap:7px}.wardrobe-controls select{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);padding:8px;font:inherit;font-size:11px}.wardrobe-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.wardrobe-item{min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:7px;text-align:left}.wardrobe-item img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:7px;background:var(--surface2)}.wardrobe-item span,.wardrobe-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wardrobe-item span{font-size:10px;font-weight:750;margin-top:6px}.wardrobe-item small{font-size:9px;color:var(--muted);margin-top:2px}.wardrobe-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}.wardrobe-note{font-size:10px;color:var(--muted);margin-top:13px}@media(min-width:650px){.wardrobe-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+</style></body>
 </html>
 <style>
 /* Track now contains the calendar as well as daily logging and targets */
