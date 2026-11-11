@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.34</div>
+<div class="version-tag">v0.1.35</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -801,7 +801,7 @@ function milestonesPage(){
  }
  const totalCard=milestoneCard("Total sessions completed",totalCompleted,totalMilestones);
  const activityCards=A.map(a=>milestoneCard(a.name,totalSessions(a.id),activityMilestones)).join("");
- return '<div class="page-head"><div class="eyebrow">YOUR PROGRESS</div><h1>Milestones</h1><p>Track the session milestones you're working towards.</p></div>'+
+ return '<div class="page-head"><div class="eyebrow">YOUR PROGRESS</div><h1>Milestones</h1><p>Track the session milestones you are working towards.</p></div>'+
   '<section class="quest-section"><div class="section-head"><h2>Overall progress</h2></div><div class="quest-list">'+totalCard+'</div></section>'+
   '<section class="quest-section"><div class="section-head"><h2>Activity milestones</h2></div><div class="quest-list">'+activityCards+'</div></section>';
 }
