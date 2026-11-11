@@ -10,6 +10,7 @@ on:
       - 'sw.js'
       - 'package.json'
       - 'capacitor.config.ts'
+      - 'assets/sidequest-icon.png'
       - '.github/workflows/android-apk.yml'
 
 permissions:
@@ -46,6 +47,34 @@ jobs:
 
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Apply Side Quest launcher icon
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          src = Image.open('assets/sidequest-icon.png').convert('RGBA')
+          res = Path('android/app/src/main/res')
+          for density, size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',192)]:
+              folder = res / f'mipmap-{density}'
+              folder.mkdir(parents=True, exist_ok=True)
+              icon = src.resize((size,size), Image.Resampling.LANCZOS).convert('RGB')
+              icon.save(folder / 'ic_launcher.png', optimize=True)
+              icon.save(folder / 'ic_launcher_round.png', optimize=True)
+          drawable = res / 'drawable'
+          drawable.mkdir(parents=True, exist_ok=True)
+          src.resize((432,432), Image.Resampling.LANCZOS).save(drawable / 'ic_launcher_foreground.png', optimize=True)
+          colors = res / 'values'
+          colors.mkdir(parents=True, exist_ok=True)
+          (colors / 'ic_launcher_background.xml').write_text('<resources><color name="ic_launcher_background">#9C27B0</color></resources>')
+          adaptive = res / 'mipmap-anydpi-v26'
+          adaptive.mkdir(parents=True, exist_ok=True)
+          xml = '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@color/ic_launcher_background"/><foreground android:drawable="@drawable/ic_launcher_foreground"/></adaptive-icon>'
+          (adaptive / 'ic_launcher.xml').write_text(xml)
+          (adaptive / 'ic_launcher_round.xml').write_text(xml)
+          PY
 
       - name: Build debug APK
         working-directory: android
