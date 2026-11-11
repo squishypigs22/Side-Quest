@@ -449,12 +449,12 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.43</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.44</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
 
-<div class="version-tag" aria-hidden="true">v0.1.43</div>
+<div class="version-tag" aria-hidden="true">v0.1.44</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -760,9 +760,8 @@ function targetsPage(){
  return '<div class="page-head"><div class="eyebrow">MONTHLY GOALS</div><h1>Targets</h1><p>Set how many sessions you want to complete each month.</p></div><div class="target-list">'+A.map(a=>{const target=targetFor(a.id,today.getFullYear(),today.getMonth()),done=sessionCount(a.id,today.getFullYear(),today.getMonth()),pct=Math.min(100,Math.round(done/target*100));return '<section class="target-card" data-category="'+a.category+'"><div class="target-card-top"><span class="activity-icon">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+done+' of '+target+' sessions this month</small></span></div><div class="target-edit"><label for="target-'+a.id+'">Monthly target</label><input id="target-'+a.id+'" type="number" min="1" max="100" step="1" value="'+target+'" data-target-input="'+a.id+'"><button data-save-target="'+a.id+'">Save</button></div><div class="target-progress"><span style="width:'+pct+'%"></span></div></section>'}).join("")+'</div>';
 }
 function logPage(){
- const done=A.filter(a=>getStatus(a.id,todayKey)===1).length;
  const dateLabel=today.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
- return '<div class="page-head"><div class="eyebrow">DAILY CHECK-IN</div><h1>Log</h1><p>'+dateLabel+'</p></div><div class="log-summary"><strong>'+done+' / '+A.length+'</strong><small>activities completed today</small></div><div class="log-list">'+A.map(a=>{
+ return '<div class="page-head"><div class="eyebrow">DAILY CHECK-IN</div><h1>Log</h1><p>'+dateLabel+'</p></div><div class="log-list">'+A.map(a=>{
   const status=getStatus(a.id,todayKey);
   const tone=a.category==="fitness"?"fitness":a.category==="music"?"music":"skate";
   return '<section class="log-row"><div class="log-activity"><span class="activity-icon" style="color:var(--'+tone+')">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+(status===1?"Completed":"Not logged")+'</small></span></div><div class="log-actions"><button data-log-activity="'+a.id+'" data-log-value="1" class="'+(status===1?"active":"")+'" aria-pressed="'+(status===1)+'">Done</button><button data-log-activity="'+a.id+'" data-log-value="0" class="'+(status===0?"active":"")+'" aria-pressed="'+(status===0)+'">Clear</button></div></section>';
@@ -868,7 +867,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.43</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.44</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
