@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.33</div>
+<div class="version-tag">v0.1.34</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -475,7 +475,7 @@ function appIcon(name){
   tricks:"trophy",
   calendar:"calendar-days",
   compass:"compass",
-  xp:"zap",
+  milestones:"award",
   target:"target"
  };
  return '<i class="sq-icon" data-lucide="'+(icons[name]||"circle")+'" aria-hidden="true"></i>';
@@ -786,29 +786,7 @@ function tricksPage(){
 }
 
 
-function xpStats(){
- const monthly={session:0,category:0,bonus:0,months:0,completedMonths:0};
- const nowY=today.getFullYear(),nowM=today.getMonth();
- let [sy,sm]=String(data.startedMonth||monthKey(nowY,nowM)).split("-").map(Number);sm--;
- for(let y=sy,m=sm,guard=0;(y<nowY||(y===nowY&&m<=nowM))&&guard++<240;){
-  let done=0;
-  for(const a of A){
-   const count=sessionCount(a.id,y,m),target=targetFor(a.id,y,m);
-   if(count>=target){done++;monthly.category+=25}
-  }
-  monthly.months++;
-  if(done===A.length){monthly.bonus+=100;monthly.completedMonths++}
-  m++;if(m>11){m=0;y++}
- }
- monthly.session=A.reduce((n,a)=>n+totalSessions(a.id),0)*10;
- monthly.total=monthly.session+monthly.category+monthly.bonus;
- return monthly;
-}
-function questPage(){
- const stats=xpStats(),xp=stats.total;
- let level=1,remaining=xp,levelRequirement=300;
- while(remaining>=levelRequirement){remaining-=levelRequirement;level++;levelRequirement=250+50*level;}
- const levelXp=remaining,levelProgress=Math.min(100,levelXp/levelRequirement*100);
+function milestonesPage(){
  const activityMilestones=[10,100,250,500,1000],totalMilestones=[100,500,1000,2500,5000];
  const totalCompleted=A.reduce((n,a)=>n+totalSessions(a.id),0);
  function milestoneCard(name,count,milestones,description){
@@ -821,17 +799,11 @@ function questPage(){
   const progress=Math.max(0,Math.min(100,(count-previous)/(next-previous)*100));
   return '<article class="quest-card milestone-card" style="'+colourStyle+'"><div class="quest-card-top"><div><strong>'+name+'</strong><p>'+count.toLocaleString()+' completed sessions</p></div><span class="quest-reward">Next: '+next.toLocaleString()+'</span></div><div class="quest-progress"><span style="width:'+progress+'%"></span></div><div class="quest-card-foot"><small>'+(previous?previous.toLocaleString()+' reached':'Starting milestone')+'</small><small>'+count.toLocaleString()+' / '+next.toLocaleString()+'</small></div></article>';
  }
- const totalMilestoneCard=milestoneCard("Total sessions completed",totalCompleted,totalMilestones);
- const achievementCards=A.map(a=>milestoneCard(a.name,totalSessions(a.id),activityMilestones)).join("");
- const currentDone=A.filter(a=>sessionCount(a.id,today.getFullYear(),today.getMonth())>=targetFor(a.id,today.getFullYear(),today.getMonth())).length;
- return '<div class="page-head"><div class="eyebrow">YOUR PROGRESS</div><h1>XP & milestones</h1><p>XP comes from logged sessions and monthly targets. Session milestones are progress markers and do not award XP.</p></div>'+
- '<section class="quest-hero"><div class="quest-level-row"><div><div class="eyebrow">YOUR LEVEL</div><div class="quest-level">Level '+level+'</div></div><div class="quest-xp">'+xp.toLocaleString()+' XP total</div></div><div class="quest-xpbar"><span style="width:'+levelProgress+'%"></span></div><div class="quest-hero-foot"><span>'+levelXp+' / '+levelRequirement+' XP to level '+(level+1)+'</span><span>'+(levelRequirement-levelXp)+' XP left</span></div></section>'+
- '<section class="quest-section"><div class="section-head"><h2>XP breakdown</h2></div><div class="quest-list">'+
- '<article class="quest-card"><div class="quest-card-top"><div><strong>Completed sessions</strong><p>10 XP for every logged session</p></div><span class="quest-reward">+'+stats.session.toLocaleString()+' XP</span></div></article>'+
- '<article class="quest-card"><div class="quest-card-top"><div><strong>Monthly activity targets</strong><p>25 XP each time you complete an activity target</p></div><span class="quest-reward">+'+stats.category.toLocaleString()+' XP</span></div></article>'+
- '<article class="quest-card"><div class="quest-card-top"><div><strong>All monthly targets</strong><p>Extra 100 XP when all four activity targets are met in a month</p></div><span class="quest-reward">+'+stats.bonus.toLocaleString()+' XP</span></div></article></div></section>'+
- '<section class="quest-section"><div class="section-head"><h2>This month</h2><small>'+currentDone+' / '+A.length+' targets complete</small></div><div class="quest-list">'+A.map(a=>{const done=sessionCount(a.id,today.getFullYear(),today.getMonth()),target=targetFor(a.id,today.getFullYear(),today.getMonth()),complete=done>=target;return '<article class="quest-card"><div class="quest-card-top"><div><strong>'+a.name+'</strong><p>'+done+' / '+target+' sessions</p></div><span class="quest-reward">'+(complete?'+25 XP':'25 XP available')+'</span></div><div class="quest-progress"><span style="width:'+Math.min(100,Math.round(done/target*100))+'%"></span></div></article>'}).join("")+'</div></section>'+
- '<section class="quest-section"><div class="section-head"><h2>Session milestones</h2><small>No XP awarded</small></div><div class="quest-list">'+totalMilestoneCard+achievementCards+'</div></section>';
+ const totalCard=milestoneCard("Total sessions completed",totalCompleted,totalMilestones);
+ const activityCards=A.map(a=>milestoneCard(a.name,totalSessions(a.id),activityMilestones)).join("");
+ return '<div class="page-head"><div class="eyebrow">YOUR PROGRESS</div><h1>Milestones</h1><p>Track the session milestones you're working towards.</p></div>'+
+  '<section class="quest-section"><div class="section-head"><h2>Overall progress</h2></div><div class="quest-list">'+totalCard+'</div></section>'+
+  '<section class="quest-section"><div class="section-head"><h2>Activity milestones</h2></div><div class="quest-list">'+activityCards+'</div></section>';
 }
 function sideQuestsPage(){
  const quests=[...(data.sideQuests||[])].sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"));
@@ -892,9 +864,9 @@ function mainQuestsPage(){
 }
 
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["XP",appIcon("xp"),"Quests"],["Main Quests",appIcon("target"),"MainQuests"]];
+ const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["Milestones",appIcon("milestones"),"Milestones"],["Main Quests",appIcon("target"),"MainQuests"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Quests"?questPage():page==="MainQuests"?mainQuestsPage():dashboard();
+ $("view").innerHTML=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Milestones"?milestonesPage():page==="MainQuests"?mainQuestsPage():dashboard();
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
