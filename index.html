@@ -450,7 +450,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.0</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.1</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -872,7 +872,7 @@ function wardrobePage(){
  return '<div class="page-head"><div class="eyebrow">YOUR CLOTHES</div><h1>Wardrobe</h1><p>Keep track of what you own and what is in the wash.</p></div>'+
  '<div class="wardrobe-toolbar"><div class="wardrobe-tabs">'+categoryTabs+'</div><div class="wardrobe-controls"><select data-wardrobe-category-select>'+data.wardrobeCategories.map(c=>'<option '+(active===c?"selected":"")+' value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join("")+'</select><select data-wardrobe-status><option>All</option><option '+(window.wardrobeStatus==="In wardrobe"?"selected":"")+'>In wardrobe</option><option '+(window.wardrobeStatus==="Dirty"?"selected":"")+'>Dirty</option></select><select data-wardrobe-tag><option value="All">All tags</option>'+data.wardrobeTags.map(t=>'<option '+(window.wardrobeTag===t?"selected":"")+' value="'+escapeHtml(t)+'">'+escapeHtml(t)+'</option>').join("")+'</select></div></div>'+
  (active?'<div class="wardrobe-grid">'+(items.length?items.map(x=>'<button type="button" class="wardrobe-item" data-wardrobe-open="'+escapeHtml(x.id)+'"><img src="'+x.photo+'" alt="Clothing item"><span>'+escapeHtml(x.tag||"Untagged")+'</span><small>'+escapeHtml(x.status||"In wardrobe")+'</small></button>').join(""):'<p class="quest-muted">No items match these filters.</p>')+'</div>':'<p class="quest-muted">Your clothing will appear here.</p>')+
- '<div class="wardrobe-add-row"><button type="button" class="wardrobe-plus" data-wardrobe-camera aria-label="Add clothing item" title="Add clothing item"><i class="sq-icon" data-lucide="plus"></i></button><span>Add clothing</span><input type="file" accept="image/*" capture="environment" data-wardrobe-add hidden></div>';
+ '<div class="wardrobe-add-row"><button type="button" class="wardrobe-plus" data-wardrobe-camera aria-label="Add clothing item" title="Add clothing item"><i class="sq-icon" data-lucide="plus"></i></button><span>Add clothing</span><input type="file" accept="image/*" capture="environment" data-wardrobe-camera-input hidden><input type="file" accept="image/*" data-wardrobe-gallery-input hidden></div>';
 }
 function wardrobeAddPage(){
  const defaults=["T-shirts","Hoodies","Jumpers","Jeans","Trousers","Shorts","Shirts","Jackets & Coats","Shoes","Accessories"];
@@ -905,7 +905,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.2.0</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.2.1</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
@@ -976,7 +976,10 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
- const wardrobeCamera=e.target.closest("[data-wardrobe-camera]");if(wardrobeCamera){const cameraInput=document.querySelector("[data-wardrobe-add]");if(cameraInput)cameraInput.click();return}
+ const wardrobeCamera=e.target.closest("[data-wardrobe-camera]");if(wardrobeCamera){$("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2>Add clothing photo</h2><p>Choose where to get your photo.</p><div class="modal-actions"><button type="button" data-wardrobe-source="camera">Take a photo</button><button type="button" data-wardrobe-source="gallery">Choose from gallery</button></div></section></div>';return}
+ const wardrobeSource=e.target.closest("[data-wardrobe-source]");if(wardrobeSource){const source=wardrobeSource.dataset.wardrobeSource;$("modalRoot").innerHTML="";const picker=document.querySelector(source==="camera"?"[data-wardrobe-camera-input]":"[data-wardrobe-gallery-input]");if(picker)picker.click();return}
+ const wardrobeCropClose=e.target.closest("[data-wardrobe-crop-close]");if(wardrobeCropClose){$("modalRoot").innerHTML="";wardrobeCropImage=null;return}
+ const wardrobeCropSave=e.target.closest("[data-wardrobe-crop-save]");if(wardrobeCropSave){const canvas=$("wardrobeCropCanvas");if(canvas){window.wardrobeDraft=canvas.toDataURL("image/jpeg",0.84);$("modalRoot").innerHTML="";wardrobeCropImage=null;page="WardrobeAdd";render();window.scrollTo(0,0)}return}
  const wardrobeDraftCancel=e.target.closest("[data-wardrobe-draft-cancel]");if(wardrobeDraftCancel){window.wardrobeDraft=null;page="Wardrobe";render();return}
  const wardrobeDraftSave=e.target.closest("[data-wardrobe-draft-save]");if(wardrobeDraftSave){const photo=window.wardrobeDraft,category=document.querySelector("[data-wardrobe-draft-category]")?.value,tag=document.querySelector("[data-wardrobe-draft-tag]")?.value,status=document.querySelector("[data-wardrobe-draft-status]")?.value;if(!photo||!category||!tag||!status)return;data.wardrobe=data.wardrobe||[];data.wardrobe.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),category,tag,status,photo});window.wardrobeCategory=category;window.wardrobeStatus="All";window.wardrobeTag="All";window.wardrobeDraft=null;save();page="Wardrobe";render();toast("Clothing item added");return}
  const wardrobeCategory=e.target.closest("[data-wardrobe-category]");if(wardrobeCategory){window.wardrobeCategory=wardrobeCategory.dataset.wardrobeCategory;window.wardrobeStatus="All";window.wardrobeTag="All";render();return}
@@ -1027,6 +1030,21 @@ function drawProfileCrop(){
  const x=(size-w)*(cropX/100),y=(size-hh)*(cropY/100);
  const ctx=canvas.getContext("2d");ctx.clearRect(0,0,size,size);ctx.drawImage(cropImage,x,y,w,hh);
 }
+let wardrobeCropImage=null,wardrobeCropZoom=1,wardrobeCropX=50,wardrobeCropY=50;
+function drawWardrobeCrop(){
+ const canvas=$("wardrobeCropCanvas");if(!canvas||!wardrobeCropImage)return;
+ const width=320,height=400,scale=Math.max(width/wardrobeCropImage.naturalWidth,height/wardrobeCropImage.naturalHeight)*wardrobeCropZoom;
+ const w=wardrobeCropImage.naturalWidth*scale,h=wardrobeCropImage.naturalHeight*scale;
+ const x=(width-w)*(wardrobeCropX/100),y=(height-h)*(wardrobeCropY/100);
+ const ctx=canvas.getContext("2d");ctx.clearRect(0,0,width,height);ctx.drawImage(wardrobeCropImage,x,y,w,h);
+}
+function openWardrobeCrop(src){
+ wardrobeCropImage=new Image();wardrobeCropImage.onload=()=>{
+  wardrobeCropZoom=1;wardrobeCropX=50;wardrobeCropY=50;
+  $("modalRoot").innerHTML='<div class="crop-backdrop"><section class="crop-dialog wardrobe-crop-dialog"><div class="crop-heading"><h2>Crop clothing photo</h2><button type="button" data-wardrobe-crop-close aria-label="Close">×</button></div><p>Move and zoom the photo to frame the item.</p><canvas id="wardrobeCropCanvas" width="320" height="400"></canvas><label>Zoom<input type="range" min="1" max="3" step="0.01" value="1" data-wardrobe-crop-zoom></label><label>Horizontal position<input type="range" min="0" max="100" value="50" data-wardrobe-crop-x></label><label>Vertical position<input type="range" min="0" max="100" value="50" data-wardrobe-crop-y></label><div class="crop-actions"><button type="button" data-wardrobe-crop-close>Cancel</button><button type="button" class="primary" data-wardrobe-crop-save>Use photo</button></div></section></div>';
+  drawWardrobeCrop();
+ };wardrobeCropImage.onerror=()=>toast("Could not load that image");wardrobeCropImage.src=src;
+}
 function openProfileCrop(src){
  cropImage=new Image();cropImage.onload=()=>{
   cropZoom=1;cropX=50;cropY=50;
@@ -1035,11 +1053,11 @@ function openProfileCrop(src){
  };cropImage.onerror=()=>toast("Could not load that image");cropImage.src=src;
 }
 document.addEventListener("change",e=>{
- const wardrobeUpload=e.target.closest("[data-wardrobe-add]");
+ const wardrobeUpload=e.target.closest("[data-wardrobe-camera-input],[data-wardrobe-gallery-input]");
  if(wardrobeUpload&&wardrobeUpload.files?.[0]){
   const file=wardrobeUpload.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");wardrobeUpload.value="";return}
   if(file.size>15*1024*1024){toast("Choose an image under 15 MB");wardrobeUpload.value="";return}
-  const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,900/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);window.wardrobeDraft=canvas.toDataURL("image/jpeg",0.78);page="WardrobeAdd";render();window.scrollTo(0,0)};img.onerror=()=>toast("Could not read that photo");img.src=reader.result};reader.onerror=()=>toast("Could not read that photo");reader.readAsDataURL(file);wardrobeUpload.value="";
+  const reader=new FileReader();reader.onload=()=>openWardrobeCrop(reader.result);reader.onerror=()=>toast("Could not read that photo");reader.readAsDataURL(file);wardrobeUpload.value="";
  }
  const draftCategory=e.target.closest("[data-wardrobe-draft-category]");if(draftCategory&&draftCategory.value==="__add__"){const name=window.prompt("New clothing category");if(name?.trim()){data.wardrobeCategories=data.wardrobeCategories||[];if(!data.wardrobeCategories.some(x=>x.toLowerCase()===name.trim().toLowerCase()))data.wardrobeCategories.push(name.trim().slice(0,40));const select=document.querySelector("[data-wardrobe-draft-category]");if(select){const option=document.createElement("option");option.value=name.trim().slice(0,40);option.textContent=name.trim().slice(0,40);option.selected=true;select.insertBefore(option,select.lastElementChild)}}else draftCategory.selectedIndex=0;return}
  const draftTag=e.target.closest("[data-wardrobe-draft-tag]");if(draftTag&&draftTag.value==="__add__"){const name=window.prompt("New clothing tag");if(name?.trim()){data.wardrobeTags=data.wardrobeTags||[];if(!data.wardrobeTags.some(x=>x.toLowerCase()===name.trim().toLowerCase()))data.wardrobeTags.push(name.trim().slice(0,40));const select=document.querySelector("[data-wardrobe-draft-tag]");if(select){const option=document.createElement("option");option.value=name.trim().slice(0,40);option.textContent=name.trim().slice(0,40);option.selected=true;select.insertBefore(option,select.lastElementChild)}}else draftTag.selectedIndex=0;return}
@@ -1065,6 +1083,10 @@ document.addEventListener("change",e=>{
  const s=e.target.closest("[data-trick]");if(s){data.tricks[s.dataset.trick]=s.value;save();render()}
 });
 document.addEventListener("input",e=>{
+ if(e.target.matches("[data-wardrobe-crop-zoom]"))wardrobeCropZoom=Number(e.target.value);
+ if(e.target.matches("[data-wardrobe-crop-x]"))wardrobeCropX=Number(e.target.value);
+ if(e.target.matches("[data-wardrobe-crop-y]"))wardrobeCropY=Number(e.target.value);
+ if(e.target.matches("[data-wardrobe-crop-zoom],[data-wardrobe-crop-x],[data-wardrobe-crop-y]"))drawWardrobeCrop();
  if(e.target.matches("[data-crop-zoom]"))cropZoom=Number(e.target.value);
  if(e.target.matches("[data-crop-x]"))cropX=Number(e.target.value);
  if(e.target.matches("[data-crop-y]"))cropY=Number(e.target.value);
@@ -1163,3 +1185,5 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 .crop-backdrop{position:fixed;inset:0;z-index:1000;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px}.crop-dialog{width:min(100%,390px);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 18px 60px #0008}.crop-heading{display:flex;align-items:center;justify-content:space-between}.crop-heading h2{margin:0;font-size:17px}.crop-heading button{border:0;background:transparent;color:var(--text);font-size:24px}.crop-dialog p{font-size:12px;color:var(--muted)}#profileCropCanvas{display:block;width:min(100%,320px);aspect-ratio:1;margin:14px auto;border-radius:50%;background:#252a33;object-fit:contain}.crop-dialog label{display:grid;gap:6px;margin:12px 0;font-size:12px;color:var(--muted)}.crop-dialog input[type=range]{width:100%;accent-color:var(--accent)}.crop-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.crop-actions button{border:1px solid var(--line);border-radius:8px;padding:9px 13px;background:var(--surface2);color:var(--text);font-weight:700}.crop-actions button.primary{background:var(--accent);color:#10151d;border-color:var(--accent)}
 </style>
 <style>.version-tag{display:none!important}</style>
+
+<style>.wardrobe-crop-dialog #wardrobeCropCanvas{display:block;width:min(100%,320px);height:auto;aspect-ratio:4/5;margin:14px auto;border-radius:10px;background:#252a33}.wardrobe-crop-dialog{width:min(100%,420px)}</style>
