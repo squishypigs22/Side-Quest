@@ -945,7 +945,7 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
- const start=e.target.closest("[data-checkin-start]");if(start){checkinType=start.dataset.checkinStart;checkinIndex=0;window.checkinWizardOpen=true;render();window.scrollTo(0,0);return}
+ const checkinStartBtn=e.target.closest("[data-checkin-start]");if(checkinStartBtn){checkinType=checkinStartBtn.dataset.checkinStart;checkinIndex=0;window.checkinWizardOpen=true;render();window.scrollTo(0,0);return}
  if(e.target.closest("[data-checkin-exit]")){window.checkinWizardOpen=false;render();return}
  if(e.target.closest("[data-checkin-back]")){checkinIndex=Math.max(0,checkinIndex-1);render();return}
  if(e.target.closest("[data-checkin-next]")){const st=checkinStats(checkinType),q=st.questions[checkinIndex];if(!isAnswered(q,st.record)){toast("Answer this question or choose Answer later");return}if(checkinIndex<st.questions.length-1){checkinIndex++;render()}else{window.checkinWizardOpen=false;save();render();toast("Check-in saved")}return}
