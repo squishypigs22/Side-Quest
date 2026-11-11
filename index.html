@@ -392,7 +392,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 @media(max-width:420px){.bottom-nav{gap:1px;padding-left:5px;padding-right:5px}.bottom-nav button{font-size:9px}.bottom-nav button span .sq-icon{width:19px;height:19px}.quest-achievements{gap:6px}.quest-achievement{padding:9px}}
 
 /* Real-life side quests */
-.bottom-nav{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-template-rows:1fr!important;grid-auto-flow:column!important;grid-auto-rows:auto!important}
+.bottom-nav{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr!important;grid-auto-flow:column!important;grid-auto-rows:auto!important}
 .sidequest-create{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);margin-bottom:22px}
 .sidequest-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .sidequest-form label{display:grid;gap:5px;color:var(--muted);font-size:10px;font-weight:800}
@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.32</div>
+<div class="version-tag">v0.1.33</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -769,7 +769,8 @@ function trackPage(){
  const stripHead=x=>{const marker="</p></div>";const i=x.indexOf(marker);return i<0?x:x.slice(i+marker.length)};
  const log=stripHead(logPage());
  const goals=stripHead(targetsPage());
- return '<div class="page-head"><h1>Track</h1></div><div class="track-grid"><section class="track-panel"><div class="section-head"><h2>Log</h2><small>Today</small></div>'+log+'</section><section class="track-panel"><div class="section-head"><h2>Goals</h2><small>Monthly targets</small></div>'+goals+'</section></div>';
+ const calendar=calendarPage().replace('<div class="page-head"><h1>Calendar</h1></div>','<div class="section-head"><h2>Activity calendar</h2><small>Tap a date to edit</small></div>');
+ return '<div class="page-head"><h1>Track</h1></div><div class="track-grid"><section class="track-panel"><div class="section-head"><h2>Log</h2><small>Today</small></div>'+log+'</section><section class="track-panel"><div class="section-head"><h2>Goals</h2><small>Monthly targets</small></div>'+goals+'</section></div><section class="track-calendar">'+calendar+'</section>';
 }
 function tricksPage(){
   const statusOf=t=>{const v=data.tricks[t]||"Not learnt";return v==="Rolling"?"Learnt (rolling)":v==="Learnt"?"Learnt (flat)":v};
@@ -891,9 +892,9 @@ function mainQuestsPage(){
 }
 
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Calendar",appIcon("calendar"),"Calendar"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["XP",appIcon("xp"),"Quests"],["Main Quests",appIcon("target"),"MainQuests"]];
+ const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Tricks",appIcon("tricks"),"Tricks"],["Side Quests",appIcon("compass"),"SideQuests"],["XP",appIcon("xp"),"Quests"],["Main Quests",appIcon("target"),"MainQuests"]];
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((page===target||(target.startsWith("cat:")&&page==="Activity"&&A.find(a=>a.id===activityId)?.category===target.slice(4)))?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- $("view").innerHTML=page==="Overview"?dashboard():page==="Calendar"?calendarPage():page==="Track"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Quests"?questPage():page==="MainQuests"?mainQuestsPage():dashboard();
+ $("view").innerHTML=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Quests"?questPage():page==="MainQuests"?mainQuestsPage():dashboard();
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
@@ -971,3 +972,7 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 </script>
 </body>
 </html>
+<style>
+/* Track now contains the calendar as well as daily logging and targets */
+.track-calendar{margin-top:26px}.track-calendar .calendar-screen{width:100%}.track-calendar .calendar-screen .year-nav{margin-top:4px}.track-calendar .calendar-screen .months-grid{max-width:none}
+</style>
