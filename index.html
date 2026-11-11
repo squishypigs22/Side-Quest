@@ -450,7 +450,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.55</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.56</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -856,12 +856,12 @@ function wardrobePage(){
  data.wardrobeCategories=Array.isArray(data.wardrobeCategories)?data.wardrobeCategories:defaults.slice();
  data.wardrobeTags=Array.isArray(data.wardrobeTags)?data.wardrobeTags:["Band T-shirt","Plain","Smart"];
  data.wardrobe=Array.isArray(data.wardrobe)?data.wardrobe:[];
- const active=window.wardrobeCategory||data.wardrobeCategories.find(c=>data.wardrobe.some(x=>x.category===c))||"";
+ const active=window.wardrobeCategory||data.wardrobeCategories.find(c=>data.wardrobe.some(x=>x.category===c))||data.wardrobeCategories[0]||"";
  const visible=data.wardrobeCategories.filter(c=>data.wardrobe.some(x=>x.category===c));
  const items=data.wardrobe.filter(x=>x.category===active).filter(x=>(!window.wardrobeStatus||window.wardrobeStatus==="All"||x.status===window.wardrobeStatus)&&(!window.wardrobeTag||window.wardrobeTag==="All"||x.tag===window.wardrobeTag));
  const categoryTabs=visible.map(c=>'<button type="button" class="wardrobe-tab '+(active===c?"active":"")+'" data-wardrobe-category="'+escapeHtml(c)+'">'+escapeHtml(c)+'</button>').join("");
  return '<div class="page-head"><div class="eyebrow">YOUR CLOTHES</div><h1>Wardrobe</h1><p>Keep track of what you own and what is in the wash.</p></div>'+
- '<div class="wardrobe-toolbar"><div class="wardrobe-tabs">'+categoryTabs+'</div><div class="wardrobe-controls"><select data-wardrobe-status><option>All</option><option '+(window.wardrobeStatus==="In wardrobe"?"selected":"")+'>In wardrobe</option><option '+(window.wardrobeStatus==="Dirty"?"selected":"")+'>Dirty</option></select><select data-wardrobe-tag><option>All</option>'+data.wardrobeTags.map(t=>'<option '+(window.wardrobeTag===t?"selected":"")+'>'+escapeHtml(t)+'</option>').join("")+'</select></div></div>'+
+ '<div class="wardrobe-toolbar"><div class="wardrobe-tabs">'+categoryTabs+'</div><div class="wardrobe-controls"><select data-wardrobe-category-select>'+data.wardrobeCategories.map(c=>'<option '+(active===c?"selected":"")+' value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join("")+'</select><select data-wardrobe-status><option>All</option><option '+(window.wardrobeStatus==="In wardrobe"?"selected":"")+'>In wardrobe</option><option '+(window.wardrobeStatus==="Dirty"?"selected":"")+'>Dirty</option></select><select data-wardrobe-tag><option>All</option>'+data.wardrobeTags.map(t=>'<option '+(window.wardrobeTag===t?"selected":"")+'>'+escapeHtml(t)+'</option>').join("")+'</select></div></div>'+
  (active?'<div class="wardrobe-grid">'+(items.length?items.map(x=>'<button type="button" class="wardrobe-item" data-wardrobe-open="'+escapeHtml(x.id)+'"><img src="'+x.photo+'" alt="Clothing item"><span>'+escapeHtml(x.tag||"Untagged")+'</span><small>'+escapeHtml(x.status||"In wardrobe")+'</small></button>').join(""):'<p class="quest-muted">No items match these filters.</p>')+'</div>':'<p class="quest-muted">Add your first clothing item to get started. Categories only appear here once they contain an item.</p>')+
  '<div class="wardrobe-actions"><label class="quest-action">Add clothing item<input type="file" accept="image/*" data-wardrobe-add hidden '+(!active?"disabled":"")+'></label><button type="button" class="quest-action" data-wardrobe-category-add>Add category</button><button type="button" class="quest-action" data-wardrobe-tag-add>Add tag</button></div>'+
  '<p class="wardrobe-note">One photo and one tag per item. Your wardrobe is separate from Main Quest progress.</p>';
@@ -883,7 +883,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.55</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.56</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
@@ -1013,7 +1013,7 @@ document.addEventListener("change",e=>{
   const file=wardrobeUpload.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
   if(file.size>12*1024*1024){toast("Choose an image under 12 MB");wardrobeUpload.value="";return}
   const category=window.wardrobeCategory;if(!category){toast("Choose a category first");return}
-  const tags=data.wardrobeTags||["Band T-shirt","Plain","Smart"];const tag=window.prompt("Choose one tag: "+tags.join(", "));if(tag===null)return;
+  const tags=data.wardrobeTags||["Band T-shirt","Plain","Smart"];const tag=window.prompt("Choose one tag: "+tags.join(", ")+" (or type a new tag)");if(tag===null||!tag.trim())return;data.wardrobeTags=data.wardrobeTags||tags;if(!data.wardrobeTags.some(x=>x.toLowerCase()===tag.trim().toLowerCase()))data.wardrobeTags.push(tag.trim().slice(0,40));
   const status=window.prompt("Status: In wardrobe or Dirty","In wardrobe");if(status===null)return;if(!["In wardrobe","Dirty"].includes(status.trim())){toast("Choose In wardrobe or Dirty");return}
   const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,700/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);const photo=canvas.toDataURL("image/jpeg",0.68);data.wardrobe=data.wardrobe||[];data.wardrobe.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),category,tag:tag.trim(),status:status.trim(),photo});save();render();toast("Clothing item added")};img.onerror=()=>toast("Could not read that image");img.src=reader.result};reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
  }
@@ -1024,6 +1024,9 @@ document.addEventListener("change",e=>{
   if(file.size>12*1024*1024){toast("Choose an image under 12 MB");questPhoto.value="";return}
   const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,900/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);const src=canvas.toDataURL("image/jpeg",0.72);data.questPhotos=data.questPhotos||{};data.questPhotos[questId]=data.questPhotos[questId]||[];data.questPhotos[questId].push({src,date:todayKey});save();render();toast("Progress photo saved")};img.onerror=()=>toast("Could not read that image");img.src=reader.result};reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
  }
+ const wardrobeCategorySelect=e.target.closest("[data-wardrobe-category-select]");if(wardrobeCategorySelect){window.wardrobeCategory=wardrobeCategorySelect.value;render();return}
+ const wardrobeStatus=e.target.closest("[data-wardrobe-status]");if(wardrobeStatus){window.wardrobeStatus=wardrobeStatus.value;render();return}
+ const wardrobeTag=e.target.closest("[data-wardrobe-tag]");if(wardrobeTag){window.wardrobeTag=wardrobeTag.value;render();return}
  const picture=e.target.closest("[data-profile-picture]");
  if(picture&&picture.files?.[0]){
   const file=picture.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
