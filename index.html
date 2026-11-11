@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.38</div>
+<div class="version-tag">v0.1.39</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -815,7 +815,7 @@ function sideQuestsPage(){
   const status=q.status||"planned";
   const statusLabel=status==="in-progress"?"In progress":status==="completed"?"Completed":status==="cancelled"?"Cancelled":"Planned";
   const stars=Array.from({length:5},(_,i)=>'<button type="button" data-quest-rate="'+escapeHtml(q.id)+'" data-rating="'+(i+1)+'" class="'+(i<(q.rating||0)?"selected":"")+'" aria-label="'+(i+1)+' out of 5 stars">★</button>').join("");
-  const actions=status==="planned"?'<button type="button" data-quest-start="'+escapeHtml(q.id)+'">Start quest</button><button type="button" data-quest-cancel="'+escapeHtml(q.id)+'">Cancel</button>':status==="in-progress"?'<button type="button" data-quest-complete="'+escapeHtml(q.id)+'">Mark completed</button><button type="button" data-quest-cancel="'+escapeHtml(q.id)+'">Cancel</button>':"";
+  const actions=status==="planned"?'<button type="button" data-quest-start="'+escapeHtml(q.id)+'">Start quest</button><button type="button" data-quest-cancel="'+escapeHtml(q.id)+'">Cancel</button>':status==="in-progress"?'<button type="button" data-quest-complete="'+escapeHtml(q.id)+'">Mark completed</button><button type="button" data-quest-cancel="'+escapeHtml(q.id)+'">Cancel</button>':status==="cancelled"?'<button type="button" data-quest-reschedule="'+escapeHtml(q.id)+'">Reschedule</button>':"";
   return '<article class="sidequest-card"><div class="sidequest-card-top"><div class="sidequest-card-heading"><h3>'+escapeHtml(q.title)+'</h3></div><div style="display:flex;align-items:flex-start;gap:9px"><span class="sidequest-status">'+statusLabel+'</span><details class="sidequest-menu"><summary aria-label="Quest options">⋯</summary><div class="sidequest-menu-options"><button type="button" data-quest-delete="'+escapeHtml(q.id)+'">Delete quest</button></div></details></div></div>'+
    (details?'<div class="sidequest-details">'+details+'</div>':"")+
    (q.description?'<p class="sidequest-description">'+escapeHtml(q.description)+'</p>':"")+
@@ -839,14 +839,14 @@ function sideQuestsPage(){
   '<section class="sidequest-group"><div class="section-head"><h2>Completed</h2><small>'+completed.length+' quests</small></div>'+
   (completed.length?completed.slice().reverse().map(card).join(""):'<div class="sidequest-empty">Completed adventures will show up here.</div>')+'</section>'+
   '<section class="sidequest-group"><div class="section-head"><h2>Cancelled</h2><small>'+cancelled.length+' quests</small></div>'+
-  (cancelled.length?cancelled.slice().reverse().map(card).join(""):'<div class="sidequest-empty">Cancelled quests will show up here.</div>')+'</section>';
+  (cancelled.length?'<section class="sidequest-group"><div class="section-head"><h2>Cancelled</h2><small>'+cancelled.length+' quests</small></div>'+cancelled.slice().reverse().map(card).join("")+'</section>':"");
 }
 
 
 function questsPage(){
  const personal=questSection==="Personal";
  return '<div class="page-head"><div class="eyebrow">YOUR QUESTS</div><h1>Quests</h1><p>Personal goals and real-life adventures, all in one place.</p></div>'+
- '<div class="quest-section-switch"><button type="button" data-quest-section="Personal" class="'+(personal?"active":"")+'">Personal quests</button><button type="button" data-quest-section="Side" class="'+(!personal?"active":"")+'">Side quests</button></div>'+
+ '<div class="quest-section-switch"><button type="button" data-quest-section="Personal" class="'+(personal?"active":"")+'">Main Quests</button><button type="button" data-quest-section="Side" class="'+(!personal?"active":"")+'">Side quests</button></div>'+
  (personal?mainQuestsPage():sideQuestsPage());
 }
 
@@ -867,7 +867,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>View your session achievements and progress</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.38</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.39</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
 }
 
 function mainQuestsPage(){
@@ -924,6 +924,7 @@ document.addEventListener("click",e=>{
  const complete=e.target.closest("[data-quest-complete]");if(complete){const q=data.sideQuests.find(x=>x.id===complete.dataset.questComplete);if(q){q.status="completed";q.completedAt=new Date().toISOString();q.updatedAt=new Date().toISOString();save();render();toast("Quest completed")}return}
  const rate=e.target.closest("[data-quest-rate]");if(rate){const q=data.sideQuests.find(x=>x.id===rate.dataset.questRate);if(q){q.rating=Number(rate.dataset.rating);q.updatedAt=new Date().toISOString();save();render()}return}
  const cancelQuest=e.target.closest("[data-quest-cancel]");if(cancelQuest){const q=data.sideQuests.find(x=>x.id===cancelQuest.dataset.questCancel);if(q){q.status="cancelled";q.cancelledAt=new Date().toISOString();q.updatedAt=q.cancelledAt;save();render();toast("Quest cancelled")}return}
+ const reschedule=e.target.closest("[data-quest-reschedule]");if(reschedule){const q=data.sideQuests.find(x=>x.id===reschedule.dataset.questReschedule);if(q){const nextDate=window.prompt("Choose a new date (YYYY-MM-DD):",q.date||todayKey);if(nextDate===null)return;if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(nextDate)||Number.isNaN(new Date(nextDate+"T12:00:00").getTime())){toast("Enter a valid date");return}q.date=nextDate;q.status="planned";delete q.cancelledAt;q.updatedAt=new Date().toISOString();save();render();toast("Quest rescheduled")}return}
  const deleteQuest=e.target.closest("[data-quest-delete]");if(deleteQuest){const id=deleteQuest.dataset.questDelete,q=data.sideQuests.find(x=>x.id===id);if(q&&window.confirm('Delete "'+q.title.replace(/"/g,'\\"')+'" permanently?')){data.sideQuests=data.sideQuests.filter(x=>x.id!==id);save();render();toast("Quest deleted")}return}
 
  const close=e.target.closest("[data-close-modal]");if(close){$("modalRoot").innerHTML="";return} if(e.target.classList?.contains("modal-backdrop")){$("modalRoot").innerHTML="";return}
