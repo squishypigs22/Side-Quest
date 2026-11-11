@@ -445,11 +445,12 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .mainquest-empty{font-size:10px;color:var(--muted);padding:8px 0}
 .mainquest-add{margin-top:10px;border:1px solid #83baff66;border-radius:8px;background:#83baff12;color:var(--accent);padding:7px 10px;font-size:10px;font-weight:800}
 @media(max-width:650px){.mainquest-grid{grid-template-columns:1fr}.mainquest-category{padding:12px}}
+.quest-description{font-size:11px;color:var(--muted);margin:7px 0 10px}.quest-muted{font-size:11px;color:var(--muted);margin:8px 0}.quest-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.quest-action{display:inline-flex;align-items:center;justify-content:center;border:1px solid #83baff66;border-radius:8px;background:#83baff12;color:var(--accent);padding:8px 11px;font-size:10px;font-weight:800;cursor:pointer}.quest-photo-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.quest-photo-grid figure{width:88px;margin:0}.quest-photo-grid img{display:block;width:88px;height:88px;object-fit:cover;border-radius:9px;border:1px solid var(--line)}.quest-photo-grid figcaption{font-size:9px;color:var(--muted);margin-top:4px}.quest-record-list{display:grid;gap:6px;margin-top:8px}.quest-record-list>div{display:grid;grid-template-columns:1fr auto;gap:3px 8px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}.quest-record-list strong{font-size:11px}.quest-record-list span{font-size:10px;color:var(--muted);text-align:right}.quest-record-list small{grid-column:1/-1;font-size:9px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.51</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.1.52</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -500,7 +501,7 @@ const monthKey=(y,m)=>y+"-"+String(m+1).padStart(2,"0"),key=(y,m,d)=>y+"-"+Strin
 const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.getDate());
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
 data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
-data.mainQuestProgress=data.mainQuestProgress||{};data.profile=data.profile||{};
+data.mainQuestProgress=data.mainQuestProgress||{};data.questLogs=data.questLogs||{};data.questPhotos=data.questPhotos||{};data.strengthLogs=data.strengthLogs||[];data.sleepLogs=data.sleepLogs||{};data.questEvidence=data.questEvidence||[];data.profile=data.profile||{};
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="",questSection="Personal";
 const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
 const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
@@ -867,31 +868,51 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.44</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.52</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){
- const progressData=data.mainQuestProgress||{};
  const groups=[
-  {name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},
-  {name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},
-  {name:"Style",quests:[["wardrobe","Build a wardrobe I like"]]},
-  {name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"],]},
-  {name:"Confidence",quests:[,["role-model","Become someone people look up to"]]}
+  {name:"Appearance & Grooming",quests:[["skincare","Skincare routine","Monthly progress photos","photo"]]},
+  {name:"Fitness & Health",quests:[["strength","Build muscle and strength","Exercise performance, personal bests and monthly progress photos","strength"],["exercise","Build a consistent exercise routine","Tracked automatically through your Fitness activity calendar","fitness"],["flexibility","Improve flexibility and mobility","Monthly progress photos or videos","photo"],["posture","Improve posture","Monthly progress photos","photo"]]},
+  {name:"Style",quests:[["wardrobe","Build a wardrobe I like","Use your separate Wardrobe in Profile","wardrobe"]]},
+  {name:"Lifestyle",quests:[["sleep","Fix my sleep schedule","Record bedtime and wake-up time each day","sleep"]]},
+  {name:"Confidence",quests:[["role-model","Become someone people look up to","Build an evidence timeline of achievements and progress","evidence"]]}
  ];
- const all=groups.flatMap(g=>g.quests);
- const total=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
- const possible=all.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
- return groups.map(g=>{
-  const done=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).filter(m=>m.done).length,0);
-  const count=g.quests.reduce((n,[id])=>n+(progressData[id]?.milestones||[]).length,0);
-  return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+g.name+'</h2><small>'+done+' / '+count+' milestones</small></div><div class="mainquest-grid">'+g.quests.map(([id,name])=>{
-   const milestones=progressData[id]?.milestones||[];const complete=milestones.filter(m=>m.done).length;const pct=milestones.length?Math.round(complete/milestones.length*100):0;
-   return '<article class="mainquest-card"><div class="mainquest-card-top"><h3>'+name+'</h3><span class="mainquest-count">'+complete+'/'+milestones.length+'</span></div><div class="mainquest-bar"><span style="width:'+pct+'%"></span></div>'+(milestones.length?'<div class="mainquest-milestones">'+milestones.map((m,i)=>'<label class="mainquest-milestone"><input type="checkbox" data-main-milestone="'+id+'" data-milestone-index="'+i+'" '+(m.done?'checked':'')+'><span>'+escapeHtml(m.title)+'</span></label>').join('')+'</div>':'<div class="mainquest-empty">No milestones added yet.</div>')+'<button type="button" class="mainquest-add" data-add-main-milestone="'+id+'">+ Add milestone</button></article>';
-  }).join('')+'</div></section>';
- }).join('');
+ const photos=data.questPhotos||{},strength=data.strengthLogs||[],evidence=data.questEvidence||[],sleep=data.sleepLogs||{};
+ return groups.map(group=>{
+  const items=group.quests.map(([id,name,desc,type])=>{
+   let body="",actions="";
+   if(type==="photo"){
+    const entries=(photos[id]||[]).slice().reverse();
+    body='<div class="quest-photo-grid">'+(entries.length?entries.map(p=>'<figure><img src="'+p.src+'" alt="Progress record"><figcaption>'+escapeHtml(p.date||"")+'</figcaption></figure>').join(""):'<p class="quest-muted">Your monthly records will appear here.</p>')+'</div>';
+    actions='<label class="quest-action">Add monthly photo<input type="file" accept="image/*" data-quest-photo="'+id+'" hidden></label>';
+   }else if(type==="strength"){
+    body='<div class="quest-record-list">'+(strength.length?strength.slice().reverse().map(x=>'<div><strong>'+escapeHtml(x.exercise)+'</strong><span>'+escapeHtml(x.result)+'</span><small>'+escapeHtml(x.date)+'</small></div>').join(""):'<p class="quest-muted">Your exercise results and personal bests will appear here.</p>')+'</div>';
+    actions='<button class="quest-action" data-strength-add>Add performance</button><label class="quest-action">Add monthly photo<input type="file" accept="image/*" data-quest-photo="strength" hidden></label>';
+    const ps=(photos.strength||[]).slice().reverse();
+    body+='<div class="quest-photo-grid">'+ps.map(p=>'<figure><img src="'+p.src+'" alt="Progress record"><figcaption>'+escapeHtml(p.date||"")+'</figcaption></figure>').join("")+'</div>';
+   }else if(type==="fitness"){
+    const count=Object.values(data.activityDays?.workout||{}).filter(v=>v===1).length;
+    body='<p class="quest-muted">'+count+' workout sessions recorded in your Fitness tracker. This quest uses that calendar directly, so there is no duplicate log.</p>';
+    actions='<button class="quest-action" data-page="Track">Open Fitness tracker</button>';
+   }else if(type==="sleep"){
+    const entries=Object.entries(sleep).sort((a,b)=>a[0].localeCompare(b[0])).reverse().slice(0,8);
+    body='<div class="quest-record-list">'+(entries.length?entries.map(([date,x])=>'<div><strong>'+escapeHtml(date)+'</strong><span>Bed '+escapeHtml(x.bed||"—")+' · Wake '+escapeHtml(x.wake||"—")+'</span></div>').join(""):'<p class="quest-muted">No sleep records yet.</p>')+'</div>';
+    actions='<button class="quest-action" data-sleep-add>Log sleep</button>';
+   }else if(type==="evidence"){
+    body='<div class="quest-record-list">'+(evidence.length?evidence.slice().reverse().map(x=>'<div><strong>'+escapeHtml(x.title)+'</strong><span>'+escapeHtml(x.note||"")+'</span><small>'+escapeHtml(x.date)+'</small></div>').join(""):'<p class="quest-muted">Your achievements and examples will build up here over time.</p>')+'</div>';
+    actions='<button class="quest-action" data-evidence-add>Add evidence</button>';
+   }else if(type==="wardrobe"){
+    body='<p class="quest-muted">Your digital Wardrobe is a separate Profile feature. It does not automatically change this quest’s progress.</p>';
+    actions='<button class="quest-action" data-page="Profile">Open Profile</button>';
+   }
+   const count=type==="photo"?(photos[id]||[]).length:type==="strength"?strength.length:type==="sleep"?Object.keys(sleep).length:type==="evidence"?evidence.length:type==="fitness"?Object.values(data.activityDays?.workout||{}).filter(v=>v===1).length:0;
+   return '<article class="mainquest-card"><div class="mainquest-card-top"><h3>'+name+'</h3><span class="mainquest-count">'+(type==="wardrobe"?"Separate feature":count+" records")+'</span></div><p class="quest-description">'+desc+'</p>'+body+'<div class="quest-actions">'+actions+'</div></article>';
+  }).join("");
+  return '<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+items+'</div></section>';
+ }).join("");
 }
-
 function render(){
  const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
  const profileSection=["Targets","Milestones","Tricks"].includes(page);
@@ -924,8 +945,11 @@ document.addEventListener("click",e=>{
  if(e.target.closest("[data-crop-save]")&&cropImage){
   const canvas=$("profileCropCanvas");data.profile=data.profile||{};data.profile.avatar=canvas.toDataURL("image/jpeg",0.86);save();$("modalRoot").innerHTML="";cropImage=null;render();toast("Profile picture updated");return
  }
- const addMain=e.target.closest("[data-add-main-milestone]");if(addMain){const id=addMain.dataset.addMainMilestone;const title=window.prompt("Milestone name");if(title&&title.trim()){data.mainQuestProgress[id]=data.mainQuestProgress[id]||{milestones:[]};data.mainQuestProgress[id].milestones.push({title:title.trim(),done:false,type:"permanent"});save();render();toast("Milestone added")}return}
- const mainToggle=e.target.closest("[data-main-milestone]");if(mainToggle){const id=mainToggle.dataset.mainMilestone,index=Number(mainToggle.dataset.milestoneIndex);const list=data.mainQuestProgress[id]?.milestones||[];if(list[index]){list[index].done=mainToggle.checked;save();render()}return}
+ const strengthAdd=e.target.closest("[data-strength-add]");if(strengthAdd){const exercise=window.prompt("Exercise name");if(!exercise?.trim())return;const result=window.prompt("Result or personal best (e.g. weight, reps or time)");if(!result?.trim())return;data.strengthLogs=data.strengthLogs||[];data.strengthLogs.push({exercise:exercise.trim().slice(0,60),result:result.trim().slice(0,100),date:todayKey});save();render();toast("Performance saved");return}
+ const sleepAdd=e.target.closest("[data-sleep-add]");if(sleepAdd){const bed=window.prompt("What time did you go to bed? (nearest 30 minutes)");if(bed===null)return;const wake=window.prompt("What time did you wake up? (nearest 30 minutes)");if(wake===null)return;data.sleepLogs=data.sleepLogs||{};data.sleepLogs[todayKey]={bed:bed.trim(),wake:wake.trim()};save();render();toast("Sleep record saved");return}
+ const evidenceAdd=e.target.closest("[data-evidence-add]");if(evidenceAdd){const title=window.prompt("Achievement or evidence title");if(!title?.trim())return;const note=window.prompt("Add a short note (optional)")||"";data.questEvidence=data.questEvidence||[];data.questEvidence.push({title:title.trim().slice(0,90),note:note.trim().slice(0,240),date:todayKey});save();render();toast("Evidence added");return}
+ const addMain=e.target.closest("[data-add-main-milestone]");if(addMain)return;
+ const mainToggle=e.target.closest("[data-main-milestone]");if(mainToggle)return
  const start=e.target.closest("[data-quest-start]");if(start){const q=data.sideQuests.find(x=>x.id===start.dataset.questStart);if(q){q.status="in-progress";q.updatedAt=new Date().toISOString();save();render();toast("Quest started")}return}
  const complete=e.target.closest("[data-quest-complete]");if(complete){const q=data.sideQuests.find(x=>x.id===complete.dataset.questComplete);if(q){q.status="completed";q.completedAt=new Date().toISOString();q.updatedAt=new Date().toISOString();save();render();toast("Quest completed")}return}
  const rate=e.target.closest("[data-quest-rate]");if(rate){const q=data.sideQuests.find(x=>x.id===rate.dataset.questRate);if(q){q.rating=Number(rate.dataset.rating);q.updatedAt=new Date().toISOString();save();render()}return}
@@ -965,6 +989,13 @@ function openProfileCrop(src){
  };cropImage.onerror=()=>toast("Could not load that image");cropImage.src=src;
 }
 document.addEventListener("change",e=>{
+ const questPhoto=e.target.closest("[data-quest-photo]");
+ if(questPhoto&&questPhoto.files?.[0]){
+  const file=questPhoto.files[0],questId=questPhoto.dataset.questPhoto;
+  if(!file.type.startsWith("image/")){toast("Choose an image file");return}
+  if(file.size>12*1024*1024){toast("Choose an image under 12 MB");questPhoto.value="";return}
+  const reader=new FileReader();reader.onload=()=>{const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,900/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);const src=canvas.toDataURL("image/jpeg",0.72);data.questPhotos=data.questPhotos||{};data.questPhotos[questId]=data.questPhotos[questId]||[];data.questPhotos[questId].push({src,date:todayKey});save();render();toast("Progress photo saved")};img.onerror=()=>toast("Could not read that image");img.src=reader.result};reader.onerror=()=>toast("Could not read that image");reader.readAsDataURL(file);
+ }
  const picture=e.target.closest("[data-profile-picture]");
  if(picture&&picture.files?.[0]){
   const file=picture.files[0];if(!file.type.startsWith("image/")){toast("Choose an image file");return}
