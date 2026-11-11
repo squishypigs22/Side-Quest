@@ -453,7 +453,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
-<div class="version-tag">v0.1.37</div>
+<div class="version-tag">v0.1.38</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -500,7 +500,7 @@ const today=new Date(),todayKey=key(today.getFullYear(),today.getMonth(),today.g
 let data={};try{data=JSON.parse(localStorage.getItem("sq27")||"{}")||{}}catch(e){data={}}
 data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
 data.mainQuestProgress=data.mainQuestProgress||{};data.profile=data.profile||{};
-let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="";
+let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="",questSection="Personal";
 const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
 const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
 let syncConfig=null;try{syncConfig=JSON.parse(localStorage.getItem("sq27_sync")||"null")}catch(e){}
@@ -770,9 +770,8 @@ function logPage(){
 function trackPage(){
  const stripHead=x=>{const marker="</p></div>";const i=x.indexOf(marker);return i<0?x:x.slice(i+marker.length)};
  const log=stripHead(logPage());
- const goals=stripHead(targetsPage());
  const calendar=calendarPage().replace('<div class="page-head"><h1>Calendar</h1></div>','<div class="section-head"><h2>Activity calendar</h2><small>Tap a date to edit</small></div>');
- return '<div class="page-head"><h1>Track</h1></div><div class="track-grid"><section class="track-panel"><div class="section-head"><h2>Log</h2><small>Today</small></div>'+log+'</section><section class="track-panel"><div class="section-head"><h2>Goals</h2><small>Monthly targets</small></div>'+goals+'</section></div><section class="track-calendar">'+calendar+'</section>';
+ return '<div class="page-head"><h1>Track</h1></div><section class="track-panel">'+log+'</section><section class="track-calendar">'+calendar+'</section>';
 }
 function tricksPage(){
   const statusOf=t=>{const v=data.tricks[t]||"Not learnt";return v==="Rolling"?"Learnt (rolling)":v==="Learnt"?"Learnt (flat)":v};
@@ -844,10 +843,17 @@ function sideQuestsPage(){
 }
 
 
+function questsPage(){
+ const personal=questSection==="Personal";
+ return '<div class="page-head"><div class="eyebrow">YOUR QUESTS</div><h1>Quests</h1><p>Personal goals and real-life adventures, all in one place.</p></div>'+
+ '<div class="quest-section-switch"><button type="button" data-quest-section="Personal" class="'+(personal?"active":"")+'">Personal quests</button><button type="button" data-quest-section="Side" class="'+(!personal?"active":"")+'">Side quests</button></div>'+
+ (personal?mainQuestsPage():sideQuestsPage());
+}
+
 function profilePage(){
  const profile=data.profile||{};
  const displayName=(profile.name||"").trim();
- const totalGoals=14;
+ const totalGoals=A.length;
  const totalMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).length,0);
  const completedMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).filter(m=>m.done).length,0);
  const trickCount=tricks.length;
@@ -857,11 +863,11 @@ function profilePage(){
  '<section class="profile-identity"><div class="profile-avatar">'+(initials?esc(initials):'<i class="sq-icon" data-lucide="user-round"></i>')+'</div><div class="profile-identity-copy"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><small>'+(profile.focus?esc(profile.focus):"Set up your profile details below")+'</small></div></section>'+
  '<section class="profile-section"><div class="section-head"><h2>My profile information</h2><small>Only stored in your Side Quest data</small></div><form class="profile-form" data-profile-form><label>Display name<input name="name" maxlength="40" placeholder="Your name" value="'+esc(profile.name||"")+'"></label><label>About me<textarea name="about" rows="2" maxlength="180" placeholder="A little about yourself...">'+esc(profile.about||"")+'</textarea></label><label>Current focus<input name="focus" maxlength="70" placeholder="What are you focusing on?" value="'+esc(profile.focus||"")+'"></label><button class="profile-save" type="submit">Save profile</button></form></section>'+
  '<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
- '<button class="profile-link" data-page="Goals"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>'+completedMilestones+' / '+totalMilestones+' milestones completed across '+totalGoals+' goals</small></span><span class="profile-chevron">›</span></button>'+
+ '<button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>View your session achievements and progress</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.37</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.1.38</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>';
 }
 
 function mainQuestsPage(){
@@ -887,10 +893,11 @@ function mainQuestsPage(){
 }
 
 function render(){
- const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Side Quests",appIcon("compass"),"SideQuests"],["Profile",appIcon("profile"),"Profile"]];
- const profileSection=["Goals","Milestones","Tricks"].includes(page);
- $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
- let content=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="SideQuests"?sideQuestsPage():page==="Milestones"?milestonesPage():page==="Goals"?mainQuestsPage():page==="Profile"?profilePage():dashboard();
+ const labels=[["Home",appIcon("home"),"Overview"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
+ const profileSection=["Targets","Milestones","Tricks"].includes(page);
+ const questsSection=page==="Quests"||page==="SideQuests"||page==="Goals";
+ $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||target==="Quests"&&questsSection||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
+ let content=page==="Overview"?dashboard():page==="Track"||page==="Calendar"?trackPage():page==="Tricks"?tricksPage():page==="Quests"||page==="SideQuests"||page==="Goals"?questsPage():page==="Milestones"?milestonesPage():page==="Targets"?targetsPage():page==="Profile"?profilePage():dashboard();
  if(profileSection)content='<button type="button" class="profile-back" data-page="Profile">← Back to profile</button>'+content;
  $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
@@ -924,6 +931,7 @@ document.addEventListener("click",e=>{
  const quickLog=e.target.closest("[data-log-activity]");if(quickLog){const id=quickLog.dataset.logActivity,value=Number(quickLog.dataset.logValue);data.activityDays[id]=data.activityDays[id]||{};if(value===0)delete data.activityDays[id][todayKey];else data.activityDays[id][todayKey]=value;save();render();return}
  const music=e.target.closest("[data-music-activity]");if(music){activityId=music.dataset.musicActivity;categoryId="music";viewYear=today.getFullYear();page="Activity";render();return}
  const profileAction=e.target.closest("[data-profile-action]");if(profileAction){if(profileAction.dataset.profileAction==="connect")$("connectBtn").click();else $("syncBtn").click();return}
+ const questTab=e.target.closest("[data-quest-section]");if(questTab){questSection=questTab.dataset.questSection==="Side"?"Side":"Personal";page="Quests";render();window.scrollTo(0,0);return}
  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
@@ -1006,4 +1014,10 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
 .profile-setting-row button{border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--text);padding:7px 11px;font-size:10px;font-weight:800}
 .profile-back{margin:-8px 0 16px;border:0;background:transparent;color:var(--accent);font-size:11px;font-weight:800;padding:5px 0}
 @media(min-width:760px){.profile-section,.profile-identity{max-width:760px}}
+</style>
+
+<style>
+.quest-section-switch{display:flex;gap:6px;padding:4px;margin:0 0 18px;background:var(--surface);border:1px solid var(--line);border-radius:11px;width:max-content;max-width:100%}
+.quest-section-switch button{border:0;border-radius:8px;padding:9px 15px;background:transparent;color:var(--muted);font-size:12px;font-weight:750}
+.quest-section-switch button.active{background:#8bbaff1b;color:var(--accent)}
 </style>
