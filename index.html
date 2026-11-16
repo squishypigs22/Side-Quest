@@ -460,7 +460,7 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 .college-calendar-toolbar{flex-wrap:wrap;gap:8px}.college-calendar-toolbar>strong{flex:1;min-width:90px;text-align:center}.college-calendar-toggle{display:flex;flex:0 0 auto;gap:4px;padding:3px;border:1px solid var(--line);border-radius:9px;background:var(--surface);min-width:112px}.college-calendar-toggle button,.college-calendar-toolbar .college-calendar-toggle button{width:auto;min-width:0;flex:1;border:0;border-radius:6px;padding:7px 12px;background:transparent;color:var(--muted);font-size:11px;line-height:1.2;font-weight:800;white-space:nowrap}.college-calendar-toggle button.active{background:var(--accent);color:#111}@media(max-width:520px){.college-calendar-toolbar{display:grid;grid-template-columns:34px minmax(0,1fr) 34px;gap:8px}.college-calendar-toolbar>strong{min-width:0;font-size:13px}.college-calendar-toggle{grid-column:1/-1;width:100%;min-width:0}.college-calendar-toggle button,.college-calendar-toolbar .college-calendar-toggle button{padding:9px 12px;font-size:12px}}</style>\n</head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.20</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.21</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
@@ -727,14 +727,18 @@ const DS26_B64="H4sIAHgH+2oC/8VdWXfbOJb+Kzh+cKfOkSsS5f1NlmRH1dpKiz01Pf1ASZCFDkWq
 let ds26Tasks=[],ds26Ready=false;
 async function loadDS26(){
  const bytes=Uint8Array.from(atob(DS26_B64),c=>c.charCodeAt(0));
- let jsonText;
+ let jsonText="";
  if(typeof DecompressionStream!=="undefined"){
-  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
-  jsonText=await new Response(stream).text();
- }else{
+  try{
+   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+   jsonText=await new Response(stream).text();
+  }catch(err){console.warn("Native schedule decompression failed; using fallback",err)}
+ }
+ if(!jsonText||jsonText[0]!=="["){
   if(!window.pako){
    await new Promise((resolve,reject)=>{const script=document.createElement("script");script.src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js";script.onload=resolve;script.onerror=reject;document.head.appendChild(script)});
   }
+  if(!window.pako)throw new Error("Schedule decompression is unavailable");
   jsonText=new TextDecoder().decode(window.pako.ungzip(bytes));
  }
  const parsed=JSON.parse(jsonText);
@@ -759,7 +763,7 @@ function collegeDashboard(){
  const validCollegeTabs=["overview","schedule","glm","calendar"];const tab=validCollegeTabs.includes(window.collegeTab)?window.collegeTab:"overview";
  const term=window.ds26Term||"All terms",mod=window.ds26Module||"All modules",q=(window.ds26Query||"").toLowerCase();
  const filtered=assignments.filter(t=>(term==="All terms"||t[5]===term)&&(mod==="All modules"||t[1]===mod)&&(!q||String(t[0]).toLowerCase().includes(q)||String(t[1]).toLowerCase().includes(q))).sort((a,b)=>String(a[3]).localeCompare(String(b[3])));
- const taskCard=t=>{const isDone=submitted(t);return '<article class="college-task assignment-task '+(isDone?"handed-in":"not-handed-in")+'"><div class="college-task-copy"><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - "))+'</strong><small>'+escapeHtml(t[1])+' · Week '+t[4]+' · '+escapeHtml(t[5])+'</small><small>'+escapeHtml(t[2])+' – '+escapeHtml(t[3])+' · Assignment</small></div><button type="button" data-college-done="'+escapeHtml(t[1]+"|"+t[0])+'" class="college-done '+(isDone?"active":"overdue-status")+'">'+(isDone?"✓ Handed in":"Not handed in")+'</button></article>'};
+ const taskCard=t=>{const isDone=submitted(t);return '<article class="college-task assignment-task '+(isDone?"handed-in":"not-handed-in")+'"><div class="college-task-copy"><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - ")||t[0])+'</strong><small>'+escapeHtml(t[1])+' · Week '+t[4]+' · '+escapeHtml(t[5])+'</small><small>'+escapeHtml(t[2])+' – '+escapeHtml(t[3])+' · Assignment</small></div><button type="button" data-college-done="'+escapeHtml(t[1]+"|"+t[0])+'" class="college-done '+(isDone?"active":"overdue-status")+'">'+(isDone?"✓ Handed in":"Not handed in")+'</button></article>'};
  const moduleCards=modules.map(m=>{const list=assignments.filter(t=>t[1]===m),n=list.filter(submitted).length;return '<button type="button" class="college-module" data-college-module="'+escapeHtml(m)+'"><span class="college-module-head"><strong>'+escapeHtml(m)+'</strong><b>'+n+'/'+list.length+'</b></span><span class="college-bar"><i style="width:'+(list.length?n/list.length*100:0)+'%"></i></span><small>'+Math.round(list.length?n/list.length*100:0)+'% handed in · '+list.length+' assignments</small></button>'}).join("");
  const datePlus=(iso,days)=>{const d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+days);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
  const glmRows=glmTasks.slice().sort((a,b)=>a[2].localeCompare(b[2])).map(t=>{const day=datePlus(t[2],3);return '<article class="college-task glm-task"><div class="college-task-copy"><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - "))+'</strong><small>Thursday · '+new Date(day+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+' · Week '+t[4]+'</small><small>'+escapeHtml(t[5])+' · GLM</small></div><span class="college-event-tag glm-tag">GLM</span></article>'}).join("");
