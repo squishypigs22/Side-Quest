@@ -513,68 +513,57 @@ const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
 let syncConfig=null;try{syncConfig=JSON.parse(localStorage.getItem("sq27_sync")||"null")}catch(e){}
 let syncReady=false,syncDirty=localStorage.getItem("sq27_sync_dirty")==="1",syncTimer=null,syncBusy=false;
 async function syncRequest(action,extra={},config=syncConfig){
- const headers={"Content-Type":"application/json","apikey":SYNC_KEY};
- if(config?.deviceToken)headers.Authorization="Bearer "+config.deviceToken;
- const response=await fetch(SYNC_URL,{method:"POST",headers,body:JSON.stringify({action,vault_id:config?.vaultId||extra.vault_id,...extra})});
- const result=await response.json().catch(()=>({}));
- if(!response.ok)throw new Error(result.error||"Sync request failed");
- return result;
+ const headers={"Content-Type":"application/json","apikey":SYNC_KEY};if(config?.deviceToken)headers.Authorization="Bearer "+config.deviceToken;
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+ try{const response=await fetch(SYNC_URL,{method:"POST",headers,body:JSON.stringify({action,vault_id:config?.vaultId||extra.vault_id,...extra}),signal:controller.signal});const result=await response.json().catch(()=>({}));if(!response.ok)throw new Error(result.error||"Sync request failed ("+response.status+")");return result}
+ catch(e){if(e.name==="AbortError")throw new Error("Sync timed out");throw e}finally{clearTimeout(timeout)}
+}
+function normalizeAppData(source){
+ if(!source||typeof source!=="object"||Array.isArray(source))throw new Error("Invalid sync data");
+ const d={...source};
+ ["activityDays","tricks","targets","mainQuestProgress","questLogs","questPhotos","sleepLogs","profile","dailyCheckins","monthlyCheckins"].forEach(k=>{if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={}});
+ ["sideQuests","strengthLogs","questEvidence","personalTasks","personalEvents","personalProjects","quickNotes"].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
+ d.startedMonth=typeof d.startedMonth==="string"?d.startedMonth:monthKey(today.getFullYear(),today.getMonth());return d;
 }
 function mergeProgress(cloud,local){
  const merged={...(cloud||{}),...(local||{})};
- merged.activityDays={...(cloud?.activityDays||{})};
- for(const [id,days] of Object.entries(local?.activityDays||{}))merged.activityDays[id]={...(merged.activityDays[id]||{}),...days};
- merged.tricks={...(cloud?.tricks||{}),...(local?.tricks||{})};
- const rank={"Not learnt":0,"Learning":1,"Learnt":2,"Learnt (flat)":2,"Rolling":3,"Learnt (rolling)":3};
- for(const [trick,value] of Object.entries(merged.tricks)){
-  const a=cloud?.tricks?.[trick],b=local?.tricks?.[trick];
-  if(a&&b)merged.tricks[trick]=(rank[b]??0)>=(rank[a]??0)?b:a;
- }
- merged.targets={...(cloud?.targets||{})};
- for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
- merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest;}
+ merged.activityDays={...(cloud?.activityDays||{})};for(const [id,days] of Object.entries(local?.activityDays||{}))merged.activityDays[id]={...(merged.activityDays[id]||{}),...days};
+ merged.tricks={...(cloud?.tricks||{}),...(local?.tricks||{})};const rank={"Not learnt":0,"Learning":1,"Learnt":2,"Learnt (flat)":2,"Rolling":3,"Learnt (rolling)":3};
+ for(const [trick,value] of Object.entries(merged.tricks)){const a=cloud?.tricks?.[trick],b=local?.tricks?.[trick];if(a&&b)merged.tricks[trick]=(rank[b]??0)>=(rank[a]??0)?b:a}
+ merged.targets={...(cloud?.targets||{})};for(const [id,target] of Object.entries(local?.targets||{}))merged.targets[id]={...(merged.targets[id]||{}),...target,months:{...(merged.targets[id]?.months||{}),...(target?.months||{})}};
+ merged.sideQuests=[...(cloud?.sideQuests||[])];for(const quest of (local?.sideQuests||[])){const index=merged.sideQuests.findIndex(item=>item.id===quest.id);if(index<0)merged.sideQuests.push(quest);else merged.sideQuests[index]=quest}
  merged.startedMonth=local?.startedMonth||cloud?.startedMonth||merged.startedMonth;
  merged.mainQuestProgress={...(cloud?.mainQuestProgress||{}),...(local?.mainQuestProgress||{})};
- merged.questPhotos={...(cloud?.questPhotos||{})};for(const [id,items] of Object.entries(local?.questPhotos||{})){const combined=[...(merged.questPhotos[id]||[])];for(const item of items){if(!combined.some(x=>x.date===item.date&&x.src===item.src))combined.push(item)}merged.questPhotos[id]=combined;}
+ merged.questPhotos={...(cloud?.questPhotos||{})};for(const [id,items] of Object.entries(local?.questPhotos||{})){const combined=[...(merged.questPhotos[id]||[])];for(const item of items){if(!combined.some(x=>x.date===item.date&&x.src===item.src))combined.push(item)}merged.questPhotos[id]=combined}
  merged.sleepLogs={...(cloud?.sleepLogs||{}),...(local?.sleepLogs||{})};
  const mergeRecords=(a,b)=>{const out=[...(a||[])];for(const item of (b||[])){if(!out.some(x=>JSON.stringify(x)===JSON.stringify(item)))out.push(item)}return out};
- merged.strengthLogs=mergeRecords(cloud?.strengthLogs,local?.strengthLogs);
- merged.questEvidence=mergeRecords(cloud?.questEvidence,local?.questEvidence);
- return merged;
+ merged.strengthLogs=mergeRecords(cloud?.strengthLogs,local?.strengthLogs);merged.questEvidence=mergeRecords(cloud?.questEvidence,local?.questEvidence);
+ return normalizeAppData(merged);
 }
 async function syncPush(){
- if(!syncConfig||!syncReady||syncBusy||!navigator.onLine)return;
- syncBusy=true;
- try{await syncRequest("save",{data});syncDirty=false;localStorage.removeItem("sq27_sync_dirty");}
- catch(e){syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");}
- finally{syncBusy=false;}
+ if(!syncConfig||!syncReady||syncBusy||!navigator.onLine)return false;syncBusy=true;const snapshot=JSON.stringify(data);
+ try{await syncRequest("save",{data:JSON.parse(snapshot)});if(JSON.stringify(data)===snapshot){syncDirty=false;try{localStorage.removeItem("sq27_sync_dirty")}catch(_){}}else{syncDirty=true;try{localStorage.setItem("sq27_sync_dirty","1")}catch(_){}}return true}
+ catch(e){syncDirty=true;try{localStorage.setItem("sq27_sync_dirty","1")}catch(_){}return false}finally{syncBusy=false}
 }
 function scheduleSync(){
- if(!syncConfig||!syncReady)return;
- syncDirty=true;localStorage.setItem("sq27_sync_dirty","1");
- clearTimeout(syncTimer);syncTimer=setTimeout(syncPush,700);
+ if(!syncConfig||!syncReady)return;syncDirty=true;try{localStorage.setItem("sq27_sync_dirty","1")}catch(_){}
+ clearTimeout(syncTimer);syncTimer=setTimeout(()=>{syncPush().catch(()=>{})},1200);
 }
 async function syncPull(){
- if(!syncConfig||syncBusy||!navigator.onLine)return false;
- syncBusy=true;
+ if(!syncConfig||syncBusy||!navigator.onLine)return false;syncBusy=true;
+ const previousData=data,previousRaw=(()=>{try{return localStorage.getItem("sq27")}catch(_){return null}})();
  try{
-  const result=await syncRequest("load");
-  if(syncDirty){
-   data=mergeProgress(result.data,data);
-   localStorage.setItem("sq27",JSON.stringify(data));
-   syncBusy=false;await syncPush();return true;
-  }
-  data=result.data||{};
-  data.activityDays=data.activityDays||{};data.tricks=data.tricks||{};data.targets=data.targets||{};data.sideQuests=Array.isArray(data.sideQuests)?data.sideQuests:[];delete data.questClaims;delete data.sideQuestClaims;
-  data.startedMonth=data.startedMonth||monthKey(today.getFullYear(),today.getMonth());
-  data.mainQuestProgress=data.mainQuestProgress||{};
-  localStorage.setItem("sq27",JSON.stringify(data));
-  render();
-  return true;
- }catch(e){toast("Sync unavailable — keeping this device's data");return false}
- finally{syncBusy=false;}
+  const result=await syncRequest("load"),remote=normalizeAppData(result.data),next=syncDirty?mergeProgress(remote,previousData):remote;
+  localStorage.setItem("sq27",JSON.stringify(next));data=next;render();
+  if(syncDirty){syncBusy=false;await syncPush();return true}return true;
+ }catch(e){data=previousData;if(previousRaw!==null){try{localStorage.setItem("sq27",previousRaw)}catch(_){}}toast("Sync unavailable — your device data is safe. You can keep using the app.");return false}
+ finally{syncBusy=false}
 }
-function save(){try{if(storageRecoveryNeeded){const raw=localStorage.getItem("sq27");if(raw&&!localStorage.getItem("sq27_recovery_backup"))localStorage.setItem("sq27_recovery_backup",raw);storageRecoveryNeeded=false}localStorage.setItem("sq27",JSON.stringify(data));scheduleSync();return true}catch(e){toast("Couldn’t save — device storage may be full. Your changes are only on this screen.");return false}}
+function save(){
+ try{if(storageRecoveryNeeded){const raw=localStorage.getItem("sq27");if(raw&&!localStorage.getItem("sq27_recovery_backup"))localStorage.setItem("sq27_recovery_backup",raw);storageRecoveryNeeded=false}
+ localStorage.setItem("sq27",JSON.stringify(data));scheduleSync();return true}
+ catch(e){toast("Couldn’t save — device storage may be full. Your changes are only on this screen.");return false}
+}
 function showSyncModal(content){
  const root=$("modalRoot");
  root.innerHTML='<div class="modal-backdrop"><section class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button>'+content+'</section></div>';
