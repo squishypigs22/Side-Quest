@@ -984,6 +984,8 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
+ const collegeView=e.target.closest("[data-college-view]");if(collegeView){window.collegeTab=collegeView.dataset.collegeView;render();return}
+ const collegeModule=e.target.closest("[data-college-module]");if(collegeModule){window.ds26Module=collegeModule.dataset.collegeModule;window.collegeTab="schedule";render();return}
  const cd=e.target.closest("[data-college-done]");if(cd){data.collegeProgress=data.collegeProgress||{};const k=cd.dataset.collegeDone;if(data.collegeProgress[k]==="done")delete data.collegeProgress[k];else data.collegeProgress[k]="done";save();render();return}
  const taskDone=e.target.closest("[data-task-done]");if(taskDone){const t=data.personalTasks.find(x=>x.id===taskDone.dataset.taskDone);if(t)t.done=!t.done;save();render();return}
  const taskDelete=e.target.closest("[data-task-delete]");if(taskDelete){data.personalTasks=data.personalTasks.filter(x=>x.id!==taskDelete.dataset.taskDelete);save();render();return}
