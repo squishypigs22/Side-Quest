@@ -732,11 +732,11 @@ const DS26_B64="H4sIAHgH+2oC/8VdWXfbOJb+Kzh+cKfOkSsS5f1NlmRH1dpKiz01Pf1ASZCFDkWq
 let ds26Tasks=[];
 async function loadDS26(){const b=Uint8Array.from(atob(DS26_B64),c=>c.charCodeAt(0));const s=new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"));ds26Tasks=JSON.parse(await new Response(s).text());}
 function collegeDashboard(){
- const p=data.collegeProgress||(data.collegeProgress={}),done=ds26Tasks.filter(t=>p[t[0]]==="done").length;
+ const p=data.collegeProgress||(data.collegeProgress={}),done=ds26Tasks.filter(t=>p[t[1]+"|"+t[0]]==="done").length;
  const assess=ds26Tasks.filter(t=>t[6]),up=assess.filter(t=>t[3]>=todayKey).sort((a,b)=>a[3].localeCompare(b[3]));
  const current=ds26Tasks.filter(t=>t[2]<=todayKey&&t[3]>=todayKey),mods=[...new Set(ds26Tasks.map(t=>t[1]))];
- const card=t=>'<article class="college-task '+(t[6]?"assessment":"")+'"><div><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - "))+'</strong><small>'+escapeHtml(t[1])+' · Week '+t[4]+' · '+t[5]+'</small><small>'+t[2]+' to '+t[3]+' · '+(t[6]?"Assessment item":"Weekly checkpoint")+'</small></div><button data-college-done="'+escapeHtml(t[0])+'" class="college-done '+(p[t[0]]==="done"?"active":"")+'">'+(p[t[0]]==="done"?"✓ Done":"Mark done")+'</button></article>';
- const subjects=mods.map(m=>{let a=ds26Tasks.filter(t=>t[1]===m),n=a.filter(t=>p[t[0]]==="done").length;return '<div class="college-subject"><strong>'+escapeHtml(m)+'</strong><small>'+n+' / '+a.length+' complete</small><div class="college-bar"><i style="width:'+(n/a.length*100)+'%"></i></div></div>'}).join("");
+ const card=t=>'<article class="college-task '+(t[6]?"assessment":"")+'"><div><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - "))+'</strong><small>'+escapeHtml(t[1])+' · Week '+t[4]+' · '+t[5]+'</small><small>'+t[2]+' to '+t[3]+' · '+(t[6]?"Assessment item":"Weekly checkpoint")+'</small></div><button data-college-done="'+escapeHtml(t[1]+"|"+t[0])+'" class="college-done '+(p[t[1]+"|"+t[0]]==="done"?"active":"")+'">'+(p[t[1]+"|"+t[0]]==="done"?"✓ Done":"Mark done")+'</button></article>';
+ const subjects=mods.map(m=>{let a=ds26Tasks.filter(t=>t[1]===m),n=a.filter(t=>p[t[1]+"|"+t[0]]==="done").length;return '<div class="college-subject"><strong>'+escapeHtml(m)+'</strong><small>'+n+' / '+a.length+' complete</small><div class="college-bar"><i style="width:'+(n/a.length*100)+'%"></i></div></div>'}).join("");
  const upcoming=up.slice(0,5).map(t=>'<div class="college-deadline"><strong>'+escapeHtml(t[0].split(" - ").slice(1).join(" - "))+'</strong><span>'+t[3]+'</span></div>').join("");
  const term=window.ds26Term||"All terms",mod=window.ds26Module||"All modules",q=(window.ds26Query||"").toLowerCase();
  const filtered=ds26Tasks.filter(t=>(term==="All terms"||t[5]===term)&&(mod==="All modules"||t[1]===mod)&&(!q||t[0].toLowerCase().includes(q)||t[1].toLowerCase().includes(q)));
