@@ -735,6 +735,7 @@ async function loadDS26(){
  if(!Array.isArray(parsed)||parsed.length!==263)throw new Error("DS26 schedule data is incomplete");
  ds26Tasks=parsed;ds26Ready=true;
 }
+window.setCollegeTab=function(tab){window.collegeTab=tab;try{render()}catch(err){console.error("College tab render failed",err);toast("Could not open that College section. Try again.")}};
 function collegeDashboard(){
  if(!ds26Ready)return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Preparing your 263 curriculum checkpoints…</p></div><div class="college-loading"><span class="college-spinner"></span><strong>Loading your planner</strong><small>Your saved completion records are safe.</small></div></div>';
  const p=data.collegeProgress||(data.collegeProgress={});
@@ -762,7 +763,7 @@ function collegeDashboard(){
  }else{
   body='<section class="college-section-intro"><span class="eyebrow">ALL 263 CHECKPOINTS</span><h2>Course schedule</h2><p>Search, filter and update any checkpoint. Your progress saves automatically.</p></section><div class="college-filters-v2"><input id="ds26Query" placeholder="Search topics or modules" value="'+escapeHtml(window.ds26Query||"")+'"><select id="ds26Term"><option>All terms</option>'+["Term 1","Term 2","Term 3"].map(x=>'<option '+(term===x?"selected":"")+'>'+x+'</option>').join("")+'</select><select id="ds26Module"><option>All modules</option>'+modules.map(x=>'<option '+(mod===x?"selected":"")+'>'+escapeHtml(x)+'</option>').join("")+'</select></div><div class="college-results-label">'+filtered.length+' matching checkpoints</div><div class="college-list college-list-v2">'+filtered.map(taskCard).join("")+'</div>';
  }
- return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Your course planner and progress tracker</p></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button data-college-view="'+id+'" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'<p class="college-footnote">Weekly dates are planning checkpoints, not necessarily submission deadlines. Confirm exact assessment requirements with your tutor.</p></div>';
+ return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Your course planner and progress tracker</p></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button type="button" data-college-view="'+id+'" onclick="window.setCollegeTab(\''+id+'\')" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'<p class="college-footnote">Weekly dates are planning checkpoints, not necessarily submission deadlines. Confirm exact assessment requirements with your tutor.</p></div>';
 }
 function dashboard(){return collegeDashboard();
 
@@ -984,7 +985,7 @@ document.addEventListener("submit",e=>{
  save();render();toast("Side quest created");
 });
 document.addEventListener("click",e=>{
- const collegeView=e.target.closest("[data-college-view]");if(collegeView){window.collegeTab=collegeView.dataset.collegeView;render();return}
+ const collegeView=e.target.closest("[data-college-view]");if(collegeView){e.preventDefault();window.setCollegeTab(collegeView.dataset.collegeView);return}
  const collegeModule=e.target.closest("[data-college-module]");if(collegeModule){window.ds26Module=collegeModule.dataset.collegeModule;window.collegeTab="schedule";render();return}
  const cd=e.target.closest("[data-college-done]");if(cd){data.collegeProgress=data.collegeProgress||{};const k=cd.dataset.collegeDone;if(data.collegeProgress[k]==="done")delete data.collegeProgress[k];else data.collegeProgress[k]="done";save();render();return}
  const taskDone=e.target.closest("[data-task-done]");if(taskDone){const t=data.personalTasks.find(x=>x.id===taskDone.dataset.taskDone);if(t)t.done=!t.done;save();render();return}
