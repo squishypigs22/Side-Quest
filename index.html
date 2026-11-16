@@ -454,12 +454,12 @@ h2{font-size:15px;letter-spacing:-.25px;margin:0}.section{margin:0 0 22px}.secti
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.9</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i class="sq-icon" data-lucide="shield-check" aria-hidden="true"></i></span>Side Quest <span class="brand-version">v0.2.11</span></div><div class="top-actions"><button class="top-action-btn" id="connectBtn" type="button">Connect</button><button class="top-action-btn sync-action-btn" id="syncBtn" type="button" aria-label="Sync now" title="Sync now"><i class="sq-icon" data-lucide="refresh-cw" aria-hidden="true"></i><span>Sync</span></button></div></header>
 <main id="view"></main>
 </div>
 <nav class="bottom-nav" id="bottomNav"></nav>
 
-<div class="version-tag" aria-hidden="true">v0.2.10</div>
+<div class="version-tag" aria-hidden="true">v0.2.11</div>
 <div class="toast" id="toast" role="status"></div>
 <div id="modalRoot"></div>
 <script src="https://unpkg.com/lucide@1.71.0"></script>
@@ -556,7 +556,7 @@ async function syncPull(){
   const result=await syncRequest("load"),remote=normalizeAppData(result.data),next=syncDirty?mergeProgress(remote,previousData):remote;
   localStorage.setItem("sq27",JSON.stringify(next));data=next;render();
   if(syncDirty){syncBusy=false;await syncPush();return true}return true;
- }catch(e){data=previousData;if(previousRaw!==null){try{localStorage.setItem("sq27",previousRaw)}catch(_){}}toast("Sync unavailable — your device data is safe. You can keep using the app.");return false}
+ }catch(e){data=previousData;if(previousRaw!==null){try{localStorage.setItem("sq27",previousRaw)}catch(_){}}try{render()}catch(_){}toast("Sync unavailable — your device data is safe. You can keep using the app.");return false}
  finally{syncBusy=false}
 }
 function save(){
