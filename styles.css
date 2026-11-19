@@ -719,3 +719,7 @@ body.work-mode .app{padding-top:24px!important}
 
 .music-playlist-section{margin:18px 0 24px}.music-playlist-tabs{display:flex;gap:7px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;width:max-content;margin-bottom:15px}.music-playlist-tabs button{border:0;border-radius:7px;padding:9px 18px;background:transparent;color:var(--muted);font-size:12px;font-weight:750}.music-playlist-tabs button.active{background:#b69aff20;color:var(--music)}.music-playlist-section .spotify-results{display:grid;gap:8px}.music-playlist-section .spotify-track{grid-template-columns:58px minmax(0,1fr)}
 @media(max-width:520px){.music-playlist-section .spotify-track{grid-template-columns:48px minmax(0,1fr)}}
+
+/* v0.6.5 — remove songs from connected Spotify playlists */
+.spotify-remove-track{flex:0 0 auto;padding:8px 10px;font-size:11px;border:1px solid #754047;border-radius:8px;background:#24171b;color:#ff9ba5;cursor:pointer}.spotify-remove-track:hover{background:#3a2026}.spotify-remove-track:disabled{opacity:.6;cursor:wait}
+@media(max-width:520px){.spotify-remove-track{padding:8px;font-size:10px}}
