@@ -44,7 +44,8 @@ data.mainQuestProgress=data.mainQuestProgress||{};data.questLogs=data.questLogs|
 const spotifyPlaylistPrefsKey="sq27_spotify_playlists";
 function restoreSpotifyPlaylistPrefs(target=data){
  target.profile=target.profile||{};
- let saved={};try{saved=JSON.parse(localStorage.getItem(spotifyPlaylistPrefsKey)||"{}")||{}}catch(e){}
+ let saved={},raw=null;try{raw=localStorage.getItem(spotifyPlaylistPrefsKey);saved=JSON.parse(raw||"{}")||{}}catch(e){}
+ if(raw===null&&target.profile.spotifyPlaylists){saved=target.profile.spotifyPlaylists;try{localStorage.setItem(spotifyPlaylistPrefsKey,JSON.stringify(saved))}catch(e){}}
  target.profile.spotifyPlaylists={...(target.profile.spotifyPlaylists||{}),...saved};
  return target;
 }
