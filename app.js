@@ -742,6 +742,7 @@ function render(){
  if(profileSection)content='<button type="button" class="profile-back" data-page="'+(page==="ProgressCategory"?"Progress":"Profile")+'">← Back</button>'+content;
  $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
+ if(page==="MusicLibrary"){if(spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab,true);else{const list=$("musicPlaylistTracks");if(list)list.innerHTML='<p class="spotify-status">Connect Spotify above to load your playlists.</p>'}}
  if(page==="Profile"&&spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
