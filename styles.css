@@ -673,3 +673,10 @@ body.work-mode .app{padding-top:24px!important}
 .spotify-profile-avatar{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:cover;border-radius:50%;border:1px solid #3b4552;background:#252c35}
 .spotify-profile-avatar-fallback{display:flex;align-items:center;justify-content:center;color:#aab3c0}
 .spotify-profile-avatar-fallback .sq-icon{width:20px;height:20px}
+
+
+/* v0.4.9 — assign separate Spotify playlists to Guitar and Drums */
+.spotify-profile-playlists{display:grid;gap:8px;margin-top:14px;padding-top:13px;border-top:1px solid #303945}
+.spotify-profile-playlists label{font-size:12px;font-weight:850;color:#d8dce3}
+.spotify-profile-playlists select{width:100%;min-height:42px}
+.spotify-search-tools{display:grid;gap:9px}
