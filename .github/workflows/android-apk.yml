@@ -57,7 +57,7 @@ jobs:
           import re
           path = Path('android/app/src/main/AndroidManifest.xml')
           manifest = path.read_text()
-          pattern = r'(<activity\b(?=[^>]*android:name="[^"]*MainActivity")[^>]*>)([\s\\S]*?)(</activity>)'
+          pattern = r'(<activity\b(?=[^>]*android:name="[^"]*MainActivity")[^>]*>)([\s\S]*?)(</activity>)'
           match = re.search(pattern, manifest)
           if not match:
               raise SystemExit('Could not find Capacitor MainActivity in AndroidManifest.xml')
