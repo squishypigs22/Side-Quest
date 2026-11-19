@@ -803,3 +803,21 @@ body.work-mode .topbar #syncBtn{margin-left:auto!important}
 
 /* v0.8.18 - hide the topbar divider in Main mode */
 body.work-mode .topbar{border-bottom:0!important}
+
+
+/* v0.8.20 - selectable app themes */
+body[data-theme="graphite"]{--bg:#101113;--surface:#1c1e21;--surface2:#292c30;--line:#3b3f44;--text:#e7e8e9;--muted:#a0a3a8;--accent:#d0d3d7;--green:#aeb5b0;--red:#d68b8b;--fitness:#aeb5b0;--music:#c0b9c9;--skate:#c8b9a6;color-scheme:dark}
+body[data-theme="paper"]{--bg:#f2efe8;--surface:#fffdf8;--surface2:#e9e4da;--line:#d5cec1;--text:#292a2b;--muted:#77766f;--accent:#466c91;--green:#398264;--red:#bd6262;--fitness:#43856c;--music:#79629a;--skate:#b87943;color-scheme:light}
+body[data-theme="ocean"]{--bg:#0c1820;--surface:#132631;--surface2:#1c3542;--line:#294653;--text:#e4f2f5;--muted:#91abb4;--accent:#55c6d8;--green:#6bc9a7;--red:#e78383;--fitness:#6bc9a7;--music:#9ba8ef;--skate:#e6b36d;color-scheme:dark}
+body[data-theme="ember"]{--bg:#1c1412;--surface:#281c19;--surface2:#392722;--line:#533a31;--text:#f6e9df;--muted:#b99e91;--accent:#f0a36b;--green:#8fc39c;--red:#e17e72;--fitness:#8fc39c;--music:#d5a0c2;--skate:#f0b56d;color-scheme:dark}
+body[data-theme="paper"] .bottom-nav{background:#fffdf8f5;border-color:var(--line)}
+body[data-theme="paper"] .bottom-nav button.active{background:#466c9118}
+body[data-theme="paper"] .month-card{background:linear-gradient(145deg,#fffdf8,#e9e4da);border-color:var(--line);box-shadow:0 5px 18px #493b2612}
+body[data-theme="paper"] .date-cell{background:#292a2b08;color:#494a4b}
+body[data-theme="paper"] .date-cell.done{background:#398264;color:#fff;border-color:#398264}
+body[data-theme="paper"] .modal{background:var(--surface);color:var(--text)}
+body[data-theme="paper"] .toast{background:#292a2b;color:#fff}
+body[data-theme="paper"] .topbar{border-color:var(--line)}
+body[data-theme="paper"] .brand-mark{border-color:var(--line)}
+.theme-setting-row select{min-width:116px;max-width:46%;padding:9px 28px 9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface2);color:var(--text);font:700 11px "Nunito",sans-serif}
+@media(max-width:520px){.theme-setting-row{align-items:flex-start}.theme-setting-row select{max-width:42%;margin-top:2px}}
