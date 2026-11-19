@@ -754,3 +754,8 @@ body.work-mode .app{padding-top:24px!important}
 .spotify-playlist-label{display:flex;align-items:center;gap:8px}.spotify-playlist-label .sq-icon{width:18px;height:18px;flex:0 0 18px}
 
 .spotify-playlist-select-row{display:flex;align-items:center;gap:9px}.spotify-playlist-select-row>.sq-icon{width:20px;height:20px;flex:0 0 20px;opacity:.9}.spotify-playlist-select-row select{flex:1;min-width:0}.spotify-add-track:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(1)}
+
+/* Mobile keyboard: hide the fixed taskbar so it cannot cover the form or results. */
+body.keyboard-open .bottom-nav{display:none!important}
+body.keyboard-open .version-tag{display:none!important}
+body.keyboard-open .app{padding-bottom:24px!important}
