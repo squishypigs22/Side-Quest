@@ -563,7 +563,7 @@ function spotifyProfilePanel(){
  const avatar=account?.images?.[0]?.url?'<img class="spotify-profile-avatar" src="'+esc(account.images[0].url)+'" alt="Spotify profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
  const display=account?.display_name||account?.id||"Spotify account";
  const playlistOptionsFor=key=>'<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'"'+(data.profile?.spotifyPlaylists?.[key]===p.id?' selected':'')+'>'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
- return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2></div>'+(connected?'<div class="spotify-account-row">'+avatar+'<span class="spotify-account-name"><strong>'+esc(display)+'</strong></span></div>':'<div class="spotify-connected-row"><span><strong>Connect Spotify</strong><small>Connect your account to use your playlists in Side Quest.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>')+(connected?'<div class="spotify-profile-playlists"><label class="spotify-playlist-label" for="spotifyGuitarPlaylist"><i class="sq-icon" data-lucide="guitar" aria-hidden="true"></i> Guitar playlist</label><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptionsFor('guitar'):'<option value="">Loading playlists…</option>')+'</select><label class="spotify-playlist-label" for="spotifyDrumsPlaylist"><i class="sq-icon" data-lucide="drum" aria-hidden="true"></i> Drums playlist</label><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptionsFor('drums'):'<option value="">Loading playlists…</option>')+'</select></div>':'')+'</section>';
+ return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2></div>'+(connected?'<div class="spotify-account-row">'+avatar+'<span class="spotify-account-name"><strong>'+esc(display)+'</strong></span></div>':'<div class="spotify-connected-row"><span><strong>Connect Spotify</strong><small>Connect your account to use your playlists in Side Quest.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>')+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="guitar" aria-hidden="true"></i><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptionsFor('guitar'):'<option value="">Loading playlists…</option>')+'</select></div><label for="spotifyDrumsPlaylist">Drums playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="drum" aria-hidden="true"></i><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptionsFor('drums'):'<option value="">Loading playlists…</option>')+'</select></div></div>':'')+'</section>';
 }
 
 function spotifyPanel(){
@@ -698,13 +698,25 @@ async function spotifySearchTracks(queryOverride){
   spotifyTracks=result.tracks?.items||[];
   await spotifyEnsureSkillPlaylists();
   if(sequence!==spotifySearchSequence||$("spotifyTrackQuery")?.value.trim()!==query)return;
-  results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>{
-   const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
-   return '<article class="spotify-track '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'">Add &amp; sync</button></div></article>';
-  }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
+  spotifyRenderTrackResults();
  }catch(e){if(sequence===spotifySearchSequence)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
+function spotifyTrackAlreadyAdded(trackId,choice){
+ const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
+ return Boolean(trackId)&&targets.every(key=>Boolean(spotifyMusicCache[key]?.items?.some(item=>item.id===trackId)));
+}
+function spotifyRenderTrackResults(){
+ const results=$("spotifyResults");if(!results)return;
+ const choice=$("musicSongInstrument")?.value||"Drums";
+ const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
+ results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>{
+  const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
+  const already=targets.every(key=>Boolean(spotifyMusicCache[key]?.items?.some(item=>item.id===track.id)));
+  return '<article class="spotify-track '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'"'+(already?' disabled aria-disabled="true"':'')+'>'+(already?'Added':'Add to '+choice)+'</button></div></article>';
+ }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
+}
 async function spotifyAddTrack(index){
+ if(spotifyTrackAlreadyAdded(track?.id,choice)){toast("Already in the selected playlist");return}
  const track=spotifyTracks[index],choice=$("musicSongInstrument")?.value||"Drums";
  if(!track?.uri){toast("Choose a track first");return}
  const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
@@ -913,6 +925,7 @@ document.addEventListener("click",async e=>{
 });
 document.addEventListener("change",e=>{
  const playlistSelect=e.target.closest("[data-spotify-profile-playlist]");if(playlistSelect){const key=playlistSelect.dataset.spotifyProfilePlaylist,value=playlistSelect.value;data.profile=data.profile||{};data.profile.spotifyPlaylists=data.profile.spotifyPlaylists||{};if(value)data.profile.spotifyPlaylists[key]=value;else delete data.profile.spotifyPlaylists[key];if(!persistSpotifyPlaylistPrefs()||!save())return;spotifyMusicCache={};if(syncConfig&&syncReady){clearTimeout(syncTimer);syncPush().catch(err=>console.warn("Playlist sync will retry",err))}return}
+ if(e.target.matches("#musicSongInstrument")){spotifyRenderTrackResults();return}
  if(e.target.matches("#musicPlaylistSort")){musicPlaylistSort=e.target.value;renderMusicPlaylistTracks(musicActiveTab);return}
  const instagram=e.target.closest("[data-cover-instagram]");if(instagram){const cover=(data.coverProjects||[]).find(x=>String(x.id)===instagram.dataset.coverInstagram);if(cover){const value=instagram.value.trim();if(value&&!/^https?:\/\/(www\.)?instagram\.com\//i.test(value)){toast("Enter a valid Instagram URL");return}cover.instagramUrl=value;save();render();toast("Instagram post saved")}return}
   const status=e.target.closest("[data-cover-status]");if(status){const cover=(data.coverProjects||[]).find(x=>String(x.id)===status.dataset.coverStatus);if(cover){cover.status=status.value;if(status.value==="Posted")cover.checklist={...(cover.checklist||{}),posted:true};coversActiveTab=status.value==="Posted"?"posted":"all";save();render()}return}
