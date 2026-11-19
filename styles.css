@@ -691,3 +691,8 @@ body.work-mode .app{padding-top:24px!important}
 .spotify-account-name{display:grid;gap:3px;min-width:0;flex:1}
 .spotify-account-name strong{font-size:15px;overflow-wrap:anywhere}
 .spotify-account-name small{font-size:11px;color:var(--muted,#a4aab4)}
+
+
+/* v0.5.5 — Spotify playlist save controls */
+.spotify-save-button{justify-self:start;border:1px solid #35404d;border-radius:8px;padding:8px 12px;background:#202833;color:#e8edf4;font-size:12px;font-weight:800;cursor:pointer}
+.spotify-save-button:disabled{opacity:.6;cursor:wait}
