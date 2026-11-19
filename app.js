@@ -796,6 +796,7 @@ function spotifyInstrumentIndicators(trackId){
  else if(musicPlaylistSort==="newest")items.sort((a,b)=>String(b._addedAt||"").localeCompare(String(a._addedAt||"")));
  else if(musicPlaylistSort==="oldest")items.sort((a,b)=>String(a._addedAt||"").localeCompare(String(b._addedAt||"")));
  list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+ if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 async function spotifyRemoveTrack(trackId){
  const button=document.querySelector('[data-spotify-remove="'+CSS.escape(trackId)+'"]');
