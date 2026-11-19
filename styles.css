@@ -541,3 +541,43 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 img,video,svg{max-width:100%}
 @media(max-width:520px){.app{padding-left:13px;padding-right:13px}.topbar{margin-bottom:20px}.bottom-nav{left:0;right:0}.bottom-nav button{font-size:9px;padding:5px 0}}
 @media(min-width:900px){.app{max-width:1500px;margin:0 auto;padding-left:28px;padding-right:28px}#view{max-width:1240px;margin:0 auto}}
+
+
+/* v0.3.1 design consistency pass */
+.college-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}
+.college-next-assignment{margin:0 0 18px;padding:14px;border:1px solid #8bbaff55;border-radius:14px;background:linear-gradient(145deg,#1d242e,#191b1f)}
+.college-next-assignment>.section-head{margin-bottom:9px}
+.college-next-assignment>.section-head h2{font-size:14px}
+.college-next-assignment .college-task{margin:0;background:#202630;border-color:#465365}
+.college-next-assignment .college-task-copy{overflow-wrap:anywhere}
+.college-next-assignment .college-task small{line-height:1.45}
+.college-filters-v2{align-items:center}
+.college-filters-v2 input,.college-filters-v2 select{min-height:42px}
+.music-search-row input{flex:1 1 150px;min-width:0}
+.music-spotify-button{min-height:40px;flex:0 0 auto}
+.music-song-row{flex-wrap:wrap}
+.music-song-copy{overflow:hidden}
+.topbar{gap:10px}
+.brand{min-width:0;flex-wrap:wrap}
+.top-actions{flex:0 0 auto}
+.top-action-btn{white-space:nowrap}
+@media(max-width:520px){
+ .topbar{gap:6px}
+ .brand{gap:5px;font-size:16px}
+ .brand-mark{margin-right:2px;width:25px;height:25px}
+ .brand-version{font-size:9px;padding:4px 5px}
+ .top-actions{gap:5px}
+ .top-action-btn{height:33px;padding:0 8px;font-size:10px}
+ .college-next-assignment{padding:11px}
+ .college-next-assignment .college-task{gap:7px;padding:10px}
+ .college-filters-v2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .college-filters-v2 input{grid-column:1/-1}
+ .bottom-nav{gap:1px;padding-left:4px;padding-right:4px}
+ .bottom-nav button{font-size:9px;min-width:0}
+}
+@media(max-width:360px){
+ .brand{font-size:14px}
+ .top-action-btn{padding:0 6px}
+ .top-action-btn span{display:none}
+ .college-tabs button{font-size:10px}
+}
