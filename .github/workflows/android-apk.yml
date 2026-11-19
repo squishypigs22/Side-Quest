@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'app.js'
+      - 'styles.css'
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'package.json'
@@ -40,7 +42,7 @@ jobs:
       - name: Prepare web assets
         run: |
           mkdir -p www
-          cp index.html manifest.webmanifest sw.js www/
+          cp index.html app.js styles.css manifest.webmanifest sw.js www/
 
       - name: Generate Android project
         run: npx cap add android
