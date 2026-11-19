@@ -792,3 +792,10 @@ body.work-mode .top-action-btn svg,body.work-mode .top-action-btn .sq-icon{width
 /* v0.8.16 - unassigned assignments use a neutral grey status */
 .assignment-set-tag.is-unassigned{color:#b8bec8;background:#9aa3af18;border:1px solid #87909d88}
 .assignment-task.assignment-unassigned{border-color:#87909d!important}
+
+
+/* v0.8.17 - separate Main mode actions to opposite sides */
+body.work-mode .topbar{justify-content:flex-start!important}
+body.work-mode .topbar .top-actions{display:flex!important;width:100%!important;flex:1 1 100%!important;justify-content:space-between!important;margin:0!important;order:0!important}
+body.work-mode .topbar #connectBtn{margin-right:auto!important}
+body.work-mode .topbar #syncBtn{margin-left:auto!important}
