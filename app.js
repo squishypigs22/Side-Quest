@@ -696,7 +696,21 @@ async function spotifyAddTrack(index){
  }catch(e){toast(e.message)}
 }
 async function spotifyLoadMusicPlaylist(key,force=false){
- const id=data.profile?.spotifyPlaylists?.[key],list=$("musicPlaylistTracks");if(!list)return;
+ const list=$("musicPlaylistTracks");if(!list)return;
+ if(key==="both"){
+  const ids=["drums","guitar"].map(k=>({key:k,id:data.profile?.spotifyPlaylists?.[k]}));
+  const missing=ids.filter(x=>!x.id);
+  if(missing.length){list.innerHTML='<p class="spotify-status">Connect both your Drums and Guitar playlists in Profile to see everything together.</p>';return}
+  if(!force&&spotifyMusicCache.both?.ids===ids.map(x=>x.id).join("|")){renderMusicPlaylistTracks("both");return}
+  list.innerHTML='<p class="spotify-status">Loading both playlists…</p>';
+  try{
+   const results=await Promise.all(ids.map(async x=>{const r=await spotifyApi("/playlists/"+encodeURIComponent(x.id)+"/items?limit=50");return (r.items||[]).map(row=>row.item||row.track||row).filter(t=>t&&t.id)}));
+   const seen=new Set(),items=results.flat().filter(t=>!seen.has(t.id)&&seen.add(t.id));
+   spotifyMusicCache.both={ids:ids.map(x=>x.id).join("|"),items};renderMusicPlaylistTracks("both");
+  }catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
+  return;
+ }
+ const id=data.profile?.spotifyPlaylists?.[key];
  if(!id){list.innerHTML='<p class="spotify-status">Choose your '+(key==="drums"?"Drums":"Guitar")+' playlist in Profile to see it here.</p>';return}
  if(!force&&spotifyMusicCache[key]?.id===id){renderMusicPlaylistTracks(key);return}
  list.innerHTML='<p class="spotify-status">Loading playlist…</p>';
@@ -715,8 +729,8 @@ async function spotifyCreatePlaylist(){
 }
 
 function musicLibraryPage(){
- const active=musicActiveTab==="guitar"?"guitar":"drums",label=active==="guitar"?"Guitar":"Drums";
- return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section"><div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button></div><div class="section-head"><h2>'+label+' playlist</h2><small>Spotify synced</small></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
+ const active=["guitar","both"].includes(musicActiveTab)?musicActiveTab:"drums",label=active==="both"?"Both":active==="guitar"?"Guitar":"Drums";
+ return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section"><div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button><button type="button" data-music-tab="both" class="'+(active==="both"?"active":"")+'">Both</button></div><div class="section-head"><h2>'+label+(active==="both"?" playlists":" playlist")+'</h2><small>Spotify synced</small></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
 }
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
