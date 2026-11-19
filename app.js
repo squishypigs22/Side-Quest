@@ -407,7 +407,7 @@ function openModal(date){
  }).join("");
  $("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal calendar-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Tap an activity to mark it completed or clear it.</p><div class="calendar-log-list">'+rows+'</div></section></div>';
  if(window.lucide?.createIcons)window.lucide.createIcons();
- if(page==="MusicLibrary"&&spotifyTokens()&&$("spotifyPlaylistSelect")&&!$("spotifyPlaylistSelect").dataset.loaded){$("spotifyPlaylistSelect").dataset.loaded="1";spotifyLoadPlaylists();}
+ if(page==="Profile"&&spotifyTokens()&&document.querySelector("[data-spotify-profile-playlist]")&&!document.querySelector("[data-spotify-profile-playlist]").dataset.loaded){document.querySelectorAll("[data-spotify-profile-playlist]").forEach(select=>select.dataset.loaded="1");spotifyLoadPlaylists();}
 }
 function targetsPage(){
  return '<div class="page-head"><div class="eyebrow">MONTHLY GOALS</div><h1>Targets</h1><p>Set how many sessions you want to complete each month.</p></div><div class="target-list">'+A.map(a=>{const target=targetFor(a.id,today.getFullYear(),today.getMonth()),done=sessionCount(a.id,today.getFullYear(),today.getMonth()),pct=Math.min(100,Math.round(done/target*100));return '<section class="target-card" data-category="'+a.category+'"><div class="target-card-top"><span class="activity-icon">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+done+' of '+target+' sessions this month</small></span></div><div class="target-edit"><label for="target-'+a.id+'">Monthly target</label><input id="target-'+a.id+'" type="number" min="1" max="100" step="1" value="'+target+'" data-target-input="'+a.id+'"><button data-save-target="'+a.id+'">Save</button></div><div class="target-progress"><span style="width:'+pct+'%"></span></div></section>'}).join("")+'</div>';
@@ -527,7 +527,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
  spotifyProfilePanel()+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.4.8</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.4.9</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -550,15 +550,17 @@ function spotifyLogo(){return '<span class="spotify-mark" aria-label="Spotify"><
 function spotifyProfilePanel(){
  const profile=data.profile||{},connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
  const avatar=profile.avatar?'<img class="spotify-profile-avatar" src="'+profile.avatar+'" alt="Your profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
- return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Account connection</small></div><div class="spotify-connected-row">'+(connected?'<span class="spotify-profile-identity">'+avatar+'<span><strong>Spotify connected</strong><small>Your Spotify account is linked to Side Quest.</small></span></span>':'<span><strong>Connect Spotify</strong><small>Connect your account to search songs and manage playlists in Music.</small></span>')+(connected?'<button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button>':'<button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button>')+'</div></section>';
+ const selected=profile.spotifyPlaylists||{};
+ const playlistOptions='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
+ return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Account connection</small></div><div class="spotify-connected-row">'+(connected?'<span class="spotify-profile-identity">'+avatar+'<span><strong>Spotify connected</strong><small>Your Spotify account is linked to Side Quest.</small></span></span>':'<span><strong>Connect Spotify</strong><small>Connect your account to search songs and choose your playlists.</small></span>')+(connected?'<button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button>':'<button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button>')+'</div>'+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><label for="spotifyDrumsPlaylist">Drums playlist</label><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><small class="spotify-note">Choose which Spotify playlist Side Quest should use for guitar and drum songs.</small></div>':'')+'</section>';
 }
 
 function spotifyPanel(){
  const connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
  let body="";
- if(!connected){body='<div class="spotify-setup"><p>Connect your Spotify account from <strong>Profile → Spotify</strong>. Once connected, you can search for songs and add them to your playlists here.</p></div>';}
- else{body='<div class="spotify-connected-row"><span><strong>Spotify connected</strong><small>Search for tracks and add them to one of your playlists.</small></span><button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button></div><div class="spotify-playlist-tools"><label for="spotifyPlaylistSelect">Add songs to</label><select id="spotifyPlaylistSelect"><option value="">Loading playlists…</option></select><div class="spotify-inline-actions"><button type="button" data-spotify-playlists>Refresh playlists</button><button type="button" data-spotify-create>Create private playlist</button></div></div><div class="spotify-search-tools"><label for="spotifyTrackQuery">Search Spotify</label><div class="spotify-search-line"><input id="spotifyTrackQuery" type="search" placeholder="Song title or artist"><button type="button" class="spotify-primary" data-spotify-search>Search</button></div></div><div id="spotifyResults" class="spotify-results" aria-live="polite"></div><small class="spotify-note">Spotify access is stored only for this browser session. You can disconnect at any time.</small>';}
- return '<section class="spotify-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Search and playlists</small></div>'+body+'</section>';
+ if(!connected){body='<div class="spotify-setup"><p>Connect your Spotify account from <strong>Profile → Spotify</strong>. Once connected, choose your Guitar and Drums playlists in Profile, then search for songs here.</p></div>';}
+ else{body='<div class="spotify-search-tools"><label for="spotifyTargetInstrument">Add songs to</label><select id="spotifyTargetInstrument"><option value="guitar">Guitar playlist</option><option value="drums">Drums playlist</option></select><label for="spotifyTrackQuery">Search Spotify</label><div class="spotify-search-line"><input id="spotifyTrackQuery" type="search" placeholder="Song title or artist"><button type="button" class="spotify-primary" data-spotify-search>Search</button></div></div><div id="spotifyResults" class="spotify-results" aria-live="polite"></div><small class="spotify-note">Choose the destination playlist in Profile. Spotify access is stored only for this browser session.</small>';}
+ return '<section class="spotify-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Search songs</small></div>'+body+'</section>';
 }
 function spotifyRandomString(length=64){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";const values=crypto.getRandomValues(new Uint8Array(length));return Array.from(values,x=>chars[x%chars.length]).join("")}
 function spotifyBase64Url(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")}
@@ -606,14 +608,14 @@ async function spotifyApi(path,options={},retry=true){
  return result;
 }
 async function spotifyLoadPlaylists(){
- const select=$("spotifyPlaylistSelect");if(!select)return;
- select.innerHTML='<option value="">Loading…</option>';
+ const selects=Array.from(document.querySelectorAll("[data-spotify-profile-playlist]"));
+ if(selects.length)selects.forEach(select=>select.innerHTML='<option value="">Loading…</option>');
  try{
   const result=await spotifyApi("/me/playlists?limit=50");
   spotifyPlaylists=result.items||[];
-  select.innerHTML='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
-  if(!spotifyPlaylists.length)select.innerHTML='<option value="">No playlists found — create one below</option>';
- }catch(e){select.innerHTML='<option value="">Could not load playlists</option>';toast(e.message)}
+  const options='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
+  selects.forEach(select=>{const key=select.dataset.spotifyProfilePlaylist;select.innerHTML=spotifyPlaylists.length?options:'<option value="">No playlists found</option>';select.value=data.profile?.spotifyPlaylists?.[key]||"";});
+ }catch(e){selects.forEach(select=>select.innerHTML='<option value="">Could not load playlists</option>');toast(e.message)}
 }
 async function spotifySearchTracks(){
  const input=$("spotifyTrackQuery"),query=input?.value.trim();if(!query){toast("Enter a song or artist to search");return}
@@ -626,9 +628,11 @@ async function spotifySearchTracks(){
  }catch(e){if(results)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
 async function spotifyAddTrack(index){
- const track=spotifyTracks[index],playlistId=$("spotifyPlaylistSelect")?.value;if(!track?.uri){toast("Choose a track first");return}
- if(!playlistId){toast("Choose a playlist first");return}
- try{await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});toast("Added "+track.name+" to your playlist")}
+ const track=spotifyTracks[index],instrument=$("spotifyTargetInstrument")?.value||"guitar",playlistId=data.profile?.spotifyPlaylists?.[instrument];
+ if(!track?.uri){toast("Choose a track first");return}
+ if(!playlistId){toast("Choose a "+(instrument==="drums"?"Drums":"Guitar")+" playlist in Profile first");return}
+ const playlist=spotifyPlaylists.find(p=>p.id===playlistId);
+ try{await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});toast("Added "+track.name+" to "+(playlist?.name||"your playlist"))}
  catch(e){toast(e.message)}
 }
 async function spotifyCreatePlaylist(){
@@ -729,8 +733,6 @@ document.addEventListener("click",e=>{
  const spotifyDisconnect=e.target.closest("[data-spotify-disconnect]");if(spotifyDisconnect){spotifyClearTokens();render();toast("Spotify disconnected");return}
  const spotifySearch=e.target.closest("[data-spotify-search]");if(spotifySearch){spotifySearchTracks();return}
  const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
- const spotifyRefresh=e.target.closest("[data-spotify-playlists]");if(spotifyRefresh){spotifyLoadPlaylists();return}
- const spotifyCreate=e.target.closest("[data-spotify-create]");if(spotifyCreate){spotifyCreatePlaylist();return}
  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
@@ -757,6 +759,7 @@ function openProfileCrop(src){
  };cropImage.onerror=()=>toast("Could not load that image");cropImage.src=src;
 }
 document.addEventListener("change",e=>{
+ const spotifyPlaylist=e.target.closest("[data-spotify-profile-playlist]");if(spotifyPlaylist){data.profile=data.profile||{};data.profile.spotifyPlaylists=data.profile.spotifyPlaylists||{};data.profile.spotifyPlaylists[spotifyPlaylist.dataset.spotifyProfilePlaylist]=spotifyPlaylist.value;save();toast("Playlist saved");return}
  const ti=e.target.closest("[data-checkin-time]");if(ti){const st=checkinStore(checkinType);st.record.answers[ti.dataset.checkinTime]=ti.value;st.record.skipped=(st.record.skipped||[]).filter(x=>x!==ti.dataset.checkinTime);save();return}
  const mi=e.target.closest("[data-checkin-media]");if(mi&&mi.files?.length){const st=checkinStore(checkinType),q=monthlyQuestions.find(x=>x.id===mi.dataset.checkinMedia);if(!q)return;const existing=st.record.answers[q.id]?.media||[],files=Array.from(mi.files).slice(0,Math.max(0,q.limit-existing.length));if(!files.length){toast("Photo limit reached");mi.value="";return}let pending=files.length;const added=[];files.forEach(file=>{if(file.size>12*1024*1024){toast("Choose files under 12 MB");pending--;return}const reader=new FileReader();reader.onload=()=>{const finish=src=>{added.push({src,type:file.type,name:file.name});pending--;if(!pending){st.record.answers[q.id]={media:[...existing,...added].slice(0,q.limit)};st.record.skipped=(st.record.skipped||[]).filter(x=>x!==q.id);save();render();toast("Progress record saved")}};if(file.type.startsWith("image/")){const img=new Image();img.onload=()=>{const canvas=document.createElement("canvas"),scale=Math.min(1,1000/Math.max(img.width,img.height));canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);finish(canvas.toDataURL("image/jpeg",0.68))};img.onerror=()=>finish(reader.result);img.src=reader.result}else if(file.size>900*1024){pending--;toast("Choose a video under 900 KB so it can be saved on this device")}else finish(reader.result)};reader.onerror=()=>{pending--;toast("Could not read a file")};reader.readAsDataURL(file)});mi.value="";return}
  const questPhoto=e.target.closest("[data-quest-photo]");
