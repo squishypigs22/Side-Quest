@@ -720,7 +720,20 @@ async function spotifyLoadMusicPlaylist(key,force=false){
 function renderMusicPlaylistTracks(key){
  const list=$("musicPlaylistTracks");if(!list)return;
  const items=spotifyMusicCache[key]?.items||[];
- list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(t.name)+'</strong><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+ list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(t.name)+'</strong><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+}
+async function spotifyRemoveTrack(trackId){
+ const button=document.querySelector('[data-spotify-remove="'+CSS.escape(trackId)+'"]');
+ const targets=musicActiveTab==="both"?["drums","guitar"]:[musicActiveTab];
+ const destinations=[...new Set(targets.map(key=>data.profile?.spotifyPlaylists?.[key]).filter(Boolean))];
+ if(!destinations.length){toast("Choose a Spotify playlist in Profile first");return}
+ if(!window.confirm("Remove this song from "+(musicActiveTab==="both"?"both playlists":musicActiveTab+" playlist")+"?"))return;
+ if(button){button.disabled=true;button.textContent="Removing…"}
+ try{
+  const uri="spotify:track:"+trackId;
+  for(const playlistId of destinations)await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"DELETE",body:JSON.stringify({tracks:[{uri}]})});
+  spotifyMusicCache={};await spotifyLoadMusicPlaylist(musicActiveTab,true);toast("Song removed from Spotify playlist"+(destinations.length>1?"s":""));
+ }catch(e){if(button){button.disabled=false;button.textContent="Remove"}toast("Couldn't remove song: "+e.message)}
 }
 async function spotifyCreatePlaylist(){
  const name=window.prompt("Name your new private playlist","Side Quest Songs");if(!name?.trim())return;
@@ -824,7 +837,8 @@ document.addEventListener("click",async e=>{
  const spotifyConnect=e.target.closest("[data-spotify-connect]");if(spotifyConnect){spotifyStartConnect().catch(e=>toast(e.message));return}
  const spotifyDisconnect=e.target.closest("[data-spotify-disconnect]");if(spotifyDisconnect){spotifyClearTokens();render();toast("Spotify disconnected");return}
   
-  const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
+  const spotifyRemove=e.target.closest("[data-spotify-remove]");if(spotifyRemove){spotifyRemoveTrack(spotifyRemove.dataset.spotifyRemove);return}
+ const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
  const musicTab=e.target.closest("[data-music-tab]");if(musicTab){musicActiveTab=musicTab.dataset.musicTab;render();spotifyLoadMusicPlaylist(musicActiveTab,true);return}
   const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
