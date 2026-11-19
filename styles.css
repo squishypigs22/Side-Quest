@@ -748,3 +748,5 @@ body.work-mode .app{padding-top:24px!important}
 
 /* v0.7.3 — instrument skill outlines on Spotify search results */
 .spotify-track.skill-guitar{border-color:#3988ed;box-shadow:inset 0 0 0 1px #3988ed55}.spotify-track.skill-drums{border-color:#35b879;box-shadow:inset 0 0 0 1px #35b87955}.spotify-track.skill-both{border-color:#a879ef;box-shadow:inset 0 0 0 1px #a879ef66}
+
+/* v0.7.4 — Spotify playlist selection autosaves */
