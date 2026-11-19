@@ -679,6 +679,8 @@ async function spotifySearchCovers(query){
   const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"6"}));
   if(sequence!==spotifyCoverSearchSequence||$("spotifyCoverQuery")?.value.trim()!==query)return;
   spotifyCoverTracks=result.tracks?.items||[];
+  await spotifyEnsureSkillPlaylists();
+  if(sequence!==spotifyCoverSearchSequence||$("spotifyCoverQuery")?.value.trim()!==query)return;
   results.innerHTML=spotifyCoverTracks.length?spotifyCoverTracks.map((track,i)=>{
    const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
    return '<article class="spotify-track cover-search-result '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small></div><button type="button" class="spotify-add-track" data-cover-pick="'+i+'">Choose</button></article>';
@@ -694,6 +696,8 @@ async function spotifySearchTracks(queryOverride){
   const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"8"}));
   if(sequence!==spotifySearchSequence||$("spotifyTrackQuery")?.value.trim()!==query)return;
   spotifyTracks=result.tracks?.items||[];
+  await spotifyEnsureSkillPlaylists();
+  if(sequence!==spotifySearchSequence||$("spotifyTrackQuery")?.value.trim()!==query)return;
   results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>{
    const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
    return '<article class="spotify-track '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'">Add &amp; sync</button></div></article>';
