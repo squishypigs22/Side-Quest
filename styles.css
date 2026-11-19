@@ -680,3 +680,14 @@ body.work-mode .app{padding-top:24px!important}
 .spotify-profile-playlists label{font-size:12px;font-weight:850;color:#d8dce3}
 .spotify-profile-playlists select{width:100%;min-height:42px}
 .spotify-search-tools{display:grid;gap:9px}
+
+
+/* v0.5.0 — use the Spotify account as the Side Quest profile identity */
+.spotify-mark{width:24px;height:24px;flex:0 0 24px;margin-right:7px;background:transparent;color:#1ed760;vertical-align:middle}
+.spotify-mark svg{display:block;width:24px;height:24px;overflow:visible}
+.spotify-mark svg circle{fill:#1ed760}
+.spotify-mark svg path{stroke:#101510}
+.spotify-account-row{display:flex;align-items:center;gap:12px;min-width:0;padding:4px 0 10px}
+.spotify-account-name{display:grid;gap:3px;min-width:0;flex:1}
+.spotify-account-name strong{font-size:15px;overflow-wrap:anywhere}
+.spotify-account-name small{font-size:11px;color:var(--muted,#a4aab4)}
