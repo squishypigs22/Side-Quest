@@ -550,7 +550,6 @@ function spotifyLogo(){return '<span class="spotify-mark" aria-label="Spotify"><
 function spotifyProfilePanel(){
  const profile=data.profile||{},connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
  const avatar=profile.avatar?'<img class="spotify-profile-avatar" src="'+profile.avatar+'" alt="Your profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
- const selected=profile.spotifyPlaylists||{};
  const playlistOptions='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
  return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Account connection</small></div><div class="spotify-connected-row">'+(connected?'<span class="spotify-profile-identity">'+avatar+'<span><strong>Spotify connected</strong><small>Your Spotify account is linked to Side Quest.</small></span></span>':'<span><strong>Connect Spotify</strong><small>Connect your account to search songs and choose your playlists.</small></span>')+(connected?'<button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button>':'<button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button>')+'</div>'+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><label for="spotifyDrumsPlaylist">Drums playlist</label><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><small class="spotify-note">Choose which Spotify playlist Side Quest should use for guitar and drum songs.</small></div>':'')+'</section>';
 }
@@ -652,6 +651,7 @@ function render(){
  if(profileSection)content='<button type="button" class="profile-back" data-page="'+(page==="ProgressCategory"?"Progress":"Profile")+'">← Back</button>'+content;
  $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
+ if(page==="Profile"&&spotifyTokens()&&document.querySelector("[data-spotify-profile-playlist]")&&!document.querySelector("[data-spotify-profile-playlist]").dataset.loaded){document.querySelectorAll("[data-spotify-profile-playlist]").forEach(select=>select.dataset.loaded="1");spotifyLoadPlaylists();}
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("submit",e=>{
