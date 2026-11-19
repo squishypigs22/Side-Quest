@@ -407,7 +407,7 @@ function openModal(date){
  }).join("");
  $("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal calendar-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Tap an activity to mark it completed or clear it.</p><div class="calendar-log-list">'+rows+'</div></section></div>';
  if(window.lucide?.createIcons)window.lucide.createIcons();
- if(page==="Profile"&&spotifyTokens()&&document.querySelector("[data-spotify-profile-playlist]")&&!document.querySelector("[data-spotify-profile-playlist]").dataset.loaded){document.querySelectorAll("[data-spotify-profile-playlist]").forEach(select=>select.dataset.loaded="1");spotifyLoadPlaylists();}
+ if(page==="Profile"&&spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();
 }
 function targetsPage(){
  return '<div class="page-head"><div class="eyebrow">MONTHLY GOALS</div><h1>Targets</h1><p>Set how many sessions you want to complete each month.</p></div><div class="target-list">'+A.map(a=>{const target=targetFor(a.id,today.getFullYear(),today.getMonth()),done=sessionCount(a.id,today.getFullYear(),today.getMonth()),pct=Math.min(100,Math.round(done/target*100));return '<section class="target-card" data-category="'+a.category+'"><div class="target-card-top"><span class="activity-icon">'+a.icon+'</span><span><strong>'+a.name+'</strong><small>'+done+' of '+target+' sessions this month</small></span></div><div class="target-edit"><label for="target-'+a.id+'">Monthly target</label><input id="target-'+a.id+'" type="number" min="1" max="100" step="1" value="'+target+'" data-target-input="'+a.id+'"><button data-save-target="'+a.id+'">Save</button></div><div class="target-progress"><span style="width:'+pct+'%"></span></div></section>'}).join("")+'</div>';
@@ -510,16 +510,12 @@ function questsPage(){
 }
 
 function profilePage(){
- const profile=data.profile||{};
- const displayName=(profile.name||"").trim();
  const totalMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).length,0);
  const completedMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).filter(m=>m.done).length,0);
  const trickCount=tricks.length;
  const learntTricks=tricks.filter(t=>["Learnt (flat)","Learnt (rolling)","Learnt","Rolling"].includes(data.tricks[t])).length;
- const avatar=profile.avatar?'<img src="'+profile.avatar+'" alt="Profile picture">':'<i class="sq-icon" data-lucide="user-round"></i>';
  return '<div class="page-head"><h1>Profile</h1></div>'+
  '<div class="profile-layout"><div class="profile-column">'+
- '<section class="profile-identity"><div class="profile-avatar">'+avatar+'</div><div class="profile-identity-copy"><div class="profile-name-line"><strong>'+(displayName?esc(displayName):"Your profile")+'</strong><button type="button" class="profile-name-edit" data-edit-profile-name aria-label="Edit display name" title="Edit display name"><i class="sq-icon" data-lucide="pencil"></i></button></div><small>Profile picture and display name</small></div><label class="profile-picture-button">Change picture<input type="file" accept="image/*" data-profile-picture hidden></label></section>'+
  '</div><div class="profile-column">'+
  (data.profile?.workMode?'':('<section class="profile-section"><div class="section-head"><h2>My progress</h2><small>Personal tracking</small></div><div class="profile-links">'+
  '<button class="profile-link" data-page="Progress"><span class="profile-link-icon"><i class="sq-icon" data-lucide="chart-no-axes-combined"></i></span><span><strong>Progress</strong><small>Daily logs, monthly records and activity history</small></span><span class="profile-chevron">›</span></button><button class="profile-link" data-page="Targets"><span class="profile-link-icon">'+appIcon("target")+'</span><span><strong>Goals</strong><small>Set monthly targets for your four activities</small></span><span class="profile-chevron">›</span></button>'+
@@ -527,7 +523,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
  spotifyProfilePanel()+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.4.9</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.5.0</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -536,22 +532,24 @@ function progressPage(){const cats=[["Skincare","Monthly skincare photos"],["Mus
 function progressCategoryPage(){const name=progressCategory;if(name==="Activity tracking"||name==="Fitness"||name==="Music"||name==="Skate")return '<div class="page-head"><h1>'+escapeHtml(name)+' tracking</h1><p>Activity logs, calendars and monthly targets.</p></div>'+logPage()+calendarPage();if(name==="Tricks")return '<div class="page-head"><h1>Trick progress</h1></div><button class="profile-back" data-page="Progress">← Back to Progress</button>'+tricksPage();if(name==="Milestones")return '<div class="page-head"><h1>Milestones</h1><p>Your quest milestones and achievements.</p></div>'+milestonesPage();const monthly=Object.entries(data.monthlyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0])),daily=Object.entries(data.dailyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0]));let cards="";if(name==="Sleep"){cards=daily.map(([date,r])=>{const x=r.answers||{};return '<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed before 12: '+escapeHtml(x["bed-before-midnight"]||"—")+' · Bedtime: '+escapeHtml(x.bedtime||"—")+' · Wake: '+escapeHtml(x["wake-time"]||"—")+'</p></article>'}).join("");cards+=Object.entries(data.sleepLogs||{}).map(([date,x])=>'<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed '+escapeHtml(x.bed||"—")+' · Wake '+escapeHtml(x.wake||"—")+'</p></article>').join("")}else{const q=monthlyQuestions.find(q=>q.category===name);if(q)cards=monthly.map(([date,r])=>{const media=r.answers?.[q.id]?.media||[];return media.length?'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(date)+'</strong></div><div class="progress-media-grid">'+media.map(m=>m.type?.startsWith("video/")?'<video controls src="'+m.src+'"></video>':'<img src="'+m.src+'" alt="'+name+' progress">').join("")+'</div></article>':""}).join("");const legacy={Skincare:"skincare","Muscle & Strength":"strength","Flexibility & Mobility":"flexibility",Posture:"posture"}[name];if(legacy)cards+=(data.questPhotos?.[legacy]||[]).map(p=>'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(p.date||"Previous record")+'</strong></div><div class="progress-media-grid"><img src="'+p.src+'" alt="'+name+' progress"></div></article>').join("")}if(name==="Muscle & Strength"&&data.strengthLogs?.length)cards+='<article class="progress-record"><h2>Strength records</h2>'+data.strengthLogs.slice().reverse().map(x=>'<p><strong>'+escapeHtml(x.exercise)+'</strong> · '+escapeHtml(x.result)+' · '+escapeHtml(x.date)+'</p>').join("")+'</article>';return '<div class="page-head"><div class="eyebrow">PROGRESS</div><h1>'+escapeHtml(name)+'</h1><p>Your saved records, organised by month.</p></div><div class="progress-record-list">'+(cards||'<p class="muted">No records yet. Your completed check-ins will appear here.</p>')+'</div>'}
 
 
-let spotifyTracks=[],spotifyPlaylists=[],spotifyBusy=false;
+let spotifyTracks=[],spotifyPlaylists=[],spotifyBusy=false,spotifyUserProfile=null,spotifyProfileLoaded=false;
 // Set by the Side Quest maintainer after the Spotify developer app is registered.
 const SPOTIFY_CLIENT_ID="341d366a42f94d35a0c4a1047dea7360";
 const spotifyClientId=()=>SPOTIFY_CLIENT_ID;
 const spotifyTokenKey="sq27_spotify_tokens";
 const spotifyRedirectUri=()=>location.origin+location.pathname;
-const spotifyScopes=["playlist-read-private","playlist-modify-private","playlist-modify-public"].join(" ");
+const spotifyScopes=["playlist-read-private","playlist-modify-private","playlist-modify-public","user-read-private"].join(" ");
 function spotifyTokens(){try{return JSON.parse(sessionStorage.getItem(spotifyTokenKey)||"null")}catch(e){return null}}
 function spotifySaveTokens(value){sessionStorage.setItem(spotifyTokenKey,JSON.stringify(value))}
-function spotifyClearTokens(){sessionStorage.removeItem(spotifyTokenKey);sessionStorage.removeItem("sq27_spotify_verifier");sessionStorage.removeItem("sq27_spotify_state")}
-function spotifyLogo(){return '<span class="spotify-mark" aria-label="Spotify"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.59 14.55a.75.75 0 0 1-1.03.25c-2.82-1.72-6.37-2.1-10.55-1.15a.75.75 0 1 1-.33-1.46c4.57-1.04 8.49-.59 11.66 1.33.35.21.46.68.25 1.03Zm1.47-3.27a.94.94 0 0 1-1.29.31c-3.23-1.99-8.15-2.56-11.97-1.4a.94.94 0 1 1-.55-1.8c4.36-1.32 9.78-.68 13.5 1.6.44.27.58.85.31 1.29Zm.13-3.4c-3.87-2.3-10.27-2.51-13.98-1.39a1.13 1.13 0 1 1-.65-2.16c4.26-1.29 11.34-1.04 15.82 1.62a1.13 1.13 0 0 1-1.19 1.93Z"/></svg></span>'}
+function spotifyClearTokens(){sessionStorage.removeItem(spotifyTokenKey);sessionStorage.removeItem("sq27_spotify_verifier");sessionStorage.removeItem("sq27_spotify_state");spotifyUserProfile=null;spotifyProfileLoaded=false;spotifyPlaylists=[]}
+function spotifyLogo(){return '<span class="spotify-mark" aria-label="Spotify"><svg viewBox="0 0 24 24" role="img" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M5.2 8.8c4.5-1.35 9.95-.95 14.05 1.52M6.1 12.15c3.75-1.08 8.45-.72 11.95 1.35M6.9 15.35c3.05-.82 6.6-.53 9.35 1.08" fill="none" stroke="#1ed760" stroke-width="1.65" stroke-linecap="round"/></svg></span>'}
 function spotifyProfilePanel(){
- const profile=data.profile||{},connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
- const avatar=profile.avatar?'<img class="spotify-profile-avatar" src="'+profile.avatar+'" alt="Your profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
+ const connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
+ const account=spotifyUserProfile;
+ const avatar=account?.images?.[0]?.url?'<img class="spotify-profile-avatar" src="'+esc(account.images[0].url)+'" alt="Spotify profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
+ const display=account?.display_name||account?.id||"Spotify account";
  const playlistOptions='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
- return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Account connection</small></div><div class="spotify-connected-row">'+(connected?'<span class="spotify-profile-identity">'+avatar+'<span><strong>Spotify connected</strong><small>Your Spotify account is linked to Side Quest.</small></span></span>':'<span><strong>Connect Spotify</strong><small>Connect your account to search songs and choose your playlists.</small></span>')+(connected?'<button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button>':'<button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button>')+'</div>'+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><label for="spotifyDrumsPlaylist">Drums playlist</label><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><small class="spotify-note">Choose which Spotify playlist Side Quest should use for guitar and drum songs.</small></div>':'')+'</section>';
+ return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2><small>Account connection</small></div>'+(connected?'<div class="spotify-account-row">'+avatar+'<span class="spotify-account-name"><strong>'+esc(display)+'</strong><small>Connected Spotify account</small></span><button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button></div>':'<div class="spotify-connected-row"><span><strong>Connect Spotify</strong><small>Connect your account to use your playlists in Side Quest.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>')+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><label for="spotifyDrumsPlaylist">Drums playlist</label><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptions:'<option value="">Loading playlists…</option>')+'</select><small class="spotify-note">Choose which Spotify playlist Side Quest should use for guitar and drum songs.</small></div>':'')+'</section>';
 }
 
 function spotifyPanel(){
@@ -605,6 +603,19 @@ async function spotifyApi(path,options={},retry=true){
  const result=response.status===204?{}:await response.json().catch(()=>({}));
  if(!response.ok){if(response.status===429)throw new Error("Spotify is rate-limiting requests. Try again in a little while.");throw new Error(result.error?.message||result.error_description||"Spotify request failed ("+response.status+")")}
  return result;
+}
+async function spotifyLoadAccount(){
+ if(spotifyProfileLoaded||!spotifyTokens())return;
+ spotifyProfileLoaded=true;
+ try{
+  spotifyUserProfile=await spotifyApi("/me");
+  await spotifyLoadPlaylists();
+  if(page==="Profile")render();
+ }catch(e){
+  spotifyProfileLoaded=false;
+  if(String(e.message).includes("403")||String(e.message).toLowerCase().includes("scope"))toast("Reconnect Spotify to allow Side Quest to show your Spotify profile");
+  else toast(e.message);
+ }
 }
 async function spotifyLoadPlaylists(){
  const selects=Array.from(document.querySelectorAll("[data-spotify-profile-playlist]"));
