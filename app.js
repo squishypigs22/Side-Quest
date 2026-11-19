@@ -525,7 +525,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Milestones"><span class="profile-link-icon">'+appIcon("milestones")+'</span><span><strong>Milestones</strong><small>'+completedMilestones+' / '+totalMilestones+' achievements completed</small></span><span class="profile-chevron">›</span></button>'+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.4.3</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.4.4</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -533,7 +533,105 @@ function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["
 function progressPage(){const cats=[["Skincare","Monthly skincare photos"],["Muscle & Strength","Monthly photos and strength records"],["Flexibility & Mobility","Monthly photos and videos"],["Posture","Monthly posture photos"],["Sleep","Daily bedtime and wake-up records"],["Fitness","Workout calendar and targets"],["Music","Drums and guitar practice"],["Skate","Skate sessions and trick progress"],["Tricks","Your skate trick progress"],["Milestones","Quest milestones and achievements"],["Activity tracking","Full activity calendar, logs and monthly targets"]];return '<div class="page-head"><div class="eyebrow">YOUR RECORDS</div><h1>Progress</h1><p>All your tracking, records and history in one place.</p></div><div class="progress-link-list">'+cats.map(([n,d])=>'<button class="profile-link" data-progress-category="'+n+'"><span class="profile-link-icon"><i class="sq-icon" data-lucide="folder-chart"></i></span><span><strong>'+n+'</strong><small>'+d+'</small></span><span class="profile-chevron">›</span></button>').join("")+'</div>'}
 function progressCategoryPage(){const name=progressCategory;if(name==="Activity tracking"||name==="Fitness"||name==="Music"||name==="Skate")return '<div class="page-head"><h1>'+escapeHtml(name)+' tracking</h1><p>Activity logs, calendars and monthly targets.</p></div>'+logPage()+calendarPage();if(name==="Tricks")return '<div class="page-head"><h1>Trick progress</h1></div><button class="profile-back" data-page="Progress">← Back to Progress</button>'+tricksPage();if(name==="Milestones")return '<div class="page-head"><h1>Milestones</h1><p>Your quest milestones and achievements.</p></div>'+milestonesPage();const monthly=Object.entries(data.monthlyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0])),daily=Object.entries(data.dailyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0]));let cards="";if(name==="Sleep"){cards=daily.map(([date,r])=>{const x=r.answers||{};return '<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed before 12: '+escapeHtml(x["bed-before-midnight"]||"—")+' · Bedtime: '+escapeHtml(x.bedtime||"—")+' · Wake: '+escapeHtml(x["wake-time"]||"—")+'</p></article>'}).join("");cards+=Object.entries(data.sleepLogs||{}).map(([date,x])=>'<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed '+escapeHtml(x.bed||"—")+' · Wake '+escapeHtml(x.wake||"—")+'</p></article>').join("")}else{const q=monthlyQuestions.find(q=>q.category===name);if(q)cards=monthly.map(([date,r])=>{const media=r.answers?.[q.id]?.media||[];return media.length?'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(date)+'</strong></div><div class="progress-media-grid">'+media.map(m=>m.type?.startsWith("video/")?'<video controls src="'+m.src+'"></video>':'<img src="'+m.src+'" alt="'+name+' progress">').join("")+'</div></article>':""}).join("");const legacy={Skincare:"skincare","Muscle & Strength":"strength","Flexibility & Mobility":"flexibility",Posture:"posture"}[name];if(legacy)cards+=(data.questPhotos?.[legacy]||[]).map(p=>'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(p.date||"Previous record")+'</strong></div><div class="progress-media-grid"><img src="'+p.src+'" alt="'+name+' progress"></div></article>').join("")}if(name==="Muscle & Strength"&&data.strengthLogs?.length)cards+='<article class="progress-record"><h2>Strength records</h2>'+data.strengthLogs.slice().reverse().map(x=>'<p><strong>'+escapeHtml(x.exercise)+'</strong> · '+escapeHtml(x.result)+' · '+escapeHtml(x.date)+'</p>').join("")+'</article>';return '<div class="page-head"><div class="eyebrow">PROGRESS</div><h1>'+escapeHtml(name)+'</h1><p>Your saved records, organised by month.</p></div><div class="progress-record-list">'+(cards||'<p class="muted">No records yet. Your completed check-ins will appear here.</p>')+'</div>'}
 
-function musicLibraryPage(){data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];const songs=data.musicSongs.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||"")));const count=songs.length;return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div><section class="music-library-panel"><div class="section-head"><h2>Add a song</h2><small>Build your setlist</small></div><form id="musicSongForm" class="music-song-form"><label>Song title<input id="musicSongTitle" name="title" maxlength="100" placeholder="e.g. Everlong" required></label><label>Artist<input id="musicSongArtist" name="artist" maxlength="100" placeholder="e.g. Foo Fighters"></label><label>I can play it on<select id="musicSongInstrument" name="instrument"><option value="Drums">Drums</option><option value="Guitar">Guitar</option><option value="Both">Both</option></select></label><button type="submit" class="music-add-button">Add song</button></form><div class="music-spotify-search"><label for="musicSpotifyQuery">Find songs on Spotify</label><div class="music-search-row"><input id="musicSpotifyQuery" type="search" placeholder="Search songs or artists"><a id="musicSpotifySearch" class="music-spotify-button" href="https://open.spotify.com/search" target="_blank" rel="noopener noreferrer">Search Spotify ↗</a></div><small>Search opens Spotify in a new tab. Add the song to your list above.</small></div></section><section class="music-songs-section"><div class="section-head"><h2>My songs</h2><small>'+count+' total</small></div>'+(songs.length?songs.map(song=>'<article class="music-song-row"><div class="music-song-copy"><strong>'+esc(song.title||"Untitled song")+'</strong><small>'+esc(song.artist||"Artist not added")+'</small></div><span class="music-instrument-tag">'+esc(song.instrument||"Both")+'</span><a class="music-song-spotify" href="https://open.spotify.com/search/'+encodeURIComponent((song.title+" "+(song.artist||"")).trim())+'" target="_blank" rel="noopener noreferrer" aria-label="Find '+esc(song.title)+' on Spotify">Spotify ↗</a><button type="button" class="music-song-delete" data-music-delete="'+esc(song.id)+'" aria-label="Remove '+esc(song.title)+'">×</button></article>').join(""):'<div class="music-empty"><strong>No songs added yet</strong><small>Add songs you can play and mark which instrument you know them on.</small></div>')+'</section>'}
+
+let spotifyTracks=[],spotifyPlaylists=[],spotifyBusy=false;
+const spotifyClientId=()=>localStorage.getItem("sq27_spotify_client_id")||"";
+const spotifyTokenKey="sq27_spotify_tokens";
+const spotifyRedirectUri=()=>location.origin+location.pathname;
+const spotifyScopes=["playlist-read-private","playlist-modify-private","playlist-modify-public"].join(" ");
+function spotifyTokens(){try{return JSON.parse(sessionStorage.getItem(spotifyTokenKey)||"null")}catch(e){return null}}
+function spotifySaveTokens(value){sessionStorage.setItem(spotifyTokenKey,JSON.stringify(value))}
+function spotifyClearTokens(){sessionStorage.removeItem(spotifyTokenKey);sessionStorage.removeItem("sq27_spotify_verifier");sessionStorage.removeItem("sq27_spotify_state")}
+function spotifyPanel(){
+ const clientId=spotifyClientId(),connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
+ let body="";
+ if(!clientId){
+  body='<div class="spotify-setup"><p>Connect your Spotify account to search tracks and add them straight to a playlist.</p><label for="spotifyClientId">Spotify app Client ID</label><input id="spotifyClientId" autocomplete="off" spellcheck="false" placeholder="Paste the Client ID here"><div class="spotify-redirect"><small>Redirect URI to register in the Spotify app:</small><code>'+esc(spotifyRedirectUri())+'</code></div><button type="button" class="spotify-primary" data-spotify-save>Save app ID</button><small class="spotify-note">A parent or guardian needs to create/manage the Spotify developer app and accept its developer terms. New development apps require the app owner to have Spotify Premium.</small></div>';
+ }else if(!connected){
+  body='<div class="spotify-connected-row"><span><strong>App configured</strong><small>Connect your Spotify account to continue.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect Spotify</button></div><div class="spotify-redirect"><small>Registered redirect URI must match exactly:</small><code>'+esc(spotifyRedirectUri())+'</code></div><button type="button" class="spotify-text-button" data-spotify-edit>Change Client ID</button>';
+ }else{
+  body='<div class="spotify-connected-row"><span><strong>Spotify connected</strong><small>Choose a playlist, then search for songs.</small></span><button type="button" class="spotify-text-button" data-spotify-disconnect>Disconnect</button></div><div class="spotify-playlist-tools"><label for="spotifyPlaylistSelect">Add songs to</label><select id="spotifyPlaylistSelect"><option value="">Loading playlists…</option></select><div class="spotify-inline-actions"><button type="button" data-spotify-playlists>Refresh playlists</button><button type="button" data-spotify-create>Create private playlist</button></div></div><div class="spotify-search-tools"><label for="spotifyTrackQuery">Search Spotify</label><div class="spotify-search-line"><input id="spotifyTrackQuery" type="search" placeholder="Song title or artist"><button type="button" class="spotify-primary" data-spotify-search>Search</button></div></div><div id="spotifyResults" class="spotify-results" aria-live="polite"></div><small class="spotify-note">Spotify access is stored only for this browser session. You can disconnect at any time.</small>';
+ }
+ return '<section class="spotify-panel"><div class="section-head"><h2><span class="spotify-mark">●</span> Spotify</h2><small>Playlist tools</small></div>'+body+'</section>';
+}
+function spotifyRandomString(length=64){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";const values=crypto.getRandomValues(new Uint8Array(length));return Array.from(values,x=>chars[x%chars.length]).join("")}
+function spotifyBase64Url(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")}
+async function spotifyStartConnect(){
+ const id=spotifyClientId();if(!id){toast("Save your Spotify app Client ID first");return}
+ if(!crypto?.subtle||!crypto?.getRandomValues){toast("Secure login needs a modern browser connection");return}
+ const verifier=spotifyRandomString(),state=spotifyRandomString(32),digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier)),challenge=spotifyBase64Url(digest);
+ sessionStorage.setItem("sq27_spotify_verifier",verifier);sessionStorage.setItem("sq27_spotify_state",state);
+ const url=new URL("https://accounts.spotify.com/authorize");
+ url.search=new URLSearchParams({client_id:id,response_type:"code",redirect_uri:spotifyRedirectUri(),scope:spotifyScopes,state,code_challenge_method:"S256",code_challenge:challenge}).toString();
+ location.assign(url.toString());
+}
+async function spotifyHandleCallback(){
+ const params=new URLSearchParams(location.search),code=params.get("code"),error=params.get("error");
+ if(!code&&!error)return false;
+ const returnedState=params.get("state"),savedState=sessionStorage.getItem("sq27_spotify_state"),verifier=sessionStorage.getItem("sq27_spotify_verifier");
+ history.replaceState({},document.title,location.pathname+location.hash);
+ if(error){spotifyClearTokens();toast("Spotify connection was cancelled");return true}
+ if(!returnedState||returnedState!==savedState||!verifier){spotifyClearTokens();toast("Spotify sign-in could not be verified. Please try again.");return true}
+ try{
+  const response=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:spotifyClientId(),grant_type:"authorization_code",code,redirect_uri:spotifyRedirectUri(),code_verifier:verifier})});
+  const result=await response.json();if(!response.ok)throw new Error(result.error_description||result.error||"Token exchange failed");
+  spotifySaveTokens({access_token:result.access_token,refresh_token:result.refresh_token,expires_at:Date.now()+Number(result.expires_in||3600)*1000,issued_at:Date.now()});
+  sessionStorage.removeItem("sq27_spotify_verifier");sessionStorage.removeItem("sq27_spotify_state");
+  toast("Spotify connected");return true;
+ }catch(e){spotifyClearTokens();toast("Spotify sign-in failed: "+(e.message||"Try again"));return true}
+}
+async function spotifyRefreshToken(){
+ const current=spotifyTokens(),id=spotifyClientId();if(!current?.refresh_token||!id)throw new Error("Reconnect Spotify to continue");
+ if(current.issued_at&&Date.now()-current.issued_at>180*24*60*60*1000){spotifyClearTokens();throw new Error("Spotify authorisation has expired. Connect again.")}
+ const response=await fetch("https://accounts.spotify.com/api/token",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({client_id:id,grant_type:"refresh_token",refresh_token:current.refresh_token})});
+ const result=await response.json();if(!response.ok){if(result.error==="invalid_grant")spotifyClearTokens();throw new Error(result.error_description||result.error||"Could not refresh Spotify access")}
+ const next={...current,access_token:result.access_token,expires_at:Date.now()+Number(result.expires_in||3600)*1000};if(result.refresh_token)next.refresh_token=result.refresh_token;spotifySaveTokens(next);return next.access_token;
+}
+async function spotifyAccessToken(){
+ let token=spotifyTokens();if(!token?.refresh_token)throw new Error("Connect Spotify first");
+ if(!token.access_token||Date.now()>Number(token.expires_at||0)-60000)return spotifyRefreshToken();
+ return token.access_token;
+}
+async function spotifyApi(path,options={},retry=true){
+ const access=await spotifyAccessToken(),response=await fetch("https://api.spotify.com/v1"+path,{...options,headers:{Authorization:"Bearer "+access,"Content-Type":"application/json",...(options.headers||{})}});
+ if(response.status===401&&retry){await spotifyRefreshToken();return spotifyApi(path,options,false)}
+ const result=response.status===204?{}:await response.json().catch(()=>({}));
+ if(!response.ok){if(response.status===429)throw new Error("Spotify is rate-limiting requests. Try again in a little while.");throw new Error(result.error?.message||result.error_description||"Spotify request failed ("+response.status+")")}
+ return result;
+}
+async function spotifyLoadPlaylists(){
+ const select=$("spotifyPlaylistSelect");if(!select)return;
+ select.innerHTML='<option value="">Loading…</option>';
+ try{
+  const result=await spotifyApi("/me/playlists?limit=50");
+  spotifyPlaylists=result.items||[];
+  select.innerHTML='<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
+  if(!spotifyPlaylists.length)select.innerHTML='<option value="">No playlists found — create one below</option>';
+ }catch(e){select.innerHTML='<option value="">Could not load playlists</option>';toast(e.message)}
+}
+async function spotifySearchTracks(){
+ const input=$("spotifyTrackQuery"),query=input?.value.trim();if(!query){toast("Enter a song or artist to search");return}
+ const results=$("spotifyResults");if(results)results.innerHTML='<p class="spotify-status">Searching Spotify…</p>';
+ try{
+  const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"8"}));
+  spotifyTracks=result.tracks?.items||[];
+  if(!results)return;
+  results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>'<article class="spotify-track"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+' · '+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><button type="button" class="spotify-add-track" data-spotify-add="'+i+'">Add to playlist</button></article>').join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
+ }catch(e){if(results)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
+}
+async function spotifyAddTrack(index){
+ const track=spotifyTracks[index],playlistId=$("spotifyPlaylistSelect")?.value;if(!track?.uri){toast("Choose a track first");return}
+ if(!playlistId){toast("Choose a playlist first");return}
+ try{await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});toast("Added "+track.name+" to your playlist")}
+ catch(e){toast(e.message)}
+}
+async function spotifyCreatePlaylist(){
+ const name=window.prompt("Name your new private playlist","Side Quest Songs");if(!name?.trim())return;
+ try{const playlist=await spotifyApi("/me/playlists",{method:"POST",body:JSON.stringify({name:name.trim().slice(0,100),description:"Songs collected in Side Quest",public:false})});await spotifyLoadPlaylists();const select=$("spotifyPlaylistSelect");if(select)select.value=playlist.id;toast("Private playlist created")}
+ catch(e){toast(e.message)}
+}
+
+function musicLibraryPage(){data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];const songs=data.musicSongs.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||"")));const count=songs.length;return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div><section class="music-library-panel"><div class="section-head"><h2>Add a song</h2><small>Build your setlist</small></div><form id="musicSongForm" class="music-song-form"><label>Song title<input id="musicSongTitle" name="title" maxlength="100" placeholder="e.g. Everlong" required></label><label>Artist<input id="musicSongArtist" name="artist" maxlength="100" placeholder="e.g. Foo Fighters"></label><label>I can play it on<select id="musicSongInstrument" name="instrument"><option value="Drums">Drums</option><option value="Guitar">Guitar</option><option value="Both">Both</option></select></label><button type="submit" class="music-add-button">Add song</button></form>'+spotifyPanel()+'</section><section class="music-songs-section"><div class="section-head"><h2>My songs</h2><small>'+count+' total</small></div>'+(songs.length?songs.map(song=>'<article class="music-song-row"><div class="music-song-copy"><strong>'+esc(song.title||"Untitled song")+'</strong><small>'+esc(song.artist||"Artist not added")+'</small></div><span class="music-instrument-tag">'+esc(song.instrument||"Both")+'</span><a class="music-song-spotify" href="https://open.spotify.com/search/'+encodeURIComponent((song.title+" "+(song.artist||"")).trim())+'" target="_blank" rel="noopener noreferrer" aria-label="Find '+esc(song.title)+' on Spotify">Spotify ↗</a><button type="button" class="music-song-delete" data-music-delete="'+esc(song.id)+'" aria-label="Remove '+esc(song.title)+'">×</button></article>').join(""):'<div class="music-empty"><strong>No songs added yet</strong><small>Add songs you can play and mark which instrument you know them on.</small></div>')+'</section>'}
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
  const labels=data.profile?.workMode?[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Profile",appIcon("profile"),"Profile"]]:[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
@@ -621,7 +719,14 @@ document.addEventListener("click",e=>{
  const profileAction=e.target.closest("[data-profile-action]");if(profileAction){if(profileAction.dataset.profileAction==="connect")$("connectBtn").click();else $("syncBtn").click();return}
  const questTab=e.target.closest("[data-quest-section]");if(questTab){questSection=questTab.dataset.questSection==="Side"?"Side":"Personal";page="Quests";render();window.scrollTo(0,0);return}
  const musicDelete=e.target.closest("[data-music-delete]");if(musicDelete){data.musicSongs=data.musicSongs.filter(song=>String(song.id)!==musicDelete.dataset.musicDelete);save();render();return}
- const spotifySearch=e.target.closest("#musicSpotifySearch");if(spotifySearch){const q=document.getElementById("musicSpotifyQuery")?.value?.trim();if(q)spotifySearch.href="https://open.spotify.com/search/"+encodeURIComponent(q);else spotifySearch.href="https://open.spotify.com/search";}
+ const spotifySave=e.target.closest("[data-spotify-save]");if(spotifySave){const id=$("spotifyClientId")?.value.trim();if(!/^[a-f0-9]{32}$/i.test(id||"")){toast("Enter a valid 32-character Spotify Client ID");return}localStorage.setItem("sq27_spotify_client_id",id);render();toast("Spotify app ID saved");return}
+ const spotifyConnect=e.target.closest("[data-spotify-connect]");if(spotifyConnect){spotifyStartConnect().catch(e=>toast(e.message));return}
+ const spotifyDisconnect=e.target.closest("[data-spotify-disconnect]");if(spotifyDisconnect){spotifyClearTokens();render();toast("Spotify disconnected");return}
+ const spotifyEdit=e.target.closest("[data-spotify-edit]");if(spotifyEdit){localStorage.removeItem("sq27_spotify_client_id");spotifyClearTokens();render();return}
+ const spotifySearch=e.target.closest("[data-spotify-search]");if(spotifySearch){spotifySearchTracks();return}
+ const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
+ const spotifyRefresh=e.target.closest("[data-spotify-playlists]");if(spotifyRefresh){spotifyLoadPlaylists();return}
+ const spotifyCreate=e.target.closest("[data-spotify-create]");if(spotifyCreate){spotifyCreatePlaylist();return}
  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
@@ -705,7 +810,7 @@ async function manualSync(){
 $("syncBtn").addEventListener("click",manualSync);
 loadDS26().then(()=>{const view=$("view");view?.querySelector(".college-load-error")?.remove();if(page==="Overview")render();}).catch(e=>{console.error("DS26 schedule failed to load",e);const view=$("view");if(view&&page==="Overview")view.insertAdjacentHTML("afterbegin",'<div class="college-load-error" role="alert"><strong>College schedule could not load.</strong><span>Check your connection, then refresh the app. Your saved progress has not been changed.</span></div>')});
 
-render();
+spotifyHandleCallback().finally(()=>{render();if(spotifyTokens())spotifyLoadPlaylists()});
 if(syncConfig){syncReady=true;syncPull()}
 window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{});
