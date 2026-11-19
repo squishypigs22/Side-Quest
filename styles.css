@@ -716,3 +716,6 @@ body.work-mode .app{padding-top:24px!important}
 .music-library-cover-empty{display:grid;place-items:center;color:var(--music);font-size:22px}
 .music-song-row{align-items:center}
 @media(max-width:520px){.spotify-track{grid-template-columns:48px minmax(0,1fr);gap:9px}.spotify-track-cover{width:48px;height:48px}.spotify-track-actions{grid-column:1/-1;display:flex;justify-content:flex-end}.spotify-track-actions button{flex:1}.music-library-cover{width:40px;height:40px;flex-basis:40px}.music-song-spotify{display:none}}
+
+.music-playlist-section{margin:18px 0 24px}.music-playlist-tabs{display:flex;gap:7px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;width:max-content;margin-bottom:15px}.music-playlist-tabs button{border:0;border-radius:7px;padding:9px 18px;background:transparent;color:var(--muted);font-size:12px;font-weight:750}.music-playlist-tabs button.active{background:#b69aff20;color:var(--music)}.music-playlist-section .spotify-results{display:grid;gap:8px}.music-playlist-section .spotify-track{grid-template-columns:58px minmax(0,1fr)}
+@media(max-width:520px){.music-playlist-section .spotify-track{grid-template-columns:48px minmax(0,1fr)}}
