@@ -838,7 +838,7 @@ function musicLibraryPage(){
 }
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
- const labels=data.profile?.workMode?[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Covers",appIcon("guitar"),"Covers"],["Profile",appIcon("profile"),"Profile"]]:[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Covers",appIcon("guitar"),"Covers"],["Profile",appIcon("profile"),"Profile"]];
+ const labels=data.profile?.workMode?[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Covers",appIcon("guitar"),"Covers"],["Profile",appIcon("profile"),"Profile"]]:[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Covers",appIcon("guitar"),"Covers"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
  const profileSection=["Targets","Milestones","Tricks","Progress","ProgressCategory"].includes(page);
  const questsSection=page==="Quests"||page==="SideQuests"||page==="Goals";
  $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||target==="Quests"&&questsSection||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
