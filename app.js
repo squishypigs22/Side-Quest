@@ -712,12 +712,13 @@ function spotifyRenderTrackResults(){
  results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>{
   const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
   const already=targets.every(key=>Boolean(spotifyMusicCache[key]?.items?.some(item=>item.id===track.id)));
-  return '<article class="spotify-track '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'"'+(already?' disabled aria-disabled="true"':'')+'>'+(already?'Added':'Add to '+choice)+'</button></div></article>';
+  return '<article class="spotify-track '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(track.name)+'</strong>'+spotifyInstrumentIndicators(track.id)+'</div><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'"'+(already?' disabled aria-disabled="true"':'')+'>'+(already?'Added':'Add to '+choice)+'</button></div></article>';
  }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
 }
 async function spotifyAddTrack(index){
- if(spotifyTrackAlreadyAdded(track?.id,choice)){toast("Already in the selected playlist");return}
  const track=spotifyTracks[index],choice=$("musicSongInstrument")?.value||"Drums";
+ if(!track?.id){toast("Choose a track first");return}
+ if(spotifyTrackAlreadyAdded(track.id,choice)){toast("Already in the selected playlist");spotifyRenderTrackResults();return}
  if(!track?.uri){toast("Choose a track first");return}
  const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
  const destinations=[...new Map(targets.map(key=>[data.profile?.spotifyPlaylists?.[key],key]).filter(([id])=>id).map(([id,key])=>[id,{id,key}])).values()];
@@ -767,6 +768,7 @@ async function spotifyLoadMusicPlaylist(key,force=false){
   list.innerHTML='<p class="spotify-status">Finding songs in both playlists…</p>';
   try{
    const [drums,guitar]=await Promise.all(ids.map(x=>spotifyFetchAllPlaylistItems(x.id)));
+   spotifyMusicCache.drums={id:ids[0].id,items:drums};spotifyMusicCache.guitar={id:ids[1].id,items:guitar};
    const guitarIds=new Set(guitar.map(t=>t.id));
    const items=drums.filter(t=>guitarIds.has(t.id));
    spotifyMusicCache.both={ids:cacheKey,items};renderMusicPlaylistTracks("both");
@@ -775,9 +777,9 @@ async function spotifyLoadMusicPlaylist(key,force=false){
  }
  const id=data.profile?.spotifyPlaylists?.[key];
  if(!id){list.innerHTML='<p class="spotify-status">Choose your '+(key==="drums"?"Drums":"Guitar")+' playlist in Profile to see it here.</p>';return}
- if(!force&&spotifyMusicCache[key]?.id===id){renderMusicPlaylistTracks(key);return}
+ if(!force&&spotifyMusicCache[key]?.id===id){await spotifyEnsureSkillPlaylists();renderMusicPlaylistTracks(key);return}
  list.innerHTML='<p class="spotify-status">Loading playlist…</p>';
- try{const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};renderMusicPlaylistTracks(key)}
+ try{const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};await spotifyEnsureSkillPlaylists();renderMusicPlaylistTracks(key)}
  catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
 function spotifyInstrumentIndicators(trackId){
