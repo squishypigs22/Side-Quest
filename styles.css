@@ -799,3 +799,7 @@ body.work-mode .topbar{justify-content:flex-start!important}
 body.work-mode .topbar .top-actions{display:flex!important;width:100%!important;flex:1 1 100%!important;justify-content:space-between!important;margin:0!important;order:0!important}
 body.work-mode .topbar #connectBtn{margin-right:auto!important}
 body.work-mode .topbar #syncBtn{margin-left:auto!important}
+
+
+/* v0.8.18 - hide the topbar divider in Main mode */
+body.work-mode .topbar{border-bottom:0!important}
