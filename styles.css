@@ -615,3 +615,12 @@ img,video,svg{max-width:100%}
  .assignment-task .college-task-copy>small{font-size:12px}
  .college-section-intro p{font-size:12px}
 }
+
+
+/* v0.4.2 — focused Work mode header and centred navigation */
+body.work-mode .topbar{display:none!important}
+body.work-mode .app{padding-top:0!important}
+body.work-mode .version-tag{display:none!important}
+body.work-mode .bottom-nav{left:50%!important;right:auto!important;bottom:0!important;transform:translateX(-50%)!important;width:min(420px,calc(100% - 28px))!important;max-width:420px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;justify-content:center!important;gap:6px!important;padding:7px 8px calc(7px + env(safe-area-inset-bottom))!important;border:1px solid #353d49!important;border-bottom:0!important;border-radius:14px 14px 0 0!important;box-sizing:border-box!important}
+body.work-mode .bottom-nav button{width:100%!important;min-width:0!important;justify-content:center!important;text-align:center!important;font-size:11px!important}
+@media(max-width:520px){body.work-mode .bottom-nav{width:min(360px,calc(100% - 28px))!important;gap:5px!important}}
