@@ -759,3 +759,5 @@ body.work-mode .app{padding-top:24px!important}
 body.keyboard-open .bottom-nav{display:none!important}
 body.keyboard-open .version-tag{display:none!important}
 body.keyboard-open .app{padding-bottom:24px!important}
+
+.spotify-track-title-row{display:flex;align-items:center;gap:8px;min-width:0}.spotify-track-title-row>strong{min-width:0}.spotify-skill-icons{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;color:var(--accent)}.spotify-skill-icons .sq-icon{width:15px;height:15px}.spotify-track-actions button:disabled,.spotify-add-track:disabled{opacity:.48;cursor:default;filter:grayscale(1)}
