@@ -62,6 +62,7 @@ function normalizeAppData(source){
 }
 function mergeProgress(cloud,local){
  const merged={...(cloud||{}),...(local||{})};
+ merged.collegeAssignmentStatus={...(cloud?.collegeAssignmentStatus||{}),...(local?.collegeAssignmentStatus||{})};
  merged.activityDays={...(cloud?.activityDays||{})};for(const [id,days] of Object.entries(local?.activityDays||{}))merged.activityDays[id]={...(merged.activityDays[id]||{}),...days};
  merged.tricks={...(cloud?.tricks||{}),...(local?.tricks||{})};const rank={"Not learnt":0,"Learning":1,"Learnt":2,"Learnt (flat)":2,"Rolling":3,"Learnt (rolling)":3};
  for(const [trick,value] of Object.entries(merged.tricks)){const a=cloud?.tricks?.[trick],b=local?.tricks?.[trick];if(a&&b)merged.tricks[trick]=(rank[b]??0)>=(rank[a]??0)?b:a}
