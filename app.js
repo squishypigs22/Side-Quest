@@ -731,7 +731,7 @@ async function spotifyRemoveTrack(trackId){
  if(button){button.disabled=true;button.textContent="Removing…"}
  try{
   const uri="spotify:track:"+trackId;
-  for(const playlistId of destinations)await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"DELETE",body:JSON.stringify({tracks:[{uri}]})});
+  for(const playlistId of destinations)await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"DELETE",body:JSON.stringify({items:[{uri}]})});
   spotifyMusicCache={};await spotifyLoadMusicPlaylist(musicActiveTab,true);toast("Song removed from Spotify playlist"+(destinations.length>1?"s":""));
  }catch(e){if(button){button.disabled=false;button.textContent="Remove"}toast("Couldn't remove song: "+e.message)}
 }
