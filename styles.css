@@ -827,3 +827,10 @@ body[data-theme="paper"] .brand-mark{border-color:var(--line)}
 .bottom-nav{grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-flow:row;}
 .bottom-nav button{width:100%;min-width:0;font-size:10px;padding:6px 2px;}
 @media(max-width:360px){.bottom-nav{gap:2px;padding-left:5px;padding-right:5px}.bottom-nav button{font-size:9px}.bottom-nav button span svg,.bottom-nav button span .sq-icon{width:18px;height:18px}}
+
+
+/* v0.8.24 - keep the four primary tabs evenly spaced */
+.bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;grid-template-rows:none!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;grid-auto-rows:auto!important;left:0!important;right:0!important;width:100%!important;max-width:none!important;transform:none!important;box-sizing:border-box!important;}
+.bottom-nav button{display:flex!important;min-width:0!important;width:100%!important;max-width:none!important;min-height:52px!important;justify-content:center!important;align-items:center!important;overflow:visible!important;white-space:normal!important;font-size:10px!important;padding:6px 2px!important;}
+.bottom-nav button span{display:grid!important;place-items:center!important;width:22px!important;height:22px!important;margin:0 auto 3px!important;flex:0 0 auto!important;}
+@media(max-width:360px){.bottom-nav{gap:2px!important;padding-left:5px!important;padding-right:5px!important}.bottom-nav button{font-size:9px!important}}
