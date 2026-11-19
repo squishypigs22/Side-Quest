@@ -535,7 +535,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
  '</div><div class="profile-column profile-column-spotify">'+spotifyProfilePanel()+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.6.0</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.6.1</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -567,7 +567,7 @@ function spotifyProfilePanel(){
 
 function spotifyPanel(){
  const connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
- const body=connected?'<div class="music-search-tools"><label for="musicSongInstrument">I can play it on</label><select id="musicSongInstrument"><option value="Drums">Drums</option><option value="Guitar">Guitar</option><option value="Both">Both</option></select><label for="spotifyTargetInstrument">Spotify playlist</label><select id="spotifyTargetInstrument"><option value="guitar">Guitar playlist</option><option value="drums">Drums playlist</option></select><label for="spotifyTrackQuery">Find a song</label><input id="spotifyTrackQuery" type="search" autocomplete="off" placeholder="Start typing a song or artist…"><div id="spotifyResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Start typing to find songs on Spotify.</p></div><small class="spotify-note">Add a song to your Side Quest list, or send it straight to your saved Spotify playlist.</small></div>':'<div class="spotify-setup"><p>Connect Spotify to search songs, see their album artwork and add them to your music list.</p><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>';
+ const body=connected?'<div class="music-search-tools"><label for="musicSongInstrument">I can play it on</label><select id="musicSongInstrument"><option value="Drums">Drums</option><option value="Guitar">Guitar</option><option value="Both">Both</option></select><label for="spotifyTrackQuery">Find a song</label><input id="spotifyTrackQuery" type="search" autocomplete="off" placeholder="Start typing a song or artist…"><div id="spotifyResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Start typing to find songs on Spotify.</p></div><small class="spotify-note">Add a song to your Side Quest list, or send it straight to your saved Spotify playlist.</small></div>':'<div class="spotify-setup"><p>Connect Spotify to search songs, see their album artwork and add them to your music list.</p><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>';
  return '<section class="spotify-panel music-library-panel"><div class="section-head"><h2>'+spotifyLogo()+' Add a song</h2><small>Spotify search</small></div>'+body+'</section>';
 }
 function spotifyRandomString(length=64){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";const values=crypto.getRandomValues(new Uint8Array(length));return Array.from(values,x=>chars[x%chars.length]).join("")}
@@ -684,12 +684,17 @@ function musicAddSpotifyResult(index){
  save();render();toast("Added to your song list");
 }
 async function spotifyAddTrack(index){
- const track=spotifyTracks[index],instrument=$("spotifyTargetInstrument")?.value||"guitar",playlistId=data.profile?.spotifyPlaylists?.[instrument];
- if(!track?.uri){toast("Choose a track first");return}
- if(!playlistId){toast("Choose a "+(instrument==="drums"?"Drums":"Guitar")+" playlist in Profile first");return}
- const playlist=spotifyPlaylists.find(p=>p.id===playlistId);
- try{await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});toast("Added "+track.name+" to "+(playlist?.name||"your playlist"))}
- catch(e){toast(e.message)}
+  const track=spotifyTracks[index],choice=$("musicSongInstrument")?.value||"Drums";
+  if(!track?.uri){toast("Choose a track first");return}
+  const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
+  const destinations=[...new Map(targets.map(key=>[data.profile?.spotifyPlaylists?.[key],key]).filter(([id])=>id).map(([id,key])=>[id,{id,key}])).values()];
+  const missing=targets.filter(key=>!data.profile?.spotifyPlaylists?.[key]);
+  if(!destinations.length){toast("Set up your "+(missing.length===2?"Guitar and Drums":missing[0]==="drums"?"Drums":"Guitar")+" playlist in Profile first");return}
+  try{
+   for(const destination of destinations)await spotifyApi("/playlists/"+encodeURIComponent(destination.id)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});
+   const names=destinations.map(x=>x.key==="drums"?"Drums":"Guitar");
+   toast("Added "+track.name+" to "+names.join(" and ")+(missing.length?" (one playlist not set up)":""));
+  }catch(e){toast(e.message)}
 }
 async function spotifyCreatePlaylist(){
  const name=window.prompt("Name your new private playlist","Side Quest Songs");if(!name?.trim())return;
