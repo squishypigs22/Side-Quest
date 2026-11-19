@@ -420,6 +420,7 @@ function openModal(date){
  }).join("");
  $("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal calendar-modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" data-close-modal aria-label="Close">×</button><h2 id="modalTitle">'+new Date(date+"T12:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"})+'</h2><p>Tap an activity to mark it completed or clear it.</p><div class="calendar-log-list">'+rows+'</div></section></div>';
  if(window.lucide?.createIcons)window.lucide.createIcons();
+ if(page==="MusicLibrary"&&spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab);
 
 }
 function targetsPage(){
@@ -671,7 +672,7 @@ async function spotifySearchTracks(queryOverride){
   spotifyTracks=result.tracks?.items||[];
   results.innerHTML=spotifyTracks.length?spotifyTracks.map((track,i)=>{
    const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
-   return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="music-add-button" data-music-add-track="'+i+'">Add song</button><button type="button" class="spotify-add-track" data-spotify-add="'+i+'">Add &amp; sync</button></div></article>';
+   return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="'+esc(track.album?.name||"Album artwork")+'" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small><a href="'+esc(track.external_urls?.spotify||"https://open.spotify.com")+'" target="_blank" rel="noopener noreferrer">Open in Spotify ↗</a></div><div class="spotify-track-actions"><button type="button" class="spotify-add-track" data-spotify-add="'+i+'">Add &amp; sync</button></div></article>';
   }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
  }catch(e){if(sequence===spotifySearchSequence)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
