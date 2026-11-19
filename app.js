@@ -1018,9 +1018,10 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updat
  // Keep the fixed navigation out of the way while the mobile keyboard is open.
  const keyboardInputs='input, textarea, select, [contenteditable="true"]';
  let keyboardFieldFocused=false;
+ const initialVisualHeight=window.visualViewport?.height||window.innerHeight;
  function updateKeyboardLayout(){
   const viewport=window.visualViewport;
-  const resized=Boolean(viewport&&window.innerHeight-viewport.height>140);
+  const resized=Boolean(viewport&&initialVisualHeight-viewport.height>140);
   const focused=keyboardFieldFocused&&document.activeElement?.matches?.(keyboardInputs);
   document.body.classList.toggle("keyboard-open",Boolean(resized||focused&&resized));
  }
