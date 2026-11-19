@@ -589,3 +589,29 @@ img,video,svg{max-width:100%}
 .assignment-task.assignment-unassigned{background:transparent!important;border:1px solid #d6a92f!important;box-shadow:none}.assignment-task.assignment-assigned{background:transparent!important;border:1px solid #d65b64!important;box-shadow:none}
 
 .assignment-task .college-task-copy>strong{color:#75aaff}
+
+
+/* v0.4.0 — College typography and full-width layout polish */
+.college-shell{width:100%;max-width:none;min-width:0;margin:0 auto}
+#view{width:100%;min-width:0}
+.college-section-intro,.college-list-v2,.college-calendar-grid,.college-calendar-toolbar,.college-selected-day{width:100%;min-width:0;box-sizing:border-box}
+.college-section-intro h2{font-size:clamp(21px,2.2vw,27px);line-height:1.2;letter-spacing:-.25px}
+.college-section-intro p{font-size:clamp(12px,1.1vw,14px);line-height:1.5;overflow-wrap:break-word}
+.assignment-task{display:flex;flex-wrap:wrap;box-sizing:border-box;width:100%;min-width:0;padding:14px}
+.assignment-task .college-task-copy{display:flex;flex:1 1 100%;flex-direction:column;gap:6px;min-width:0;width:100%}
+.assignment-task .college-task-copy>strong,
+.college-task.not-handed-in.assignment-task .college-task-copy>strong,
+.college-task.handed-in.assignment-task .college-task-copy>strong,
+.assignment-task.completed-assignment .college-task-copy>strong{display:block;width:100%;color:#75aaff!important;font-size:clamp(14px,1.35vw,17px);line-height:1.35;font-weight:850;overflow-wrap:break-word;word-break:normal;text-decoration:none}
+.assignment-task .college-task-copy>small{display:block;max-width:100%;font-size:clamp(11px,1vw,12px);line-height:1.5;overflow-wrap:break-word;word-break:normal}
+.assignment-task .assignment-set-tag{align-self:flex-start;margin-top:5px}
+.assignment-task .assignment-actions{flex:1 1 100%;width:100%;min-width:0}
+.assignment-task .college-done{display:block;width:100%;box-sizing:border-box}
+.college-calendar-event,.college-day-event,.college-day-event strong,.college-day-event small{overflow-wrap:break-word;word-break:normal}
+@media(max-width:650px){
+ .college-shell{width:100%}
+ .assignment-task{padding:12px;gap:10px}
+ .assignment-task .college-task-copy>strong{font-size:15px}
+ .assignment-task .college-task-copy>small{font-size:12px}
+ .college-section-intro p{font-size:12px}
+}
