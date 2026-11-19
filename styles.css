@@ -777,3 +777,7 @@ body.work-mode .topbar{height:34px!important;min-height:34px!important;margin:0 
 body.work-mode .top-actions{gap:5px!important}
 body.work-mode .top-action-btn{height:27px!important;min-height:27px!important;padding:0 8px!important;gap:5px!important;border-radius:7px!important;font-size:10px!important;line-height:1!important}
 body.work-mode .top-action-btn svg,body.work-mode .top-action-btn .sq-icon{width:13px!important;height:13px!important}
+
+
+/* v0.8.8 — gallery video upload and in-app playback */
+.posted-video-upload{display:block;position:relative}.posted-video-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}.posted-video-upload span{display:block;padding:8px;border:1px dashed var(--line);border-radius:7px;text-align:center;color:var(--text);cursor:pointer;font-size:10px}.posted-video-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:9px}.local-cover-video-frame{min-height:0;max-height:75vh;overflow:hidden;display:block}.local-cover-video-frame video{display:block;width:100%;max-height:75vh;aspect-ratio:9/16;object-fit:contain;background:#050607;border-radius:10px}
