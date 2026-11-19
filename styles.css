@@ -726,3 +726,7 @@ body.work-mode .app{padding-top:24px!important}
 
 /* v0.6.6 — reliable desktop playlist layout and readable track actions */
 .music-playlist-section .spotify-track{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;overflow:hidden}.music-playlist-section .spotify-track-cover{width:48px;height:48px;flex:0 0 48px;object-fit:cover}.music-playlist-section .spotify-track-info{min-width:0;overflow:hidden}.music-playlist-section .spotify-track-info strong,.music-playlist-section .spotify-track-info small{display:block;min-width:0;overflow-wrap:anywhere;word-break:normal}.music-playlist-section .spotify-remove-track{justify-self:end;white-space:nowrap;align-self:center;margin-left:4px}@media(max-width:520px){.music-playlist-section .spotify-track{grid-template-columns:42px minmax(0,1fr) auto;gap:8px}.music-playlist-section .spotify-track-cover{width:42px;height:42px;flex-basis:42px}.music-playlist-section .spotify-remove-track{padding:7px 8px}}
+
+/* v0.6.8 — playlist sorting control */
+.playlist-sort-row{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin:-4px 0 12px}.playlist-sort-row label{font-size:11px;color:var(--muted)}.playlist-sort-row select{max-width:190px;min-width:145px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font-size:11px}
+@media(max-width:520px){.playlist-sort-row{justify-content:space-between}.playlist-sort-row select{flex:0 1 190px}}
