@@ -664,3 +664,12 @@ body.work-mode .app{padding-top:24px!important}
 
 /* v0.4.5 — Spotify controls live in Profile */
 .profile-column>.spotify-panel{margin-top:0;margin-bottom:16px}
+
+/* v0.4.8 Spotify branding and connected profile identity */
+.spotify-mark{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-right:6px;border-radius:50%;background:#1ed760;vertical-align:middle}
+.spotify-mark svg{display:block;width:22px;height:22px;fill:#101510}
+.spotify-profile-identity{display:flex!important;align-items:center;gap:11px;min-width:0}
+.spotify-profile-identity>span:last-child{display:grid;gap:3px;min-width:0}
+.spotify-profile-avatar{display:block;width:42px;height:42px;flex:0 0 42px;object-fit:cover;border-radius:50%;border:1px solid #3b4552;background:#252c35}
+.spotify-profile-avatar-fallback{display:flex;align-items:center;justify-content:center;color:#aab3c0}
+.spotify-profile-avatar-fallback .sq-icon{width:20px;height:20px}
