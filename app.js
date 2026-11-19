@@ -536,7 +536,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
  '</div><div class="profile-column profile-column-spotify">'+spotifyProfilePanel()+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.6.2</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.7.7</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -1014,4 +1014,21 @@ spotifySetupNativeCallback().finally(()=>spotifyHandleCallback()).finally(()=>{r
 if(syncConfig){syncReady=true;syncPull()}
 window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{});
+
+ // Keep the fixed navigation out of the way while the mobile keyboard is open.
+ const keyboardInputs='input, textarea, select, [contenteditable="true"]';
+ let keyboardFieldFocused=false;
+ function updateKeyboardLayout(){
+  const viewport=window.visualViewport;
+  const resized=Boolean(viewport&&window.innerHeight-viewport.height>140);
+  const focused=keyboardFieldFocused&&document.activeElement?.matches?.(keyboardInputs);
+  document.body.classList.toggle("keyboard-open",Boolean(resized||focused&&resized));
+ }
+ document.addEventListener("focusin",e=>{if(e.target.matches?.(keyboardInputs)){keyboardFieldFocused=true;updateKeyboardLayout()}});
+ document.addEventListener("focusout",e=>{if(e.target.matches?.(keyboardInputs)){keyboardFieldFocused=false;setTimeout(updateKeyboardLayout,180)}});
+ window.visualViewport?.addEventListener("resize",updateKeyboardLayout);
+ window.visualViewport?.addEventListener("scroll",updateKeyboardLayout);
+ window.addEventListener("resize",updateKeyboardLayout);
+ updateKeyboardLayout();
+
 })();
