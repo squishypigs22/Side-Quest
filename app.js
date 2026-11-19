@@ -683,7 +683,7 @@ async function spotifySearchCovers(query){
   if(sequence!==spotifyCoverSearchSequence||$("spotifyCoverQuery")?.value.trim()!==query)return;
   results.innerHTML=spotifyCoverTracks.length?spotifyCoverTracks.map((track,i)=>{
    const cover=track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"";
-   return '<article class="spotify-track cover-search-result '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(track.name)+'</strong><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small></div><button type="button" class="spotify-add-track" data-cover-pick="'+i+'">Choose</button></article>';
+   return '<article class="spotify-track cover-search-result '+spotifySkillClass(track.id)+'"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(track.name)+'</strong>'+spotifyInstrumentIndicators(track.id)+'</div><small>'+esc((track.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(track.album?.name||"")+'</small></div><button type="button" class="spotify-add-track" data-cover-pick="'+i+'">Choose</button></article>';
   }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
  }catch(e){if(sequence===spotifyCoverSearchSequence)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
@@ -731,7 +731,7 @@ async function spotifyAddTrack(index){
   else data.musicSongs.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),spotifyId:track.id,title:track.name,artist:(track.artists||[]).map(a=>a.name).join(", "),album:track.album?.name||"",cover:track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"",spotifyUrl:track.external_urls?.spotify||"",instrument:choice,createdAt:new Date().toISOString()});
   save();spotifyMusicCache={};
   const search=$("spotifyTrackQuery");if(search)search.value="";spotifyTracks=[];spotifySearchSequence++;const searchResults=$("spotifyResults");if(searchResults)searchResults.innerHTML='<p class="spotify-status">Search songs or artists…</p>';
-  const btn=$("spotifyResults")?.querySelector('[data-spotify-add="'+index+'"]');if(btn){btn.textContent="Added & synced";btn.disabled=true}
+  const btn=$("spotifyResults")?.querySelector('[data-spotify-add="'+index+'"]');if(btn){btn.textContent="Added";btn.disabled=true;btn.setAttribute("aria-disabled","true")}
   toast("Added and synced to "+destinations.map(d=>d.key==="drums"?"Drums":"Guitar").join(" and "));
   spotifyLoadMusicPlaylist(musicActiveTab,true);
  }catch(e){toast(e.message)}
@@ -780,14 +780,19 @@ async function spotifyLoadMusicPlaylist(key,force=false){
  try{const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};renderMusicPlaylistTracks(key)}
  catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
-function renderMusicPlaylistTracks(key){
+function spotifyInstrumentIndicators(trackId){
+  const drums=Boolean(spotifyMusicCache.drums?.items?.some(t=>t.id===trackId));
+  const guitar=Boolean(spotifyMusicCache.guitar?.items?.some(t=>t.id===trackId));
+  return '<span class="spotify-skill-icons" aria-label="'+(drums&&guitar?'Can play on drums and guitar':drums?'Can play on drums':guitar?'Can play on guitar':'No instrument selected')+'">'+(drums?'<i class="sq-icon" data-lucide="drum" title="Drums" aria-label="Drums"></i>':'')+(guitar?'<i class="sq-icon" data-lucide="guitar" title="Guitar" aria-label="Guitar"></i>':'')+'</span>';
+ }
+ function renderMusicPlaylistTracks(key){
  const list=$("musicPlaylistTracks");if(!list)return;
  const items=[...(spotifyMusicCache[key]?.items||[])];
  if(musicPlaylistSort==="title")items.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),undefined,{sensitivity:"base"}));
  else if(musicPlaylistSort==="artist")items.sort((a,b)=>String(a.artists?.[0]?.name||"").localeCompare(String(b.artists?.[0]?.name||""),undefined,{sensitivity:"base"})||String(a.name||"").localeCompare(String(b.name||"")));
  else if(musicPlaylistSort==="newest")items.sort((a,b)=>String(b._addedAt||"").localeCompare(String(a._addedAt||"")));
  else if(musicPlaylistSort==="oldest")items.sort((a,b)=>String(a._addedAt||"").localeCompare(String(b._addedAt||"")));
- list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(t.name)+'</strong><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+ list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
 }
 async function spotifyRemoveTrack(trackId){
  const button=document.querySelector('[data-spotify-remove="'+CSS.escape(trackId)+'"]');
