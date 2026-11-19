@@ -752,3 +752,5 @@ body.work-mode .app{padding-top:24px!important}
 /* v0.7.4 — Spotify playlist selection autosaves */
 
 .spotify-playlist-label{display:flex;align-items:center;gap:8px}.spotify-playlist-label .sq-icon{width:18px;height:18px;flex:0 0 18px}
+
+.spotify-playlist-select-row{display:flex;align-items:center;gap:9px}.spotify-playlist-select-row>.sq-icon{width:20px;height:20px;flex:0 0 20px;opacity:.9}.spotify-playlist-select-row select{flex:1;min-width:0}.spotify-add-track:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(1)}
