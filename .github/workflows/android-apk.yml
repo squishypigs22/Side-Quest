@@ -50,6 +50,25 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
+      - name: Configure Spotify Android callback
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('android/app/src/main/AndroidManifest.xml')
+          manifest = path.read_text()
+          pattern = r'(<activity\\b(?=[^>]*android:name="[^"]*MainActivity")[^>]*>)([\\s\\S]*?)(</activity>)'
+          match = re.search(pattern, manifest)
+          if not match:
+              raise SystemExit('Could not find Capacitor MainActivity in AndroidManifest.xml')
+          opening, body, closing = match.groups()
+          if 'android:launchMode=' not in opening:
+              opening = opening[:-1] + ' android:launchMode="singleTask">'
+          if 'android:host="spotify-callback"' not in body:
+              body += '''\n            <intent-filter>\n                <action android:name="android.intent.action.VIEW" />\n                <category android:name="android.intent.category.DEFAULT" />\n                <category android:name="android.intent.category.BROWSABLE" />\n                <data android:scheme="com.sidequest.tracker" android:host="spotify-callback" />\n            </intent-filter>\n          '''
+          path.write_text(manifest[:match.start()] + opening + body + closing + manifest[match.end():])
+          PY
+
       - name: Apply Side Quest launcher icon
         run: |
           python3 -m pip install --quiet Pillow
