@@ -54,7 +54,7 @@ function persistSpotifyPlaylistPrefs(){
  catch(e){toast("Could not save playlist choices on this device");return false}
 }
 restoreSpotifyPlaylistPrefs();
-data.personalTasks=Array.isArray(data.personalTasks)?data.personalTasks:[];data.personalEvents=Array.isArray(data.personalEvents)?data.personalEvents:[];data.personalProjects=Array.isArray(data.personalProjects)?data.personalProjects:[];data.quickNotes=Array.isArray(data.quickNotes)?data.quickNotes:[];data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];
+data.personalTasks=Array.isArray(data.personalTasks)?data.personalTasks:[];data.personalEvents=Array.isArray(data.personalEvents)?data.personalEvents:[];data.personalProjects=Array.isArray(data.personalProjects)?data.personalProjects:[];data.quickNotes=Array.isArray(data.quickNotes)?data.quickNotes:[];data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];data.coverProjects=Array.isArray(data.coverProjects)?data.coverProjects:[];
 let page="Overview",categoryId="",activityId="skate",viewYear=today.getFullYear(),showAllMonths=false,trickFilter="All",trickSearch="",questSection="Personal",progressCategory="Overview",checkinType="daily",checkinIndex=0;
 const SYNC_URL="https://hdgpiwpvxlssyjzvtisx.supabase.co/functions/v1/sidequest-sync";
 const SYNC_KEY="sb_publishable_RTTFMLdOZNKjhkk9Z0-A6w_N40eJOz9";
@@ -70,7 +70,7 @@ function normalizeAppData(source){
  if(!source||typeof source!=="object"||Array.isArray(source))throw new Error("Invalid sync data");
  const d={...source};
  ["activityDays","tricks","targets","mainQuestProgress","questLogs","questPhotos","sleepLogs","profile","dailyCheckins","monthlyCheckins"].forEach(k=>{if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={}});
- ["sideQuests","strengthLogs","questEvidence","personalTasks","personalEvents","personalProjects","quickNotes","musicSongs"].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
+ ["sideQuests","strengthLogs","questEvidence","personalTasks","personalEvents","personalProjects","quickNotes","musicSongs","coverProjects"].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[]});
  d.startedMonth=typeof d.startedMonth==="string"?d.startedMonth:monthKey(today.getFullYear(),today.getMonth());return d;
 }
 function mergeProgress(cloud,local){
@@ -661,6 +661,15 @@ async function spotifyLoadPlaylists(){
  }catch(e){selects.forEach(select=>select.innerHTML='<option value="">Could not load playlists</option>');toast(e.message)}
 }
 let spotifySearchSequence=0,spotifySearchTimer=null,musicActiveTab='drums',musicPlaylistSort='spotify',spotifyMusicCache={};
+const coverStages=['Idea','Learning','Practising','Recording','Editing','Ready to post','Posted'];
+function coversPage(){
+ const projects=data.coverProjects||[],active=projects.filter(x=>x.status!=='Posted').length,posted=projects.filter(x=>x.status==='Posted').length;
+ const cards=projects.length?projects.map(x=>{
+  const checks=[['drums','Drum part learnt'],['guitar','Guitar part learnt'],['recorded','Recording finished'],['edited','Video edited'],['posted','Posted to Instagram']],done=checks.filter(([k])=>x.checklist?.[k]).length;
+  return '<article class="cover-card"><div class="cover-card-head"><div class="cover-song"><strong>'+esc(x.title)+'</strong><small>'+esc(x.artist||'Artist not set')+'</small></div><button type="button" class="cover-delete" data-cover-delete="'+esc(x.id)+'">Remove</button></div><div class="cover-meta-row"><label>Status<select data-cover-status="'+esc(x.id)+'">'+coverStages.map(stage=>'<option value="'+stage+'" '+(x.status===stage?'selected':'')+'>'+stage+'</option>').join('')+'</select></label><span class="cover-progress">'+done+'/5 steps</span></div><div class="cover-checklist">'+checks.map(([k,label])=>'<label><input type="checkbox" data-cover-check="'+esc(x.id)+'" data-cover-step="'+k+'" '+(x.checklist?.[k]?'checked':'')+'><span>'+label+'</span></label>').join('')+'</div><div class="cover-card-foot"><span>'+(x.targetDate?'Target: '+esc(x.targetDate):'No target date')+'</span></div></article>';
+ }).join(''):'<div class="cover-empty"><strong>No covers planned yet</strong><p>Add a song you want to cover and track it from learning through to posting.</p></div>';
+ return '<section class="covers-view"><div class="cover-stats"><div><strong>'+projects.length+'</strong><small>Total covers</small></div><div><strong>'+active+'</strong><small>In progress</small></div><div><strong>'+posted+'</strong><small>Posted</small></div></div><form class="cover-form" data-cover-form><div class="section-head"><h2>Plan a cover</h2><small>Build your Instagram cover list</small></div><div class="cover-form-grid"><label>Song title<input name="title" required maxlength="100" placeholder="Song name"></label><label>Artist<input name="artist" maxlength="100" placeholder="Artist"></label><label>Instruments<select name="instruments"><option>Drums &amp; Guitar</option><option>Drums</option><option>Guitar</option></select></label><label>Target post date<input name="targetDate" type="date"></label></div><button class="spotify-primary" type="submit">Add cover</button></form><div class="section-head cover-list-heading"><h2>Your covers</h2><small>'+projects.length+' saved</small></div><div class="cover-list">'+cards+'</div></section>';
+}
 async function spotifySearchTracks(queryOverride){
  const input=$("spotifyTrackQuery"),query=String(queryOverride??input?.value??"").trim(),results=$("spotifyResults"),sequence=++spotifySearchSequence;
  if(!results)return;
@@ -759,8 +768,10 @@ async function spotifyCreatePlaylist(){
 }
 
 function musicLibraryPage(){
- const active=["guitar","both"].includes(musicActiveTab)?musicActiveTab:"drums",label=active==="both"?"Both":active==="guitar"?"Guitar":"Drums";
- return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section"><div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button><button type="button" data-music-tab="both" class="'+(active==="both"?"active":"")+'">Both</button></div><div class="section-head"><h2>'+label+(active==="both"?" playlists":" playlist")+'</h2><small>Spotify synced</small></div><div class="playlist-sort-row"><label for="musicPlaylistSort">Order by</label><select id="musicPlaylistSort" aria-label="Order playlist by"><option value="spotify" '+(musicPlaylistSort==="spotify"?"selected":"")+' >Spotify order</option><option value="title" '+(musicPlaylistSort==="title"?"selected":"")+' >Song title A–Z</option><option value="artist" '+(musicPlaylistSort==="artist"?"selected":"")+' >Artist A–Z</option><option value="newest" '+(musicPlaylistSort==="newest"?"selected":"")+' >Recently added</option><option value="oldest" '+(musicPlaylistSort==="oldest"?"selected":"")+' >Oldest added</option></select></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
+ const active=["guitar","both","covers"].includes(musicActiveTab)?musicActiveTab:"drums",label=active==="both"?"Both":active==="guitar"?"Guitar":"Drums";
+ const tabs='<div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button><button type="button" data-music-tab="both" class="'+(active==="both"?"active":"")+'">Both</button><button type="button" data-music-tab="covers" class="'+(active==="covers"?"active":"")+'">Covers</button></div>';
+ if(active==="covers")return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+tabs+coversPage();
+ return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section">'+tabs+'<div class="section-head"><h2>'+label+(active==="both"?" playlists":" playlist")+'</h2><small>Spotify synced</small></div><div class="playlist-sort-row"><label for="musicPlaylistSort">Order by</label><select id="musicPlaylistSort" aria-label="Order playlist by"><option value="spotify" '+(musicPlaylistSort==="spotify"?"selected":"")+' >Spotify order</option><option value="title" '+(musicPlaylistSort==="title"?"selected":"")+' >Song title A–Z</option><option value="artist" '+(musicPlaylistSort==="artist"?"selected":"")+' >Artist A–Z</option><option value="newest" '+(musicPlaylistSort==="newest"?"selected":"")+' >Recently added</option><option value="oldest" '+(musicPlaylistSort==="oldest"?"selected":"")+' >Oldest added</option></select></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
 }
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
@@ -772,7 +783,7 @@ function render(){
  if(profileSection)content='<button type="button" class="profile-back" data-page="'+(page==="ProgressCategory"?"Progress":"Profile")+'">← Back</button>'+content;
  $("view").innerHTML=content;
  if(window.lucide?.createIcons)window.lucide.createIcons();
- if(page==="MusicLibrary"){if(spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab,true);else{const list=$("musicPlaylistTracks");if(list)list.innerHTML='<p class="spotify-status">Connect Spotify above to load your playlists.</p>'}}
+ if(page==="MusicLibrary"&&musicActiveTab!=="covers"){if(spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab,true);else{const list=$("musicPlaylistTracks");if(list)list.innerHTML='<p class="spotify-status">Connect Spotify above to load your playlists.</p>'}}
  if(page==="Profile"&&spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
@@ -787,6 +798,8 @@ document.addEventListener("submit",e=>{
   save();render();toast("Saved");return;
  }
  
+ const coverForm=e.target.closest("[data-cover-form]");
+ if(coverForm){e.preventDefault();const values=new FormData(coverForm),title=String(values.get("title")||"").trim();if(!title){toast("Add a song title first");return}data.coverProjects=data.coverProjects||[];data.coverProjects.unshift({id:String(Date.now())+Math.random().toString(36).slice(2,6),title,artist:String(values.get("artist")||"").trim(),instruments:String(values.get("instruments")||"Drums & Guitar"),targetDate:String(values.get("targetDate")||""),status:"Idea",checklist:{},createdAt:new Date().toISOString()});save();render();toast("Cover added");return}
  const profileForm=e.target.closest("[data-profile-form]");
  if(profileForm){
   e.preventDefault();const values=new FormData(profileForm);
@@ -856,7 +869,8 @@ document.addEventListener("click",async e=>{
   
   const spotifyRemove=e.target.closest("[data-spotify-remove]");if(spotifyRemove){spotifyRemoveTrack(spotifyRemove.dataset.spotifyRemove);return}
  const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
- const musicTab=e.target.closest("[data-music-tab]");if(musicTab){musicActiveTab=musicTab.dataset.musicTab;render();spotifyLoadMusicPlaylist(musicActiveTab,true);return}
+ const coverDelete=e.target.closest("[data-cover-delete]");if(coverDelete){if(!window.confirm("Remove this cover from your list?"))return;data.coverProjects=(data.coverProjects||[]).filter(x=>String(x.id)!==coverDelete.dataset.coverDelete);save();render();return}
+ const musicTab=e.target.closest("[data-music-tab]");if(musicTab){musicActiveTab=musicTab.dataset.musicTab;render();if(musicActiveTab!=="covers"&&spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab,true);return}
   const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
@@ -866,7 +880,11 @@ document.addEventListener("click",async e=>{
  const tf=e.target.closest("[data-trick-filter]");if(tf){trickFilter=tf.dataset.trickFilter;render();return}
  const y=e.target.closest("[data-year]");if(y){viewYear=Math.max(2026,Math.min(today.getFullYear(),viewYear+Number(y.dataset.year)));showAllMonths=false;render()}
 });
-document.addEventListener("change",e=>{if(e.target.matches("#musicPlaylistSort")){musicPlaylistSort=e.target.value;renderMusicPlaylistTracks(musicActiveTab);return}});
+document.addEventListener("change",e=>{
+ if(e.target.matches("#musicPlaylistSort")){musicPlaylistSort=e.target.value;renderMusicPlaylistTracks(musicActiveTab);return}
+ const status=e.target.closest("[data-cover-status]");if(status){const cover=(data.coverProjects||[]).find(x=>String(x.id)===status.dataset.coverStatus);if(cover){cover.status=status.value;if(status.value==="Posted")cover.checklist={...(cover.checklist||{}),posted:true};save();render()}return}
+ const step=e.target.closest("[data-cover-check]");if(step){const cover=(data.coverProjects||[]).find(x=>String(x.id)===step.dataset.coverCheck);if(cover){cover.checklist=cover.checklist||{};cover.checklist[step.dataset.coverStep]=step.checked;if(step.dataset.coverStep==="posted"&&step.checked)cover.status="Posted";else if(step.dataset.coverStep==="posted"&&!step.checked&&cover.status==="Posted")cover.status="Ready to post";save();render()}return}
+});
 document.addEventListener("input",e=>{
  if(e.target.matches("[data-trick-search]")){trickSearch=e.target.value;const view=$("view"),cards=view.querySelectorAll(".trick-card"),q=trickSearch.toLowerCase();cards.forEach(card=>card.hidden=!card.querySelector("strong").textContent.toLowerCase().includes(q));const count=view.querySelector(".trick-library .section-head small");if(count)count.textContent=view.querySelectorAll(".trick-card:not([hidden])").length+" of "+tricks.length;return}
  if(e.target.matches("#spotifyTrackQuery")){clearTimeout(spotifySearchTimer);const query=e.target.value;spotifySearchTimer=setTimeout(()=>spotifySearchTracks(query),320);}
