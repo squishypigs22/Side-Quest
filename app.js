@@ -535,7 +535,7 @@ function profilePage(){
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'))+
  '</div><div class="profile-column profile-column-spotify">'+spotifyProfilePanel()+
- '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.6.1</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row"><span><strong>Work</strong><small>'+(data.profile?.workMode?"Work mode is on · College, Music and Profile only":"Show only College, Music and Profile tabs")+'</small></span><button type="button" data-work-mode>'+(data.profile?.workMode?"Turn off":"Turn on")+'</button></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.6.2</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
 }
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
@@ -659,7 +659,7 @@ async function spotifyLoadPlaylists(){
   selects.forEach(select=>{const key=select.dataset.spotifyProfilePlaylist;select.innerHTML=spotifyPlaylists.length?options:'<option value="">No playlists found</option>';select.value=data.profile?.spotifyPlaylists?.[key]||"";});
  }catch(e){selects.forEach(select=>select.innerHTML='<option value="">Could not load playlists</option>');toast(e.message)}
 }
-let spotifySearchSequence=0,spotifySearchTimer=null;
+let spotifySearchSequence=0,spotifySearchTimer=null,musicActiveTab='drums',spotifyMusicCache={};
 async function spotifySearchTracks(queryOverride){
  const input=$("spotifyTrackQuery"),query=String(queryOverride??input?.value??"").trim(),results=$("spotifyResults"),sequence=++spotifySearchSequence;
  if(!results)return;
@@ -675,26 +675,37 @@ async function spotifySearchTracks(queryOverride){
   }).join(""):'<p class="spotify-status">No tracks found. Try another search.</p>';
  }catch(e){if(sequence===spotifySearchSequence)results.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
-function musicAddSpotifyResult(index){
- const track=spotifyTracks[index];if(!track)return;
- data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];
- if(data.musicSongs.some(song=>song.spotifyId===track.id)){toast("That song is already in your list");return}
- const instrument=$("musicSongInstrument")?.value||"Drums";
- data.musicSongs.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),spotifyId:track.id,title:track.name,artist:(track.artists||[]).map(a=>a.name).join(", "),album:track.album?.name||"",cover:track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"",spotifyUrl:track.external_urls?.spotify||"",instrument,createdAt:new Date().toISOString()});
- save();render();toast("Added to your song list");
-}
 async function spotifyAddTrack(index){
-  const track=spotifyTracks[index],choice=$("musicSongInstrument")?.value||"Drums";
-  if(!track?.uri){toast("Choose a track first");return}
-  const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
-  const destinations=[...new Map(targets.map(key=>[data.profile?.spotifyPlaylists?.[key],key]).filter(([id])=>id).map(([id,key])=>[id,{id,key}])).values()];
-  const missing=targets.filter(key=>!data.profile?.spotifyPlaylists?.[key]);
-  if(!destinations.length){toast("Set up your "+(missing.length===2?"Guitar and Drums":missing[0]==="drums"?"Drums":"Guitar")+" playlist in Profile first");return}
-  try{
-   for(const destination of destinations)await spotifyApi("/playlists/"+encodeURIComponent(destination.id)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});
-   const names=destinations.map(x=>x.key==="drums"?"Drums":"Guitar");
-   toast("Added "+track.name+" to "+names.join(" and ")+(missing.length?" (one playlist not set up)":""));
-  }catch(e){toast(e.message)}
+ const track=spotifyTracks[index],choice=$("musicSongInstrument")?.value||"Drums";
+ if(!track?.uri){toast("Choose a track first");return}
+ const targets=choice==="Both"?["drums","guitar"]:[choice.toLowerCase()];
+ const destinations=[...new Map(targets.map(key=>[data.profile?.spotifyPlaylists?.[key],key]).filter(([id])=>id).map(([id,key])=>[id,{id,key}])).values()];
+ const missing=targets.filter(key=>!data.profile?.spotifyPlaylists?.[key]);
+ if(!destinations.length){toast("Set up your playlists in Profile first");return}
+ try{
+  for(const d of destinations) await spotifyApi("/playlists/"+encodeURIComponent(d.id)+"/items",{method:"POST",body:JSON.stringify({uris:[track.uri]})});
+  data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];
+  const existing=data.musicSongs.find(song=>song.spotifyId===track.id);
+  if(existing) existing.instrument=existing.instrument==="Both"||choice==="Both"?"Both":choice;
+  else data.musicSongs.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),spotifyId:track.id,title:track.name,artist:(track.artists||[]).map(a=>a.name).join(", "),album:track.album?.name||"",cover:track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"",spotifyUrl:track.external_urls?.spotify||"",instrument:choice,createdAt:new Date().toISOString()});
+  save();spotifyMusicCache={};
+  const btn=$("spotifyResults")?.querySelector('[data-spotify-add="'+index+'"]');if(btn){btn.textContent="Added & synced";btn.disabled=true}
+  toast("Added and synced to "+destinations.map(d=>d.key==="drums"?"Drums":"Guitar").join(" and "));
+  spotifyLoadMusicPlaylist(musicActiveTab,true);
+ }catch(e){toast(e.message)}
+}
+async function spotifyLoadMusicPlaylist(key,force=false){
+ const id=data.profile?.spotifyPlaylists?.[key],list=$("musicPlaylistTracks");if(!list)return;
+ if(!id){list.innerHTML='<p class="spotify-status">Choose your '+(key==="drums"?"Drums":"Guitar")+' playlist in Profile to see it here.</p>';return}
+ if(!force&&spotifyMusicCache[key]?.id===id){renderMusicPlaylistTracks(key);return}
+ list.innerHTML='<p class="spotify-status">Loading playlist…</p>';
+ try{const result=await spotifyApi("/playlists/"+encodeURIComponent(id)+"/items?limit=50");const items=(result.items||[]).map(row=>row.item||row.track||row).filter(t=>t&&t.id);spotifyMusicCache[key]={id,items};renderMusicPlaylistTracks(key)}
+ catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
+}
+function renderMusicPlaylistTracks(key){
+ const list=$("musicPlaylistTracks");if(!list)return;
+ const items=spotifyMusicCache[key]?.items||[];
+ list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><strong>'+esc(t.name)+'</strong><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
 }
 async function spotifyCreatePlaylist(){
  const name=window.prompt("Name your new private playlist","Side Quest Songs");if(!name?.trim())return;
@@ -703,9 +714,8 @@ async function spotifyCreatePlaylist(){
 }
 
 function musicLibraryPage(){
- data.musicSongs=Array.isArray(data.musicSongs)?data.musicSongs:[];
- const songs=data.musicSongs.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""))),count=songs.length;
- return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-songs-section"><div class="section-head"><h2>My songs</h2><small>'+count+' total</small></div>'+(songs.length?songs.map(song=>'<article class="music-song-row">'+(song.cover?'<img class="music-library-cover" src="'+esc(song.cover)+'" alt="'+esc(song.album||"Album artwork")+'" loading="lazy">':'<span class="music-library-cover music-library-cover-empty">♪</span>')+'<div class="music-song-copy"><strong>'+esc(song.title||"Untitled song")+'</strong><small>'+esc(song.artist||"Artist not added")+'</small></div><span class="music-instrument-tag">'+esc(song.instrument||"Both")+'</span>'+'<a class="music-song-spotify" href="'+esc(song.spotifyUrl||("https://open.spotify.com/search/"+encodeURIComponent((song.title+" "+(song.artist||"")).trim())))+'" target="_blank" rel="noopener noreferrer">Spotify ↗</a><button type="button" class="music-song-delete" data-music-delete="'+esc(song.id)+'" aria-label="Remove '+esc(song.title)+'">×</button></article>').join(""):'<div class="music-empty"><strong>No songs added yet</strong><small>Search above and add songs you want to learn on drums or guitar.</small></div>')+'</section>';
+ const active=musicActiveTab==="guitar"?"guitar":"drums",label=active==="guitar"?"Guitar":"Drums";
+ return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section"><div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button></div><div class="section-head"><h2>'+label+' playlist</h2><small>Spotify synced</small></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
 }
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
@@ -797,9 +807,10 @@ document.addEventListener("click",async e=>{
  const musicDelete=e.target.closest("[data-music-delete]");if(musicDelete){data.musicSongs=data.musicSongs.filter(song=>String(song.id)!==musicDelete.dataset.musicDelete);save();render();return}
  const spotifyConnect=e.target.closest("[data-spotify-connect]");if(spotifyConnect){spotifyStartConnect().catch(e=>toast(e.message));return}
  const spotifyDisconnect=e.target.closest("[data-spotify-disconnect]");if(spotifyDisconnect){spotifyClearTokens();render();toast("Spotify disconnected");return}
-  const musicAddTrack=e.target.closest("[data-music-add-track]");if(musicAddTrack){musicAddSpotifyResult(Number(musicAddTrack.dataset.musicAddTrack));return}
+  
   const spotifyAdd=e.target.closest("[data-spotify-add]");if(spotifyAdd){spotifyAddTrack(Number(spotifyAdd.dataset.spotifyAdd));return}
- const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
+ const musicTab=e.target.closest("[data-music-tab]");if(musicTab){musicActiveTab=musicTab.dataset.musicTab;render();spotifyLoadMusicPlaylist(musicActiveTab,true);return}
+  const p=e.target.closest("[data-page]");if(p){const target=p.dataset.page;page=target;render();window.scrollTo(0,0);return}
  const c=e.target.closest("[data-open-category]");if(c){categoryId=c.dataset.openCategory;const cat=categories.find(x=>x.id===categoryId);activityId=categoryId==="music"?"drums":cat.activities[0];page="Activity";viewYear=today.getFullYear();render();window.scrollTo(0,0);return}
  const a=e.target.closest("[data-open-activity]");if(a){activityId=a.dataset.openActivity;viewYear=today.getFullYear();page="Activity";render();window.scrollTo(0,0);return}
  const calendarLog=e.target.closest("[data-calendar-log]");if(calendarLog){e.preventDefault();const id=calendarLog.dataset.calendarLog,k=calendarLog.dataset.date;data.activityDays[id]=data.activityDays[id]||{};if(getStatus(id,k)===1)delete data.activityDays[id][k];else data.activityDays[id][k]=1;save();render();openModal(k);if(window.lucide?.createIcons)window.lucide.createIcons();return}
