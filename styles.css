@@ -660,3 +660,7 @@ body.work-mode .app{padding-top:24px!important}
 .spotify-add-track{flex:0 0 auto;padding:8px 10px;font-size:11px}
 .spotify-status{margin:0;color:#aab2be;font-size:12px}
 @media(max-width:520px){.spotify-panel{padding:13px}.spotify-connected-row{align-items:flex-start}.spotify-track{align-items:flex-start}.spotify-add-track{padding:8px;font-size:10px}.spotify-search-line{flex-wrap:wrap}.spotify-search-line input{flex:1 1 100%}}
+
+
+/* v0.4.5 — Spotify controls live in Profile */
+.profile-column>.spotify-panel{margin-top:0;margin-bottom:16px}
