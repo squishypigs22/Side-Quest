@@ -787,3 +787,8 @@ body.work-mode .top-action-btn svg,body.work-mode .top-action-btn .sq-icon{width
 /* Keep the Connect and Sync controls on the left in Main mode. */
 .work-mode .topbar{justify-content:flex-start}
 .work-mode .top-actions{order:-1;margin-right:auto}
+
+
+/* v0.8.16 - unassigned assignments use a neutral grey status */
+.assignment-set-tag.is-unassigned{color:#b8bec8;background:#9aa3af18;border:1px solid #87909d88}
+.assignment-task.assignment-unassigned{border-color:#87909d!important}
