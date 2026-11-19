@@ -308,8 +308,7 @@ function collegeDashboard(){
   {day:1,title:"Audio Technologies",lecturer:"Chris Goss",location:"C110",time:"3:00 PM – 5:00 PM",start:"15:00"},
   {day:2,title:"Skills for Success",lecturer:"Lee Gilyon",location:"C107",time:"9:00 AM – 10:00 AM",start:"09:00"},
   {day:2,title:"Personal Development",lecturer:"Kevin Thomson",location:"C205",time:"10:00 AM – 11:00 AM",start:"10:00"},
-  {day:2,title:"Audio Engineering",lecturer:"Kevin Thomson",location:"FE Studios",time:"12:00 PM – 3:00 PM",start:"12:00"},
-  {day:4,title:"Guest Lecture Masterclass",lecturer:"Dan Woodward",location:"MS Teams Online",time:"1:00 PM – 3:00 PM",start:"13:00"}
+  {day:2,title:"Audio Engineering",lecturer:"Kevin Thomson",location:"FE Studios",time:"12:00 PM – 3:00 PM",start:"12:00"}
  ];
  const calendarEvents=[];
  for(let day=1;day<=monthDays;day++){
@@ -349,7 +348,7 @@ function collegeDashboard(){
  }else{
   body='<section class="college-section-intro"><span class="eyebrow">ASSIGNMENTS ONLY</span><h2>Course assignments</h2><p>Medium-priority lessons are kept off this list and shown on the calendar instead.</p></section><div class="college-filters-v2"><input id="ds26Query" placeholder="Search assignments or modules" value="'+escapeHtml(window.ds26Query||"")+'"><select id="ds26Term"><option>All terms</option>'+["Term 1","Term 2","Term 3"].map(x=>'<option '+(term===x?"selected":"")+'>'+x+'</option>').join("")+'</select><select id="ds26Module"><option>All modules</option>'+modules.map(x=>'<option '+(mod===x?"selected":"")+'>'+escapeHtml(x)+'</option>').join("")+'</select></div><div class="college-results-label">'+filtered.length+' assignments found · '+filtered.filter(t=>!submitted(t)).length+' not handed in</div><div class="college-list college-list-v2">'+(filtered.length?filtered.map(taskCard).join(""):'<p class="college-empty">No assignments match these filters.</p>')+'</div>';
  }
- return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Your course planner and progress tracker</p></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button type="button" data-college-view="'+id+'" onclick="window.setCollegeTab(\''+id+'\')" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'<p class="college-footnote">Weekly lessons follow your supplied timetable; GLMs are kept on Thursdays and assignment dates use the planner due date.</p></div>';
+ return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Your course planner and progress tracker</p></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button type="button" data-college-view="'+id+'" onclick="window.setCollegeTab(\''+id+'\')" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'<p class="college-footnote">Weekly lessons follow your supplied timetable; GLMs appear once on Thursdays using the planner schedule; assignment dates use the planner due date.</p></div>';
 }
 function dashboard(){return collegeDashboard();
 
