@@ -105,13 +105,13 @@ async function syncPull(){
   const result=await syncRequest("load"),remote=normalizeAppData(result.data),next=restoreSpotifyPlaylistPrefs(syncDirty?mergeProgress(remote,previousData):remote);
   localStorage.setItem("sq27",JSON.stringify(next));data=next;render();
   if(syncDirty){syncBusy=false;await syncPush();return true}return true;
- }catch(e){data=previousData;if(previousRaw!==null){try{localStorage.setItem("sq27",previousRaw)}catch(_){}}try{render()}catch(_){}toast("Sync unavailable — your device data is safe. You can keep using the app.");return false}
+ }catch(e){data=previousData;if(previousRaw!==null){try{localStorage.setItem("sq27",previousRaw)}catch(_){}}try{render()}catch(_){}toast("Sync is unavailable. Your data is still saved on this device.");return false}
  finally{syncBusy=false}
 }
 function save(){
  try{if(storageRecoveryNeeded){const raw=localStorage.getItem("sq27");if(raw&&!localStorage.getItem("sq27_recovery_backup"))localStorage.setItem("sq27_recovery_backup",raw);storageRecoveryNeeded=false}
  localStorage.setItem("sq27",JSON.stringify(data));scheduleSync();return true}
- catch(e){toast("Couldn’t save — device storage may be full. Your changes are only on this screen.");return false}
+ catch(e){toast("Couldn’t save your changes. Your device storage may be full.");return false}
 }
 function showSyncModal(content){
  const root=$("modalRoot");
@@ -140,7 +140,7 @@ async function joinSharedSpace(){
  const input=$("pairCodeInput"),code=(input?.value||"").replace(/\\s/g,"").toUpperCase();
  if(!/^[A-Z0-9]{8}$/.test(code)){toast("Enter the 8-character code");input?.focus();return}
  const joinButton=$("joinSpace");
- joinButton.disabled=true;joinButton.textContent="Pairing…";
+ joinButton.disabled=true;joinButton.textContent="Pairing.";
  try{
   const result=await syncRequest("redeem",{code,device_name:syncDeviceName()},null);
   const localData=data;
@@ -159,7 +159,7 @@ function escapeHtml(value){
  return String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 }
 async function showDeviceManager(){
- showSyncModal('<div class="sync-mark">✓</div><h2 id="syncTitle">Connected devices</h2><p>These devices are authorised to sync with this shared space. The date shows when each was linked.</p><div class="device-list" id="deviceList"><div class="device-loading">Loading devices…</div></div><div class="sync-actions device-actions"><button class="sync-primary" id="addDevice">Add another device</button><button id="syncNow">Sync now</button></div>');
+ showSyncModal('<div class="sync-mark">✓</div><h2 id="syncTitle">Connected devices</h2><p>These devices are authorised to sync with this shared space. The date shows when each was linked.</p><div class="device-list" id="deviceList"><div class="device-loading">Loading devices.</div></div><div class="sync-actions device-actions"><button class="sync-primary" id="addDevice">Add another device</button><button id="syncNow">Sync now</button></div>');
  try{
   const result=await syncRequest("devices");
   const devices=result.devices||[];
@@ -173,7 +173,7 @@ async function showDeviceManager(){
    const current=button.dataset.current==="1";
    const message=current?"Disconnect this device from cloud sync? Your local progress will stay on this device.":"Remove this device's access to the shared space?";
    if(!window.confirm(message))return;
-   button.disabled=true;button.textContent="Removing…";
+   button.disabled=true;button.textContent="Removing.";
    try{
     const result=await syncRequest("revoke",{device_id:button.dataset.revokeDevice});
     if(result.revoked_current){
@@ -185,7 +185,7 @@ async function showDeviceManager(){
    }catch(e){button.disabled=false;button.textContent=current?"Disconnect":"Remove";toast(e.message||"Couldn't disconnect device")}
   }));
   $("addDevice").addEventListener("click",async()=>{
-   const button=$("addDevice");button.disabled=true;button.textContent="Creating code…";
+   const button=$("addDevice");button.disabled=true;button.textContent="Creating code.";
    try{const pairResult=await syncRequest("pair");showPairCode(pairResult.code,"Pair another device")}
    catch(e){button.disabled=false;button.textContent="Add another device";toast("Couldn't create a pairing code: "+e.message)}
   });
@@ -207,7 +207,7 @@ async function handleSync(){
   $("joinSpace").addEventListener("click",joinSharedSpace);
  });
  $("createSpace").addEventListener("click",async()=>{
-  const button=$("createSpace");button.disabled=true;button.textContent="Creating…";
+  const button=$("createSpace");button.disabled=true;button.textContent="Creating.";
   try{await createSharedSpace()}
   catch(e){button.disabled=false;button.textContent="Create a new shared space";toast("Couldn't create shared space: "+e.message)}
  });
@@ -248,7 +248,7 @@ function weeklySummary(){
  });
  const delta=thisWeek-lastWeek;
  const comparison=delta>0?"More":delta<0?"Fewer":"Same number of";
- const range=start.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" – "+end.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+ const range=start.toLocaleDateString(undefined,{day:"numeric",month:"short"})+" to "+end.toLocaleDateString(undefined,{day:"numeric",month:"short"});
  return '<section class="section"><div class="section-head"><h2>This week</h2><small>'+range+'</small></div>'+
  '<div class="week-summary">'+
  '<div class="metric"><div class="metric-label">Sessions this week</div><div class="metric-value">'+thisWeek+'</div><div class="metric-note">Across all activities</div></div>'+
@@ -290,7 +290,7 @@ async function loadDS26(){
 }
 window.setCollegeTab=function(tab){window.collegeTab=["schedule","calendar"].includes(tab)?tab:"schedule";try{render()}catch(err){console.error("College tab render failed",err);toast("Could not open that College section. Try again.")}};
 function collegeDashboard(){
- if(!ds26Ready)return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1><p>Preparing your 263 curriculum checkpoints…</p></div><div class="college-loading"><span class="college-spinner"></span><strong>Loading your planner</strong><small>Your saved completion records are safe.</small></div></div>';
+ if(!ds26Ready)return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026-2027</div><h1>College</h1><p>Loading your college planner.</p></div><div class="college-loading"><span class="college-spinner"></span><strong>Loading your planner</strong><small>Your saved completion records are safe.</small></div></div>';
  const p=data.collegeProgress||(data.collegeProgress={});
  const assignments=ds26Tasks.filter(t=>!!t[6]);
  const lessons=ds26Tasks.filter(t=>!t[6]&&!String(t[1]).toUpperCase().includes("ONLINE GUEST"));
@@ -317,12 +317,12 @@ function collegeDashboard(){
  const monthDays=new Date(monthBase.getFullYear(),monthBase.getMonth()+1,0).getDate();
  const firstOffset=(new Date(monthBase.getFullYear(),monthBase.getMonth(),1).getDay()+6)%7;
  const weeklyLessons=[
-  {day:1,title:"Music Production",lecturer:"Dan Woodward",location:"C007",time:"9:00 AM – 12:00 PM",start:"09:00"},
-  {day:1,title:"Music Industry",lecturer:"Chris Goss",location:"C110",time:"1:00 PM – 3:00 PM",start:"13:00"},
-  {day:1,title:"Audio Technologies",lecturer:"Chris Goss",location:"C110",time:"3:00 PM – 5:00 PM",start:"15:00"},
-  {day:2,title:"Skills for Success",lecturer:"Lee Gilyon",location:"C107",time:"9:00 AM – 10:00 AM",start:"09:00"},
-  {day:2,title:"Personal Development",lecturer:"Kevin Thomson",location:"C205",time:"10:00 AM – 11:00 AM",start:"10:00"},
-  {day:2,title:"Audio Engineering",lecturer:"Kevin Thomson",location:"FE Studios",time:"12:00 PM – 3:00 PM",start:"12:00"}
+  {day:1,title:"Music Production",lecturer:"Dan Woodward",location:"C007",time:"9:00 AM to 12:00 PM",start:"09:00"},
+  {day:1,title:"Music Industry",lecturer:"Chris Goss",location:"C110",time:"1:00 PM to 3:00 PM",start:"13:00"},
+  {day:1,title:"Audio Technologies",lecturer:"Chris Goss",location:"C110",time:"3:00 PM to 5:00 PM",start:"15:00"},
+  {day:2,title:"Skills for Success",lecturer:"Lee Gilyon",location:"C107",time:"9:00 AM to 10:00 AM",start:"09:00"},
+  {day:2,title:"Personal Development",lecturer:"Kevin Thomson",location:"C205",time:"10:00 AM to 11:00 AM",start:"10:00"},
+  {day:2,title:"Audio Engineering",lecturer:"Kevin Thomson",location:"FE Studios",time:"12:00 PM to 3:00 PM",start:"12:00"}
  ];
  const calendarEvents=[];
  for(let day=1;day<=monthDays;day++){
@@ -341,7 +341,7 @@ function collegeDashboard(){
  const activeDate=window.ds26CalendarSelected||todayKey;
  const weekStart=new Date(activeDate+"T12:00:00");weekStart.setDate(weekStart.getDate()-((weekStart.getDay()+6)%7));
  const weekDates=Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(d.getDate()+i);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")});
- const weekTitle=weekStart.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" – "+new Date(weekDates[6]+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+ const weekTitle=weekStart.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" to "+new Date(weekDates[6]+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
  const calendarDays=calendarMode==="week"?weekDates:Array.from({length:monthDays},(_,i)=>monthKey+"-"+String(i+1).padStart(2,"0"));
  const calendarHeading=calendarMode==="week"?weekTitle:monthTitle;
  const selectedDate=window.ds26CalendarSelected|| (monthKey===todayKey.slice(0,7)?todayKey:monthKey+"-01");
@@ -360,7 +360,7 @@ function collegeDashboard(){
  }else{
   body='<section class="college-section-intro"><span class="eyebrow">COURSEWORK</span><h2>Assignments</h2><p>'+assignments.length+' assignments · '+done+' handed in · '+(assignments.length-done)+' remaining</p></section><div class="college-list college-list-v2">'+(orderedAssignments.length?orderedAssignments.map(taskCard).join(""):'<p class="college-empty">No assignments available.</p>')+'</div>';
  }
- return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026–2027</div><h1>College</h1></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button type="button" data-college-view="'+id+'" onclick="window.setCollegeTab(\''+id+'\')" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'</div>';
+ return '<div class="college-shell"><div class="page-head"><div class="eyebrow">CONFETTI · DS26 · 2026-2027</div><h1>College</h1></div><nav class="college-tabs" aria-label="College sections">'+tabs.map(([id,label])=>'<button type="button" data-college-view="'+id+'" onclick="window.setCollegeTab(\''+id+'\')" class="'+(tab===id?"active":"")+'">'+label+'</button>').join("")+'</nav>'+body+'</div>';
 }
 function dashboard(){return collegeDashboard();
 
@@ -381,7 +381,7 @@ function dashboard(){return collegeDashboard();
  (taskRows||'<p class="personal-empty">No tasks yet. Add something you need to get done.</p>')+'</section>'+
  '<section class="personal-panel"><div class="section-head"><h2>Upcoming</h2><small>Events and deadlines</small></div><form class="personal-add-form personal-stacked" data-personal-event-form><input name="title" maxlength="90" placeholder="Add an event or deadline" required><div class="personal-form-line"><input name="date" type="date" min="'+todayKey+'" required><input name="time" type="time" aria-label="Time"></div><button type="submit">Add event</button></form>'+(eventRows||'<p class="personal-empty">No upcoming events.</p>')+'</section>'+
  '<section class="personal-panel"><div class="section-head"><h2>Projects</h2><small>Things you’re working on</small></div><form class="personal-add-form personal-stacked" data-personal-project-form><input name="title" maxlength="70" placeholder="Project name" required><input name="next" maxlength="110" placeholder="Next step (optional)"><button type="submit">Add project</button></form>'+(projectRows||'<p class="personal-empty">Add a project to keep its next step visible.</p>')+'</section>'+
- '<section class="personal-panel personal-wide"><div class="section-head"><h2>Quick notes</h2><small>Ideas and things to remember</small></div><form class="personal-add-form personal-note-form" data-personal-note-form><textarea name="text" maxlength="600" rows="2" placeholder="Write something down before you forget…" required></textarea><button type="submit">Save note</button></form><div class="personal-notes-grid">'+(noteRows||'<p class="personal-empty">Your saved notes will appear here.</p>')+'</div></section>'+
+ '<section class="personal-panel personal-wide"><div class="section-head"><h2>Quick notes</h2><small>Ideas and things to remember</small></div><form class="personal-add-form personal-note-form" data-personal-note-form><textarea name="text" maxlength="600" rows="2" placeholder="Write something down before you forget." required></textarea><button type="submit">Save note</button></form><div class="personal-notes-grid">'+(noteRows||'<p class="personal-empty">Your saved notes will appear here.</p>')+'</div></section>'+
  '</div></div>';
 }
 function categoriesPage(){
@@ -542,7 +542,7 @@ function profilePage(){
 function mainQuestsPage(){const groups=[{name:"Appearance & Grooming",quests:[["skincare","Skincare routine"]]},{name:"Fitness & Health",quests:[["strength","Build muscle and strength"],["exercise","Build a consistent exercise routine"],["flexibility","Improve flexibility and mobility"],["posture","Improve posture"]]},{name:"Lifestyle",quests:[["sleep","Fix my sleep schedule"]]},{name:"Confidence",quests:[["role-model","Become someone people look up to"]]}];return groups.map(group=>'<section class="mainquest-category"><div class="mainquest-category-head"><h2>'+group.name+'</h2></div><div class="mainquest-grid">'+group.quests.map(([id,name])=>'<article class="mainquest-card mainquest-title-only"><h3>'+name+'</h3><button type="button" class="quest-action" data-open-progress="'+id+'">Track progress</button></article>').join("")+'</div></section>').join("")}
 
 function progressPage(){const cats=[["Skincare","Monthly skincare photos"],["Muscle & Strength","Monthly photos and strength records"],["Flexibility & Mobility","Monthly photos and videos"],["Posture","Monthly posture photos"],["Sleep","Daily bedtime and wake-up records"],["Fitness","Workout calendar and targets"],["Music","Drums and guitar practice"],["Skate","Skate sessions and trick progress"],["Tricks","Your skate trick progress"],["Milestones","Quest milestones and achievements"],["Activity tracking","Full activity calendar, logs and monthly targets"]];return '<div class="page-head"><div class="eyebrow">YOUR RECORDS</div><h1>Progress</h1><p>All your tracking, records and history in one place.</p></div><div class="progress-link-list">'+cats.map(([n,d])=>'<button class="profile-link" data-progress-category="'+n+'"><span class="profile-link-icon"><i class="sq-icon" data-lucide="folder-chart"></i></span><span><strong>'+n+'</strong><small>'+d+'</small></span><span class="profile-chevron">›</span></button>').join("")+'</div>'}
-function progressCategoryPage(){const name=progressCategory;if(name==="Activity tracking"||name==="Fitness"||name==="Music"||name==="Skate")return '<div class="page-head"><h1>'+escapeHtml(name)+' tracking</h1><p>Activity logs, calendars and monthly targets.</p></div>'+logPage()+calendarPage();if(name==="Tricks")return '<div class="page-head"><h1>Trick progress</h1></div><button class="profile-back" data-page="Progress">← Back to Progress</button>'+tricksPage();if(name==="Milestones")return '<div class="page-head"><h1>Milestones</h1><p>Your quest milestones and achievements.</p></div>'+milestonesPage();const monthly=Object.entries(data.monthlyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0])),daily=Object.entries(data.dailyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0]));let cards="";if(name==="Sleep"){cards=daily.map(([date,r])=>{const x=r.answers||{};return '<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed before 12: '+escapeHtml(x["bed-before-midnight"]||"—")+' · Bedtime: '+escapeHtml(x.bedtime||"—")+' · Wake: '+escapeHtml(x["wake-time"]||"—")+'</p></article>'}).join("");cards+=Object.entries(data.sleepLogs||{}).map(([date,x])=>'<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed '+escapeHtml(x.bed||"—")+' · Wake '+escapeHtml(x.wake||"—")+'</p></article>').join("")}else{const q=monthlyQuestions.find(q=>q.category===name);if(q)cards=monthly.map(([date,r])=>{const media=r.answers?.[q.id]?.media||[];return media.length?'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(date)+'</strong></div><div class="progress-media-grid">'+media.map(m=>m.type?.startsWith("video/")?'<video controls src="'+m.src+'"></video>':'<img src="'+m.src+'" alt="'+name+' progress">').join("")+'</div></article>':""}).join("");const legacy={Skincare:"skincare","Muscle & Strength":"strength","Flexibility & Mobility":"flexibility",Posture:"posture"}[name];if(legacy)cards+=(data.questPhotos?.[legacy]||[]).map(p=>'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(p.date||"Previous record")+'</strong></div><div class="progress-media-grid"><img src="'+p.src+'" alt="'+name+' progress"></div></article>').join("")}if(name==="Muscle & Strength"&&data.strengthLogs?.length)cards+='<article class="progress-record"><h2>Strength records</h2>'+data.strengthLogs.slice().reverse().map(x=>'<p><strong>'+escapeHtml(x.exercise)+'</strong> · '+escapeHtml(x.result)+' · '+escapeHtml(x.date)+'</p>').join("")+'</article>';return '<div class="page-head"><div class="eyebrow">PROGRESS</div><h1>'+escapeHtml(name)+'</h1><p>Your saved records, organised by month.</p></div><div class="progress-record-list">'+(cards||'<p class="muted">No records yet. Your completed check-ins will appear here.</p>')+'</div>'}
+function progressCategoryPage(){const name=progressCategory;if(name==="Activity tracking"||name==="Fitness"||name==="Music"||name==="Skate")return '<div class="page-head"><h1>'+escapeHtml(name)+' tracking</h1><p>Activity logs, calendars and monthly targets.</p></div>'+logPage()+calendarPage();if(name==="Tricks")return '<div class="page-head"><h1>Trick progress</h1></div><button class="profile-back" data-page="Progress">← Back to Progress</button>'+tricksPage();if(name==="Milestones")return '<div class="page-head"><h1>Milestones</h1><p>Your quest milestones and achievements.</p></div>'+milestonesPage();const monthly=Object.entries(data.monthlyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0])),daily=Object.entries(data.dailyCheckins||{}).sort((a,b)=>b[0].localeCompare(a[0]));let cards="";if(name==="Sleep"){cards=daily.map(([date,r])=>{const x=r.answers||{};return '<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed before 12: '+escapeHtml(x["bed-before-midnight"]||".")+' · Bedtime: '+escapeHtml(x.bedtime||".")+' · Wake: '+escapeHtml(x["wake-time"]||".")+'</p></article>'}).join("");cards+=Object.entries(data.sleepLogs||{}).map(([date,x])=>'<article class="progress-record"><strong>'+escapeHtml(date)+'</strong><p>Bed '+escapeHtml(x.bed||".")+' · Wake '+escapeHtml(x.wake||".")+'</p></article>').join("")}else{const q=monthlyQuestions.find(q=>q.category===name);if(q)cards=monthly.map(([date,r])=>{const media=r.answers?.[q.id]?.media||[];return media.length?'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(date)+'</strong></div><div class="progress-media-grid">'+media.map(m=>m.type?.startsWith("video/")?'<video controls src="'+m.src+'"></video>':'<img src="'+m.src+'" alt="'+name+' progress">').join("")+'</div></article>':""}).join("");const legacy={Skincare:"skincare","Muscle & Strength":"strength","Flexibility & Mobility":"flexibility",Posture:"posture"}[name];if(legacy)cards+=(data.questPhotos?.[legacy]||[]).map(p=>'<article class="progress-record"><div class="progress-record-head"><strong>'+escapeHtml(p.date||"Previous record")+'</strong></div><div class="progress-media-grid"><img src="'+p.src+'" alt="'+name+' progress"></div></article>').join("")}if(name==="Muscle & Strength"&&data.strengthLogs?.length)cards+='<article class="progress-record"><h2>Strength records</h2>'+data.strengthLogs.slice().reverse().map(x=>'<p><strong>'+escapeHtml(x.exercise)+'</strong> · '+escapeHtml(x.result)+' · '+escapeHtml(x.date)+'</p>').join("")+'</article>';return '<div class="page-head"><div class="eyebrow">PROGRESS</div><h1>'+escapeHtml(name)+'</h1><p>Your saved records, organised by month.</p></div><div class="progress-record-list">'+(cards||'<p class="muted">No records yet. Your completed check-ins will appear here.</p>')+'</div>'}
 
 
 let spotifyTracks=[],spotifyPlaylists=[],spotifyBusy=false,spotifyUserProfile=null,spotifyProfileLoaded=false;
@@ -563,12 +563,12 @@ function spotifyProfilePanel(){
  const avatar=account?.images?.[0]?.url?'<img class="spotify-profile-avatar" src="'+esc(account.images[0].url)+'" alt="Spotify profile picture">':'<span class="spotify-profile-avatar spotify-profile-avatar-fallback"><i class="sq-icon" data-lucide="user-round"></i></span>';
  const display=account?.display_name||account?.id||"Spotify account";
  const playlistOptionsFor=key=>'<option value="">Choose a playlist</option>'+spotifyPlaylists.map(p=>'<option value="'+esc(p.id)+'"'+(data.profile?.spotifyPlaylists?.[key]===p.id?' selected':'')+'>'+esc(p.name)+' · '+Number(p.items?.total??p.tracks?.total??0)+' songs</option>').join("");
- return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2></div>'+(connected?'<div class="spotify-account-row">'+avatar+'<span class="spotify-account-name"><strong>'+esc(display)+'</strong></span></div>':'<div class="spotify-connected-row"><span><strong>Connect Spotify</strong><small>Connect your account to use your playlists in Side Quest.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>')+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="guitar" aria-hidden="true"></i><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptionsFor('guitar'):'<option value="">Loading playlists…</option>')+'</select></div><label for="spotifyDrumsPlaylist">Drums playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="drum" aria-hidden="true"></i><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptionsFor('drums'):'<option value="">Loading playlists…</option>')+'</select></div></div>':'')+'</section>';
+ return '<section class="spotify-panel spotify-profile-panel"><div class="section-head"><h2>'+spotifyLogo()+' Spotify</h2></div>'+(connected?'<div class="spotify-account-row">'+avatar+'<span class="spotify-account-name"><strong>'+esc(display)+'</strong></span></div>':'<div class="spotify-connected-row"><span><strong>Connect Spotify</strong><small>Connect your account to use your playlists in Side Quest.</small></span><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>')+(connected?'<div class="spotify-profile-playlists"><label for="spotifyGuitarPlaylist">Guitar playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="guitar" aria-hidden="true"></i><select id="spotifyGuitarPlaylist" data-spotify-profile-playlist="guitar">'+(spotifyPlaylists.length?playlistOptionsFor('guitar'):'<option value="">Loading playlists.</option>')+'</select></div><label for="spotifyDrumsPlaylist">Drums playlist</label><div class="spotify-playlist-select-row"><i class="sq-icon" data-lucide="drum" aria-hidden="true"></i><select id="spotifyDrumsPlaylist" data-spotify-profile-playlist="drums">'+(spotifyPlaylists.length?playlistOptionsFor('drums'):'<option value="">Loading playlists.</option>')+'</select></div></div>':'')+'</section>';
 }
 
 function spotifyPanel(){
  const connected=Boolean(spotifyTokens()?.refresh_token||spotifyTokens()?.access_token);
- const body=connected?'<div class="music-search-tools"><label for="spotifyTrackQuery">Find a song</label><input id="spotifyTrackQuery" type="search" autocomplete="off" placeholder="Start typing a song or artist…"><div id="spotifyResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Search songs or artists…</p></div></div>':'<div class="spotify-setup"><p>Connect Spotify to search songs, see their album artwork and add them to your music list.</p><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>';
+ const body=connected?'<div class="music-search-tools"><label for="spotifyTrackQuery">Find a song</label><input id="spotifyTrackQuery" type="search" autocomplete="off" placeholder="Start typing a song or artist."><div id="spotifyResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Search songs or artists.</p></div></div>':'<div class="spotify-setup"><p>Connect Spotify to search songs, see their album artwork and add them to your music list.</p><button type="button" class="spotify-primary" data-spotify-connect>Connect to Spotify</button></div>';
  return '<section class="spotify-panel music-library-panel"><div class="section-head"><h2>'+spotifyLogo()+' Add a song</h2><small>Spotify search</small></div>'+body+'</section>';
 }
 function spotifyRandomString(length=64){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";const values=crypto.getRandomValues(new Uint8Array(length));return Array.from(values,x=>chars[x%chars.length]).join("")}
@@ -652,7 +652,7 @@ async function spotifyLoadAccount(){
 }
 async function spotifyLoadPlaylists(){
  const selects=Array.from(document.querySelectorAll("[data-spotify-profile-playlist]"));
- if(selects.length)selects.forEach(select=>select.innerHTML='<option value="">Loading…</option>');
+ if(selects.length)selects.forEach(select=>select.innerHTML='<option value="">Loading.</option>');
  try{
   const result=await spotifyApi("/me/playlists?limit=50");
   spotifyPlaylists=result.items||[];
@@ -667,8 +667,8 @@ function coverKeys(x){const v=String(x.instruments||"Drums & Guitar").toLowerCas
 function coverHas(key,id){return Boolean(id&&spotifyMusicCache[key]?.items?.some(t=>t.id===id))}
 async function coverEnsurePlaylist(key){const id=data.profile?.spotifyPlaylists?.[key];if(!id)throw new Error("Choose your "+(key==="drums"?"Drums":"Guitar")+" playlist in Profile first");const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};return items}
 async function coverAddPlaylist(x,key){const id=data.profile?.spotifyPlaylists?.[key];if(!id)throw new Error("Choose your "+(key==="drums"?"Drums":"Guitar")+" playlist in Profile first");const items=await coverEnsurePlaylist(key);if(items.some(t=>t.id===x.spotifyId))return false;if(!x.spotifyUri){const track=await spotifyApi("/tracks/"+encodeURIComponent(x.spotifyId));x.spotifyUri=track.uri||""}if(!x.spotifyUri)throw new Error("Spotify track URI is missing");await spotifyApi("/playlists/"+encodeURIComponent(id)+"/items",{method:"POST",body:JSON.stringify({uris:[x.spotifyUri]})});items.push({id:x.spotifyId,uri:x.spotifyUri,name:x.title});return true}
-function openCoverEditModal(id){const x=(data.coverProjects||[]).find(p=>String(p.id)===String(id));if(!x)return;$("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal cover-instagram-modal" role="dialog" aria-modal="true"><button type="button" class="modal-close" data-close-modal>×</button><h2>Edit cover</h2><p>'+esc(x.title)+'</p><label class="cover-instagram-field">Instagram video URL<input id="coverInstagramUrl" type="url" placeholder="https://www.instagram.com/reel/…" value="'+esc(x.instagramUrl||'')+'"></label><div class="cover-edit-video"><label class="posted-video-upload"><span>'+(x.videoFileName?'Replace gallery video':'Add video from gallery')+'</span><input type="file" accept="video/*" data-cover-video="'+esc(x.id)+'"></label>'+(x.videoFileName?'<button type="button" class="cover-remove-video" data-cover-video-remove="'+esc(x.id)+'">Remove cover</button>':'')+'</div><div class="modal-actions"><button type="button" class="cover-instagram-save" data-save-cover-instagram="'+esc(x.id)+'">Save changes</button></div></section></div>'}
-function openCoverInstagramModal(id){const x=(data.coverProjects||[]).find(p=>String(p.id)===String(id));if(!x)return;$("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal cover-instagram-modal" role="dialog" aria-modal="true"><button type="button" class="modal-close" data-close-modal>×</button><h2>Instagram link</h2><p>Add an optional Instagram link for '+esc(x.title)+'. Your gallery video can be added separately on the Posted card.</p><label class="cover-instagram-field">Instagram video URL<input id="coverInstagramUrl" type="url" placeholder="https://www.instagram.com/reel/…" value="'+esc(x.instagramUrl||'')+'"></label><div class="modal-actions"><button type="button" class="cover-instagram-save" data-save-cover-instagram="'+esc(x.id)+'">Save link</button></div></section></div>'}
+function openCoverEditModal(id){const x=(data.coverProjects||[]).find(p=>String(p.id)===String(id));if(!x)return;$("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal cover-instagram-modal" role="dialog" aria-modal="true"><button type="button" class="modal-close" data-close-modal>×</button><h2>Edit cover</h2><p>'+esc(x.title)+'</p><label class="cover-instagram-field">Instagram video URL<input id="coverInstagramUrl" type="url" placeholder="https://www.instagram.com/reel/." value="'+esc(x.instagramUrl||'')+'"></label><div class="cover-edit-video"><label class="posted-video-upload"><span>'+(x.videoFileName?'Replace gallery video':'Add video from gallery')+'</span><input type="file" accept="video/*" data-cover-video="'+esc(x.id)+'"></label>'+(x.videoFileName?'<button type="button" class="cover-remove-video" data-cover-video-remove="'+esc(x.id)+'">Remove cover</button>':'')+'</div><div class="modal-actions"><button type="button" class="cover-instagram-save" data-save-cover-instagram="'+esc(x.id)+'">Save changes</button></div></section></div>'}
+function openCoverInstagramModal(id){const x=(data.coverProjects||[]).find(p=>String(p.id)===String(id));if(!x)return;$("modalRoot").innerHTML='<div class="modal-backdrop"><section class="modal cover-instagram-modal" role="dialog" aria-modal="true"><button type="button" class="modal-close" data-close-modal>×</button><h2>Instagram link</h2><p>Add an optional Instagram link for '+esc(x.title)+'. Your gallery video can be added separately on the Posted card.</p><label class="cover-instagram-field">Instagram video URL<input id="coverInstagramUrl" type="url" placeholder="https://www.instagram.com/reel/." value="'+esc(x.instagramUrl||'')+'"></label><div class="modal-actions"><button type="button" class="cover-instagram-save" data-save-cover-instagram="'+esc(x.id)+'">Save link</button></div></section></div>'}
 const coverVideoDbName="sidequest-cover-videos";
 function coverVideoDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(coverVideoDbName,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains("videos"))req.result.createObjectStore("videos")};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function coverVideoPut(id,blob){const db=await coverVideoDb();return new Promise((resolve,reject)=>{const tx=db.transaction("videos","readwrite");tx.objectStore("videos").put(blob,String(id));tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
@@ -680,14 +680,14 @@ function coversPage(){
  const projects=data.coverProjects||[],active=projects.filter(x=>x.status!=="Posted"),posted=projects.filter(x=>x.status==="Posted"),nativeCovers=spotifyNative();
  const cards=active.map(x=>{const keys=coverKeys(x),learned=x.learned||{},perfected=x.perfected||{},allLearned=keys.every(k=>learned[k]||coverHas(k,x.spotifyId)),allPerfected=keys.every(k=>perfected[k]);if(!["Learning","Practising","Recording","Posted"].includes(x.status))x.status=["Ready to post","Editing"].includes(x.status)?"Recording":"Learning";const stage=x.status==="Learning"&&allLearned?"Practising":x.status==="Practising"&&allPerfected?"Recording":x.status||"Learning";if(stage!==x.status)x.status=stage;let actions="";if(stage==="Learning")actions=keys.map(k=>'<button type="button" class="cover-stage-action" data-cover-learn="'+esc(x.id)+'" data-cover-instrument="'+k+'" '+((learned[k]||coverHas(k,x.spotifyId))?'disabled':'')+'>Learnt '+(k==="drums"?"drums":"guitar")+'</button>').join("");if(stage==="Practising")actions=keys.map(k=>'<button type="button" class="cover-stage-action" data-cover-perfect="'+esc(x.id)+'" data-cover-instrument="'+k+'" '+(perfected[k]?'disabled':'')+'>Perfected '+(k==="drums"?"drums":"guitar")+'</button>').join("");if(stage==="Recording")actions='<button type="button" class="cover-stage-action cover-stage-primary" data-cover-recorded="'+esc(x.id)+'">Recorded</button>';return '<article class="cover-card"><div class="cover-card-head">'+(x.cover?'<img class="cover-album-art" src="'+esc(x.cover)+'" alt="Album artwork">':'<div class="cover-album-art cover-album-art-empty">♪</div>')+'<div class="cover-song"><strong>'+esc(x.title)+'</strong><small>'+esc(x.artist||'Artist not set')+'</small></div><button type="button" class="cover-delete" data-cover-delete="'+esc(x.id)+'">Remove</button></div><div class="cover-stage-line"><span>Status</span><strong>'+stage+'</strong></div><div class="cover-instrument-progress">'+keys.map(k=>'<span class="'+((learned[k]||coverHas(k,x.spotifyId))?'done':'')+'">'+(k==="drums"?"Drums":"Guitar")+': '+((learned[k]||coverHas(k,x.spotifyId))?'Learnt':'To learn')+'</span>').join("")+'</div><div class="cover-stage-actions">'+actions+'</div></article>'}).join("")||'<div class="cover-empty"><strong>No covers planned yet</strong><p>Search Spotify and press Cover on a song to add it here.</p></div>';
   const postedCards=posted.map(x=>'<article class="posted-cover-card">'+(nativeCovers?'<button type="button" class="posted-cover-thumb" data-cover-play="'+esc(x.id)+'" aria-label="Play video for '+esc(x.title)+'">':'<div class="posted-cover-thumb">')+(x.videoCover?'<img class="posted-video-cover" src="'+esc(x.videoCover)+'" alt="Video cover for '+esc(x.title)+'">':'<div class="posted-cover-placeholder">No cover image</div>')+(x.cover?'<img class="posted-album-badge" src="'+esc(x.cover)+'" alt="Album artwork">':'')+(nativeCovers?'<span class="posted-play-icon">▶</span></button>':'</div>')+'<div class="posted-cover-info"><strong>'+esc(x.title)+'</strong><small>'+esc(x.artist||'')+'</small><div class="posted-cover-actions"><button type="button" class="posted-edit-button" data-cover-edit="'+esc(x.id)+'" aria-label="Edit video and Instagram link" title="Edit"><i class="sq-icon" data-lucide="pencil" aria-hidden="true"></i></button>'+(x.instagramUrl?'<a class="posted-instagram-button" href="'+esc(x.instagramUrl)+'" target="_blank" rel="noopener noreferrer">Open in Instagram</a>':'<button type="button" class="posted-instagram-button" disabled>Open in Instagram</button>')+'</div></div></article>').join("")||'<div class="cover-empty"><strong>No posted covers yet</strong><p>Finished recordings will appear here.</p></div>';
- return '<section class="covers-view"><div class="cover-view-tabs"><button type="button" data-cover-tab="all" class="'+(coversActiveTab==="all"?"active":"")+'">Covers</button><button type="button" data-cover-tab="posted" class="'+(coversActiveTab==="posted"?"active":"")+'">Posted <span>'+posted.length+'</span></button></div>'+(coversActiveTab==="posted"?'<div class="posted-cover-grid">'+postedCards+'</div>':'<form class="cover-form" data-cover-form><div class="section-head"><h2>Plan a cover</h2></div><div class="cover-form-grid"><label>Instruments<select name="instruments"><option>Drums &amp; Guitar</option><option>Drums</option><option>Guitar</option></select></label></div><div class="cover-song-search"><label for="spotifyCoverQuery">Find a song on Spotify</label><input id="spotifyCoverQuery" type="search" autocomplete="off" placeholder="Search songs or artists…"><div id="spotifyCoverResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Search Spotify to find a song to cover.</p></div></div></form><div class="section-head cover-list-heading"><h2>Your covers</h2><small>'+active.length+' in progress</small></div><div class="cover-list">'+cards+'</div>')+'</section>';
+ return '<section class="covers-view"><div class="cover-view-tabs"><button type="button" data-cover-tab="all" class="'+(coversActiveTab==="all"?"active":"")+'">Covers</button><button type="button" data-cover-tab="posted" class="'+(coversActiveTab==="posted"?"active":"")+'">Posted <span>'+posted.length+'</span></button></div>'+(coversActiveTab==="posted"?'<div class="posted-cover-grid">'+postedCards+'</div>':'<form class="cover-form" data-cover-form><div class="section-head"><h2>Plan a cover</h2></div><div class="cover-form-grid"><label>Instruments<select name="instruments"><option>Drums &amp; Guitar</option><option>Drums</option><option>Guitar</option></select></label></div><div class="cover-song-search"><label for="spotifyCoverQuery">Find a song on Spotify</label><input id="spotifyCoverQuery" type="search" autocomplete="off" placeholder="Search songs or artists."><div id="spotifyCoverResults" class="spotify-results" aria-live="polite"><p class="spotify-status">Search Spotify to find a song to cover.</p></div></div></form><div class="section-head cover-list-heading"><h2>Your covers</h2><small>'+active.length+' in progress</small></div><div class="cover-list">'+cards+'</div>')+'</section>';
 }
 async function spotifySearchCovers(query){
  const results=$("spotifyCoverResults"),sequence=++spotifyCoverSearchSequence;
  if(!results)return;
  if(!spotifyTokens()){results.innerHTML='<p class="spotify-status">Connect Spotify in the Music tab to search for cover songs.</p>';return}
- if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters…</p>':'';spotifyCoverTracks=[];return}
- results.innerHTML='<p class="spotify-status">Searching Spotify…</p>';
+ if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters.</p>':'';spotifyCoverTracks=[];return}
+ results.innerHTML='<p class="spotify-status">Searching Spotify.</p>';
  try{
   const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"6"}));
   if(sequence!==spotifyCoverSearchSequence||$("spotifyCoverQuery")?.value.trim()!==query)return;
@@ -703,8 +703,8 @@ async function spotifySearchCovers(query){
 async function spotifySearchTracks(queryOverride){
  const input=$("spotifyTrackQuery"),query=String(queryOverride??input?.value??"").trim(),results=$("spotifyResults"),sequence=++spotifySearchSequence;
  if(!results)return;
- if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters…</p>':'<p class="spotify-status">Search songs or artists…</p>';spotifyTracks=[];return}
- results.innerHTML='<p class="spotify-status">Searching Spotify…</p>';
+ if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters.</p>':'<p class="spotify-status">Search songs or artists.</p>';spotifyTracks=[];return}
+ results.innerHTML='<p class="spotify-status">Searching Spotify.</p>';
  try{
   const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"8"}));
   if(sequence!==spotifySearchSequence||$("spotifyTrackQuery")?.value.trim()!==query)return;
@@ -746,7 +746,7 @@ async function spotifyAddTrack(index){
   if(existing) existing.instrument=existing.instrument==="Both"||choice==="Both"?"Both":choice;
   else data.musicSongs.push({id:String(Date.now())+Math.random().toString(36).slice(2,6),spotifyId:track.id,title:track.name,artist:(track.artists||[]).map(a=>a.name).join(", "),album:track.album?.name||"",cover:track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"",spotifyUrl:track.external_urls?.spotify||"",instrument:choice,createdAt:new Date().toISOString()});
   save();spotifyMusicCache={};
-  const search=$("spotifyTrackQuery");if(search)search.value="";spotifyTracks=[];spotifySearchSequence++;const searchResults=$("spotifyResults");if(searchResults)searchResults.innerHTML='<p class="spotify-status">Search songs or artists…</p>';
+  const search=$("spotifyTrackQuery");if(search)search.value="";spotifyTracks=[];spotifySearchSequence++;const searchResults=$("spotifyResults");if(searchResults)searchResults.innerHTML='<p class="spotify-status">Search songs or artists.</p>';
   const btn=$("spotifyResults")?.querySelector('[data-spotify-add="'+index+'"]');if(btn){btn.textContent="Added";btn.disabled=true;btn.setAttribute("aria-disabled","true")}
   toast("Added and synced to "+destinations.map(d=>d.key==="drums"?"Drums":"Guitar").join(" and "));
   spotifyLoadMusicPlaylist(musicActiveTab,true);
@@ -780,7 +780,7 @@ async function spotifyLoadMusicPlaylist(key,force=false){
   if(missing.length){list.innerHTML='<p class="spotify-status">Connect both your Drums and Guitar playlists in Profile to see songs they share.</p>';return}
   const cacheKey=ids.map(x=>x.id).join("|");
   if(!force&&spotifyMusicCache.both?.ids===cacheKey){renderMusicPlaylistTracks("both");return}
-  list.innerHTML='<p class="spotify-status">Finding songs in both playlists…</p>';
+  list.innerHTML='<p class="spotify-status">Finding songs in both playlists.</p>';
   try{
    const [drums,guitar]=await Promise.all(ids.map(x=>spotifyFetchAllPlaylistItems(x.id)));
    spotifyMusicCache.drums={id:ids[0].id,items:drums};spotifyMusicCache.guitar={id:ids[1].id,items:guitar};
@@ -793,7 +793,7 @@ async function spotifyLoadMusicPlaylist(key,force=false){
  const id=data.profile?.spotifyPlaylists?.[key];
  if(!id){list.innerHTML='<p class="spotify-status">Choose your '+(key==="drums"?"Drums":"Guitar")+' playlist in Profile to see it here.</p>';return}
  if(!force&&spotifyMusicCache[key]?.id===id){await spotifyEnsureSkillPlaylists();renderMusicPlaylistTracks(key);return}
- list.innerHTML='<p class="spotify-status">Loading playlist…</p>';
+ list.innerHTML='<p class="spotify-status">Loading playlist.</p>';
  try{const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};await spotifyEnsureSkillPlaylists();renderMusicPlaylistTracks(key)}
  catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
@@ -818,7 +818,7 @@ async function spotifyRemoveTrack(trackId){
  const destinations=[...new Set(targets.map(key=>data.profile?.spotifyPlaylists?.[key]).filter(Boolean))];
  if(!destinations.length){toast("Choose a Spotify playlist in Profile first");return}
  if(!window.confirm("Remove this song from "+(musicActiveTab==="both"?"both playlists":musicActiveTab+" playlist")+"?"))return;
- if(button){button.disabled=true;button.textContent="Removing…"}
+ if(button){button.disabled=true;button.textContent="Removing."}
  try{
   const uri="spotify:track:"+trackId;
   for(const playlistId of destinations)await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items",{method:"DELETE",body:JSON.stringify({items:[{uri}]})});
@@ -834,7 +834,7 @@ async function spotifyCreatePlaylist(){
 function musicLibraryPage(){
  const active=["guitar","both"].includes(musicActiveTab)?musicActiveTab:"drums",label=active==="both"?"Both":active==="guitar"?"Guitar":"Drums";
  const tabs='<div class="music-playlist-tabs"><button type="button" data-music-tab="drums" class="'+(active==="drums"?"active":"")+'">Drums</button><button type="button" data-music-tab="guitar" class="'+(active==="guitar"?"active":"")+'">Guitar</button><button type="button" data-music-tab="both" class="'+(active==="both"?"active":"")+'">Both</button></div>';
- return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section">'+tabs+'<div class="section-head"><h2>'+label+(active==="both"?" playlists":" playlist")+'</h2><small>Spotify synced</small></div><div class="playlist-sort-row"><label for="musicPlaylistSort">Order by</label><select id="musicPlaylistSort" aria-label="Order playlist by"><option value="spotify" '+(musicPlaylistSort==="spotify"?"selected":"")+' >Spotify order</option><option value="title" '+(musicPlaylistSort==="title"?"selected":"")+' >Song title A–Z</option><option value="artist" '+(musicPlaylistSort==="artist"?"selected":"")+' >Artist A–Z</option><option value="newest" '+(musicPlaylistSort==="newest"?"selected":"")+' >Recently added</option><option value="oldest" '+(musicPlaylistSort==="oldest"?"selected":"")+' >Oldest added</option></select></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist…</p></div></section>';
+ return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-playlist-section">'+tabs+'<div class="section-head"><h2>'+label+(active==="both"?" playlists":" playlist")+'</h2><small>Spotify synced</small></div><div class="playlist-sort-row"><label for="musicPlaylistSort">Order by</label><select id="musicPlaylistSort" aria-label="Order playlist by"><option value="spotify" '+(musicPlaylistSort==="spotify"?"selected":"")+' >Spotify order</option><option value="title" '+(musicPlaylistSort==="title"?"selected":"")+' >Song title A–Z</option><option value="artist" '+(musicPlaylistSort==="artist"?"selected":"")+' >Artist A–Z</option><option value="newest" '+(musicPlaylistSort==="newest"?"selected":"")+' >Recently added</option><option value="oldest" '+(musicPlaylistSort==="oldest"?"selected":"")+' >Oldest added</option></select></div><div id="musicPlaylistTracks" class="spotify-results"><p class="spotify-status">Loading playlist.</p></div></section>';
 }
 function render(){
  document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
@@ -936,7 +936,7 @@ document.addEventListener("click",async e=>{
  const coverPick=e.target.closest("[data-cover-pick]");if(coverPick){const track=spotifyCoverTracks[Number(coverPick.dataset.coverPick)];if(!track)return;if((data.coverProjects||[]).some(x=>x.spotifyId===track.id)){toast("That song is already in your covers");return}const form=document.querySelector("[data-cover-form]"),instrument=String(new FormData(form).get("instruments")||"Drums & Guitar"),keys=instrument==="Drums"?["drums"]:instrument==="Guitar"?["guitar"]:["drums","guitar"];if(keys.some(k=>!data.profile?.spotifyPlaylists?.[k])){toast("Choose your "+keys.filter(k=>!data.profile?.spotifyPlaylists?.[k]).map(k=>k==="drums"?"Drums":"Guitar").join(" and ")+" playlist in Profile first");return}data.coverProjects=data.coverProjects||[];data.coverProjects.unshift({id:String(Date.now())+Math.random().toString(36).slice(2,6),title:track.name,artist:(track.artists||[]).map(a=>a.name).join(", "),instruments:instrument,spotifyId:track.id,spotifyUri:track.uri||"",album:track.album?.name||"",cover:track.album?.images?.[1]?.url||track.album?.images?.[0]?.url||"",spotifyUrl:track.external_urls?.spotify||"",status:"Learning",learned:{},perfected:{},createdAt:new Date().toISOString()});save();const q=$("spotifyCoverQuery");if(q)q.value="";spotifyCoverTracks=[];spotifyCoverSearchSequence++;render();toast("Cover added");return}
  const coverTab=e.target.closest("[data-cover-tab]");if(coverTab){coversActiveTab=coverTab.dataset.coverTab==="posted"?"posted":"all";render();return}
   const coverDelete=e.target.closest("[data-cover-delete]");if(coverDelete){if(!window.confirm("Remove this cover from your list?"))return;const removed=coverDelete.dataset.coverDelete;data.coverProjects=(data.coverProjects||[]).filter(x=>String(x.id)!==removed);coverVideoDelete(removed);save();render();return}
- const learn=e.target.closest("[data-cover-learn]");if(learn){const x=data.coverProjects.find(p=>String(p.id)===learn.dataset.coverLearn),key=learn.dataset.coverInstrument;if(!x||!window.confirm("Mark "+key+" as learnt and add it to your "+key+" playlist if it is not already there?"))return;try{const added=await coverAddPlaylist(x,key);x.learned=x.learned||{};x.learned[key]=true;if(coverKeys(x).every(k=>x.learned[k]||coverHas(k,x.spotifyId)))x.status="Practising";save();render();toast(added?"Added to playlist":"Already in playlist — marked learnt")}catch(err){toast(err.message)}return}
+ const learn=e.target.closest("[data-cover-learn]");if(learn){const x=data.coverProjects.find(p=>String(p.id)===learn.dataset.coverLearn),key=learn.dataset.coverInstrument;if(!x||!window.confirm("Mark "+key+" as learnt and add it to your "+key+" playlist if it is not already there?"))return;try{const added=await coverAddPlaylist(x,key);x.learned=x.learned||{};x.learned[key]=true;if(coverKeys(x).every(k=>x.learned[k]||coverHas(k,x.spotifyId)))x.status="Practising";save();render();toast(added?"Added to playlist":"Already in playlist . marked learnt")}catch(err){toast(err.message)}return}
  const perfect=e.target.closest("[data-cover-perfect]");if(perfect){const x=data.coverProjects.find(p=>String(p.id)===perfect.dataset.coverPerfect),key=perfect.dataset.coverInstrument;if(!x||!window.confirm("Mark "+key+" as perfected?"))return;x.perfected=x.perfected||{};x.perfected[key]=true;if(coverKeys(x).every(k=>x.perfected[k]))x.status="Recording";save();render();return}
  const recorded=e.target.closest("[data-cover-recorded]");if(recorded){const x=data.coverProjects.find(p=>String(p.id)===recorded.dataset.coverRecorded);if(!x||!window.confirm("Confirm the recording is finished and move this cover to Posted?"))return;x.status="Posted";x.postedAt=new Date().toISOString();coversActiveTab="posted";save();render();openCoverInstagramModal(x.id);return}
  const editCover=e.target.closest("[data-cover-edit]");if(editCover){openCoverEditModal(editCover.dataset.coverEdit);return}
@@ -958,7 +958,7 @@ document.addEventListener("change",e=>{
  const playlistSelect=e.target.closest("[data-spotify-profile-playlist]");if(playlistSelect){const key=playlistSelect.dataset.spotifyProfilePlaylist,value=playlistSelect.value;data.profile=data.profile||{};data.profile.spotifyPlaylists=data.profile.spotifyPlaylists||{};if(value)data.profile.spotifyPlaylists[key]=value;else delete data.profile.spotifyPlaylists[key];if(!persistSpotifyPlaylistPrefs()||!save())return;spotifyMusicCache={};if(syncConfig&&syncReady){clearTimeout(syncTimer);syncPush().catch(err=>console.warn("Playlist sync will retry",err))}return}
   if(e.target.matches("#musicPlaylistSort")){musicPlaylistSort=e.target.value;renderMusicPlaylistTracks(musicActiveTab);return}
  const instagram=e.target.closest("[data-cover-instagram]");if(instagram){const cover=(data.coverProjects||[]).find(x=>String(x.id)===instagram.dataset.coverInstagram);if(cover){const value=instagram.value.trim();if(value&&!/^https?:\/\/(www\.)?instagram\.com\//i.test(value)){toast("Enter a valid Instagram URL");return}cover.instagramUrl=value;save();render();toast("Instagram post saved")}return}
-  const videoInput=e.target.closest("[data-cover-video]");if(videoInput){$("modalRoot").innerHTML="";const file=videoInput.files?.[0],cover=(data.coverProjects||[]).find(x=>String(x.id)===videoInput.dataset.coverVideo);if(!file||!cover)return;if(!file.type.startsWith("video/")){toast("Choose a video file");return}if(file.size>200*1024*1024){toast("Choose a video smaller than 200 MB");return}toast("Adding video and creating cover…");(async()=>{try{const thumbnail=await coverVideoThumbnail(file);await coverVideoPut(cover.id,file);cover.videoCover=thumbnail;cover.videoFileName=file.name;cover.videoMimeType=file.type;cover.videoAddedAt=new Date().toISOString();if(save()){render();toast("Video added — cover image updated")}}catch(err){console.error(err);toast("Could not add that video. Try an MP4 or MOV file.")}})();return}
+  const videoInput=e.target.closest("[data-cover-video]");if(videoInput){$("modalRoot").innerHTML="";const file=videoInput.files?.[0],cover=(data.coverProjects||[]).find(x=>String(x.id)===videoInput.dataset.coverVideo);if(!file||!cover)return;if(!file.type.startsWith("video/")){toast("Choose a video file");return}if(file.size>200*1024*1024){toast("Choose a video smaller than 200 MB");return}toast("Adding video and making cover image.");(async()=>{try{const thumbnail=await coverVideoThumbnail(file);await coverVideoPut(cover.id,file);cover.videoCover=thumbnail;cover.videoFileName=file.name;cover.videoMimeType=file.type;cover.videoAddedAt=new Date().toISOString();if(save()){render();toast("Video added . cover image updated")}}catch(err){console.error(err);toast("Could not add that video. Try an MP4 or MOV file.")}})();return}
 });
 document.addEventListener("input",e=>{
  if(e.target.matches("[data-trick-search]")){trickSearch=e.target.value;const view=$("view"),cards=view.querySelectorAll(".trick-card"),q=trickSearch.toLowerCase();cards.forEach(card=>card.hidden=!card.querySelector("strong").textContent.toLowerCase().includes(q));const count=view.querySelector(".trick-library .section-head small");if(count)count.textContent=view.querySelectorAll(".trick-card:not([hidden])").length+" of "+tricks.length;return}
@@ -1023,17 +1023,17 @@ async function checkForUpdates(){
 async function manualSync(){
  if(!navigator.onLine){toast("Connect to the internet to check for updates");return}
  if(syncBusy){toast("Sync is already running");return}
- toast("Checking for updates…");
+ toast("Checking for updates.");
  const syncTask=syncConfig?syncPull():Promise.resolve(null);
  const [ok,updateAvailable]=await Promise.all([syncTask,checkForUpdates()]);
  if(updateAvailable){
-  toast("Update found — refreshing Side Quest…");
+  toast("Update found. Refreshing Side Quest.");
   setTimeout(()=>{const url=new URL("./",location.href);url.searchParams.set("refresh",String(Date.now()));location.replace(url.href)},700);
   return;
  }
- if(!syncConfig){toast("You're up to date — connect devices to sync progress");return}
- if(ok)toast(syncDirty?"Sync pending — will retry":"Sync complete");
- else toast("Update check complete — sync unavailable");
+ if(!syncConfig){toast("You're up to date. Connect another device to sync your progress.");return}
+ if(ok)toast(syncDirty?"Sync pending. Will retry shortly.":"Sync complete");
+ else toast("Update check complete. Sync is unavailable.");
 }
 $("syncBtn").addEventListener("click",manualSync);
 loadDS26().then(()=>{const view=$("view");view?.querySelector(".college-load-error")?.remove();if(page==="Overview")render();}).catch(e=>{console.error("DS26 schedule failed to load",e);const view=$("view");if(view&&page==="Overview")view.insertAdjacentHTML("afterbegin",'<div class="college-load-error" role="alert"><strong>College schedule could not load.</strong><span>Check your connection, then refresh the app. Your saved progress has not been changed.</span></div>')});
