@@ -673,7 +673,7 @@ async function spotifySearchCovers(query){
  const results=$("spotifyCoverResults"),sequence=++spotifyCoverSearchSequence;
  if(!results)return;
  if(!spotifyTokens()){results.innerHTML='<p class="spotify-status">Connect Spotify in the Music tab to search for cover songs.</p>';return}
- if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters…</p>':'<p class="spotify-status">Search Spotify to pick a song for your cover.</p>';spotifyCoverTracks=[];return}
+ if(query.length<2){results.innerHTML=query?'<p class="spotify-status">Type at least 2 characters…</p>':'';spotifyCoverTracks=[];return}
  results.innerHTML='<p class="spotify-status">Searching Spotify…</p>';
  try{
   const result=await spotifyApi("/search?"+new URLSearchParams({q:query,type:"track",limit:"6"}));
