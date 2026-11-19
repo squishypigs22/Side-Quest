@@ -702,6 +702,18 @@ function musicLibraryPage(){
  const songs=data.musicSongs.slice().sort((a,b)=>String(a.title||"").localeCompare(String(b.title||""))),count=songs.length;
  return '<div class="page-head category-page-head cat-music"><h1>Music</h1></div>'+spotifyPanel()+'<section class="music-songs-section"><div class="section-head"><h2>My songs</h2><small>'+count+' total</small></div>'+(songs.length?songs.map(song=>'<article class="music-song-row">'+(song.cover?'<img class="music-library-cover" src="'+esc(song.cover)+'" alt="'+esc(song.album||"Album artwork")+'" loading="lazy">':'<span class="music-library-cover music-library-cover-empty">♪</span>')+'<div class="music-song-copy"><strong>'+esc(song.title||"Untitled song")+'</strong><small>'+esc(song.artist||"Artist not added")+'</small></div><span class="music-instrument-tag">'+esc(song.instrument||"Both")+'</span>'+'<a class="music-song-spotify" href="'+esc(song.spotifyUrl||("https://open.spotify.com/search/"+encodeURIComponent((song.title+" "+(song.artist||"")).trim())))+'" target="_blank" rel="noopener noreferrer">Spotify ↗</a><button type="button" class="music-song-delete" data-music-delete="'+esc(song.id)+'" aria-label="Remove '+esc(song.title)+'">×</button></article>').join(""):'<div class="music-empty"><strong>No songs added yet</strong><small>Search above and add songs you want to learn on drums or guitar.</small></div>')+'</section>';
 }
+function render(){
+ document.body.classList.toggle("work-mode",Boolean(data.profile?.workMode));
+ const labels=data.profile?.workMode?[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Profile",appIcon("profile"),"Profile"]]:[["College",appIcon("home"),"Overview"],["Music",appIcon("music"),"MusicLibrary"],["Track",appIcon("track"),"Track"],["Quests",appIcon("compass"),"Quests"],["Profile",appIcon("profile"),"Profile"]];
+ const profileSection=["Targets","Milestones","Tricks","Progress","ProgressCategory"].includes(page);
+ const questsSection=page==="Quests"||page==="SideQuests"||page==="Goals";
+ $("bottomNav").innerHTML=labels.map(([name,icon,target])=>'<button data-page="'+target+'" class="'+((target==="Profile"&&(page==="Profile"||profileSection)||target==="Quests"&&questsSection||page===target)?"active":"")+'"><span>'+icon+'</span>'+name+'</button>').join("");
+ let content=page==="MusicLibrary"?musicLibraryPage():page==="Overview"?dashboard():page==="Track"?trackPage():page==="Calendar"?calendarPage():page==="Progress"?progressPage():page==="ProgressCategory"?progressCategoryPage():page==="Tricks"?tricksPage():page==="Quests"||page==="SideQuests"||page==="Goals"?questsPage():page==="Milestones"?milestonesPage():page==="Targets"?targetsPage():page==="Profile"?profilePage():dashboard();
+ if(profileSection)content='<button type="button" class="profile-back" data-page="'+(page==="ProgressCategory"?"Progress":"Profile")+'">← Back</button>'+content;
+ $("view").innerHTML=content;
+ if(window.lucide?.createIcons)window.lucide.createIcons();
+ if(page==="Profile"&&spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();
+}
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("submit",e=>{
  const personalForm=e.target.closest("[data-personal-task-form],[data-personal-event-form],[data-personal-project-form],[data-personal-note-form]");
