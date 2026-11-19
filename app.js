@@ -695,18 +695,31 @@ async function spotifyAddTrack(index){
   spotifyLoadMusicPlaylist(musicActiveTab,true);
  }catch(e){toast(e.message)}
 }
+async function spotifyFetchAllPlaylistItems(playlistId){
+ const items=[];let offset=0,hasMore=true;
+ while(hasMore){
+  const result=await spotifyApi("/playlists/"+encodeURIComponent(playlistId)+"/items?limit=50&offset="+offset);
+  const page=(result.items||[]).map(row=>row.item||row.track||row).filter(t=>t&&t.id);
+  items.push(...page);
+  hasMore=Boolean(result.next)&&page.length>0;
+  offset+=page.length;
+ }
+ return items;
+}
 async function spotifyLoadMusicPlaylist(key,force=false){
  const list=$("musicPlaylistTracks");if(!list)return;
  if(key==="both"){
   const ids=["drums","guitar"].map(k=>({key:k,id:data.profile?.spotifyPlaylists?.[k]}));
   const missing=ids.filter(x=>!x.id);
-  if(missing.length){list.innerHTML='<p class="spotify-status">Connect both your Drums and Guitar playlists in Profile to see everything together.</p>';return}
-  if(!force&&spotifyMusicCache.both?.ids===ids.map(x=>x.id).join("|")){renderMusicPlaylistTracks("both");return}
-  list.innerHTML='<p class="spotify-status">Loading both playlists…</p>';
+  if(missing.length){list.innerHTML='<p class="spotify-status">Connect both your Drums and Guitar playlists in Profile to see songs they share.</p>';return}
+  const cacheKey=ids.map(x=>x.id).join("|");
+  if(!force&&spotifyMusicCache.both?.ids===cacheKey){renderMusicPlaylistTracks("both");return}
+  list.innerHTML='<p class="spotify-status">Finding songs in both playlists…</p>';
   try{
-   const results=await Promise.all(ids.map(async x=>{const r=await spotifyApi("/playlists/"+encodeURIComponent(x.id)+"/items?limit=50");return (r.items||[]).map(row=>row.item||row.track||row).filter(t=>t&&t.id)}));
-   const seen=new Set(),items=results.flat().filter(t=>!seen.has(t.id)&&seen.add(t.id));
-   spotifyMusicCache.both={ids:ids.map(x=>x.id).join("|"),items};renderMusicPlaylistTracks("both");
+   const [drums,guitar]=await Promise.all(ids.map(x=>spotifyFetchAllPlaylistItems(x.id)));
+   const guitarIds=new Set(guitar.map(t=>t.id));
+   const items=drums.filter(t=>guitarIds.has(t.id));
+   spotifyMusicCache.both={ids:cacheKey,items};renderMusicPlaylistTracks("both");
   }catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
   return;
  }
@@ -714,7 +727,7 @@ async function spotifyLoadMusicPlaylist(key,force=false){
  if(!id){list.innerHTML='<p class="spotify-status">Choose your '+(key==="drums"?"Drums":"Guitar")+' playlist in Profile to see it here.</p>';return}
  if(!force&&spotifyMusicCache[key]?.id===id){renderMusicPlaylistTracks(key);return}
  list.innerHTML='<p class="spotify-status">Loading playlist…</p>';
- try{const result=await spotifyApi("/playlists/"+encodeURIComponent(id)+"/items?limit=50");const items=(result.items||[]).map(row=>row.item||row.track||row).filter(t=>t&&t.id);spotifyMusicCache[key]={id,items};renderMusicPlaylistTracks(key)}
+ try{const items=await spotifyFetchAllPlaylistItems(id);spotifyMusicCache[key]={id,items};renderMusicPlaylistTracks(key)}
  catch(e){list.innerHTML='<p class="spotify-status">'+esc(e.message)+'</p>'}
 }
 function renderMusicPlaylistTracks(key){
