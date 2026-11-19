@@ -537,7 +537,8 @@ let spotifyTracks=[],spotifyPlaylists=[],spotifyBusy=false,spotifyUserProfile=nu
 const SPOTIFY_CLIENT_ID="341d366a42f94d35a0c4a1047dea7360";
 const spotifyClientId=()=>SPOTIFY_CLIENT_ID;
 const spotifyTokenKey="sq27_spotify_tokens";
-const spotifyRedirectUri=()=>location.origin+location.pathname;
+const spotifyNative=()=>Boolean(window.Capacitor?.isNativePlatform?.());
+const spotifyRedirectUri=()=>spotifyNative()?"com.sidequest.tracker://spotify-callback":location.origin+location.pathname;
 const spotifyScopes=["playlist-read-private","playlist-modify-private","playlist-modify-public","user-read-private"].join(" ");
 function spotifyTokens(){try{return JSON.parse(sessionStorage.getItem(spotifyTokenKey)||"null")}catch(e){return null}}
 function spotifySaveTokens(value){sessionStorage.setItem(spotifyTokenKey,JSON.stringify(value))}
@@ -562,19 +563,21 @@ function spotifyPanel(){
 function spotifyRandomString(length=64){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";const values=crypto.getRandomValues(new Uint8Array(length));return Array.from(values,x=>chars[x%chars.length]).join("")}
 function spotifyBase64Url(buffer){return btoa(String.fromCharCode(...new Uint8Array(buffer))).replace(/=/g,"").replace(/\+/g,"-").replace(/\//g,"_")}
 async function spotifyStartConnect(){
- const id=spotifyClientId();if(!id){toast("Save your Spotify app Client ID first");return}
+ const id=spotifyClientId();if(!id){toast("Spotify is not configured");return}
  if(!crypto?.subtle||!crypto?.getRandomValues){toast("Secure login needs a modern browser connection");return}
  const verifier=spotifyRandomString(),state=spotifyRandomString(32),digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(verifier)),challenge=spotifyBase64Url(digest);
  sessionStorage.setItem("sq27_spotify_verifier",verifier);sessionStorage.setItem("sq27_spotify_state",state);
  const url=new URL("https://accounts.spotify.com/authorize");
  url.search=new URLSearchParams({client_id:id,response_type:"code",redirect_uri:spotifyRedirectUri(),scope:spotifyScopes,state,code_challenge_method:"S256",code_challenge:challenge}).toString();
- location.assign(url.toString());
+ if(spotifyNative()&&window.Capacitor?.Plugins?.Browser?.open){
+  await window.Capacitor.Plugins.Browser.open({url:url.toString()});
+ }else location.assign(url.toString());
 }
-async function spotifyHandleCallback(){
- const params=new URLSearchParams(location.search),code=params.get("code"),error=params.get("error");
+async function spotifyHandleCallback(callbackUrl){
+ const callback=new URL(callbackUrl||location.href),params=callback.searchParams,code=params.get("code"),error=params.get("error");
  if(!code&&!error)return false;
  const returnedState=params.get("state"),savedState=sessionStorage.getItem("sq27_spotify_state"),verifier=sessionStorage.getItem("sq27_spotify_verifier");
- history.replaceState({},document.title,location.pathname+location.hash);
+ if(!callbackUrl)history.replaceState({},document.title,location.pathname+location.hash);
  if(error){spotifyClearTokens();toast("Spotify connection was cancelled");return true}
  if(!returnedState||returnedState!==savedState||!verifier){spotifyClearTokens();toast("Spotify sign-in could not be verified. Please try again.");return true}
  try{
@@ -584,6 +587,25 @@ async function spotifyHandleCallback(){
   sessionStorage.removeItem("sq27_spotify_verifier");sessionStorage.removeItem("sq27_spotify_state");
   toast("Spotify connected");return true;
  }catch(e){spotifyClearTokens();toast("Spotify sign-in failed: "+(e.message||"Try again"));return true}
+}
+async function spotifySetupNativeCallback(){
+ if(!spotifyNative())return;
+ const appPlugin=window.Capacitor?.Plugins?.App,browserPlugin=window.Capacitor?.Plugins?.Browser;
+ if(!appPlugin?.addListener){console.warn("Capacitor App plugin unavailable");return}
+ appPlugin.addListener("appUrlOpen",async event=>{
+  if(!event?.url?.startsWith("com.sidequest.tracker://spotify-callback"))return;
+  try{await browserPlugin?.close?.()}catch(_){}
+  await spotifyHandleCallback(event.url);
+  render();
+  if(spotifyTokens()){spotifyProfileLoaded=false;spotifyLoadAccount()}
+ });
+ try{
+  const launch=await appPlugin.getLaunchUrl?.();
+  if(launch?.url?.startsWith("com.sidequest.tracker://spotify-callback")){
+   try{await browserPlugin?.close?.()}catch(_){}
+   await spotifyHandleCallback(launch.url);
+  }
+ }catch(e){console.warn("Could not read Spotify launch URL",e)}
 }
 async function spotifyRefreshToken(){
  const current=spotifyTokens(),id=spotifyClientId();if(!current?.refresh_token||!id)throw new Error("Reconnect Spotify to continue");
@@ -828,7 +850,7 @@ async function manualSync(){
 $("syncBtn").addEventListener("click",manualSync);
 loadDS26().then(()=>{const view=$("view");view?.querySelector(".college-load-error")?.remove();if(page==="Overview")render();}).catch(e=>{console.error("DS26 schedule failed to load",e);const view=$("view");if(view&&page==="Overview")view.insertAdjacentHTML("afterbegin",'<div class="college-load-error" role="alert"><strong>College schedule could not load.</strong><span>Check your connection, then refresh the app. Your saved progress has not been changed.</span></div>')});
 
-spotifyHandleCallback().finally(()=>{render();if(spotifyTokens())spotifyLoadPlaylists()});
+spotifySetupNativeCallback().finally(()=>spotifyHandleCallback()).finally(()=>{render();if(spotifyTokens())spotifyLoadAccount()});
 if(syncConfig){syncReady=true;syncPull()}
 window.addEventListener("online",()=>{if(syncConfig){syncReady=true;syncPull()}});
 if("serviceWorker"in navigator)navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{});
