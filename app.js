@@ -783,8 +783,8 @@ function musicSongTagSelect(trackId,instrument,options,editable=true){
  const tags=data.musicSongTags?.[trackId]||{},value=tags[instrument]||"";
  const label=instrument==="guitar"?"Guitar":"Drums";
  const icon=instrument==="guitar"?'<i class="sq-icon" data-lucide="guitar" aria-hidden="true"></i>':'<i class="sq-icon" data-lucide="drum" aria-hidden="true"></i>';
- if(!musicEditMode||!editable)return value?`<span class="music-song-tag-pill" title="${label}"><span class="music-song-tag-icon">${icon}</span>${value==="riff"?"Riff":value.charAt(0).toUpperCase()+value.slice(1)}</span>`:"";
- return `<label class="music-song-tag"><span class="music-song-tag-icon">${icon}</span><select data-song-tag="${esc(trackId)}" data-song-instrument="${instrument}" aria-label="${label} progress for song"><option value="">Not tagged</option>${options.map(tag=>`<option value="${tag}"${value===tag?" selected":""}>${tag==="riff"?"Riff":tag.charAt(0).toUpperCase()+tag.slice(1)}</option>`).join("")}</select></label>`;
+ if(!musicEditMode||!editable)return value?`<span class="music-song-tag-pill music-song-tag-${instrument}" title="${label}"><span class="music-song-tag-icon">${icon}</span>${value==="riff"?"Riff":value.charAt(0).toUpperCase()+value.slice(1)}</span>`:"";
+ return `<label class="music-song-tag music-song-tag-${instrument}"><span class="music-song-tag-icon">${icon}</span><select data-song-tag="${esc(trackId)}" data-song-instrument="${instrument}" aria-label="${label} progress for song"><option value="">Not tagged</option>${options.map(tag=>`<option value="${tag}"${value===tag?" selected":""}>${tag==="riff"?"Riff":tag.charAt(0).toUpperCase()+tag.slice(1)}</option>`).join("")}</select></label>`;
 }
 function renderMusicPlaylistTracks(key){
  const list=$("musicPlaylistTracks");if(!list)return;
