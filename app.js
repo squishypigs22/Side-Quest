@@ -784,14 +784,18 @@ function spotifyInstrumentIndicators(trackId){
   const guitar=Boolean(spotifyMusicCache.guitar?.items?.some(t=>t.id===trackId));
   return '<span class="spotify-skill-icons" aria-label="'+(drums&&guitar?'Can play on drums and guitar':drums?'Can play on drums':guitar?'Can play on guitar':'No instrument selected')+'">'+(drums?'<i class="sq-icon" data-lucide="drum" title="Drums" aria-label="Drums"></i>':'')+(guitar?'<i class="sq-icon" data-lucide="guitar" title="Guitar" aria-label="Guitar"></i>':'')+'</span>';
  }
- function renderMusicPlaylistTracks(key){
+ function musicSongTagSelect(trackId,instrument,options){
+ const tags=data.musicSongTags?.[trackId]||{},value=tags[instrument]||"";
+ return '<label class="music-song-tag"><span>'+(instrument==="guitar"?"Guitar":"Drums")+'</span><select data-song-tag="'+esc(trackId)+'" data-song-instrument="'+instrument+'" aria-label="'+(instrument==="guitar"?"Guitar":"Drums")+' progress for song"><option value="">Not tagged</option>'+options.map(tag=>'<option value="'+tag+'"'+(value===tag?" selected":"")+">'+(tag==="riff"?"Intro riff":tag.charAt(0).toUpperCase()+tag.slice(1))+'</option>').join("")+'</select></label>';
+}
+function renderMusicPlaylistTracks(key){
  const list=$("musicPlaylistTracks");if(!list)return;
  const items=[...(spotifyMusicCache[key]?.items||[])];
  if(musicPlaylistSort==="title")items.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),undefined,{sensitivity:"base"}));
  else if(musicPlaylistSort==="artist")items.sort((a,b)=>String(a.artists?.[0]?.name||"").localeCompare(String(b.artists?.[0]?.name||""),undefined,{sensitivity:"base"})||String(a.name||"").localeCompare(String(b.name||"")));
  else if(musicPlaylistSort==="newest")items.sort((a,b)=>String(b._addedAt||"").localeCompare(String(a._addedAt||"")));
  else if(musicPlaylistSort==="oldest")items.sort((a,b)=>String(a._addedAt||"").localeCompare(String(b._addedAt||"")));
- list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+ list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small><div class="music-song-tags">'+musicSongTagSelect(t.id,"guitar",["riff","full","partial"])+musicSongTagSelect(t.id,"drums",["full","partial"])+'</div></div><button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button></article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 async function spotifyRemoveTrack(trackId){
@@ -937,6 +941,7 @@ document.addEventListener("click",async e=>{
  const y=e.target.closest("[data-year]");if(y){viewYear=Math.max(2026,Math.min(today.getFullYear(),viewYear+Number(y.dataset.year)));showAllMonths=false;render()}
 });
 document.addEventListener("change",e=>{
+ const songTag=e.target.closest("[data-song-tag]");if(songTag){const id=songTag.dataset.songTag,instrument=songTag.dataset.songInstrument;data.musicSongTags=data.musicSongTags||{};data.musicSongTags[id]=data.musicSongTags[id]||{};if(songTag.value)data.musicSongTags[id][instrument]=songTag.value;else delete data.musicSongTags[id][instrument];if(!Object.keys(data.musicSongTags[id]).length)delete data.musicSongTags[id];save();toast("Song tags saved");return}
  const themeSelect=e.target.closest("[data-app-theme]");if(themeSelect){data.profile=data.profile||{};data.profile.theme=themeSelect.value;save();render();toast(themeSelect.options[themeSelect.selectedIndex].text+" theme applied");return}
  const playlistSelect=e.target.closest("[data-spotify-profile-playlist]");if(playlistSelect){const key=playlistSelect.dataset.spotifyProfilePlaylist,value=playlistSelect.value;data.profile=data.profile||{};data.profile.spotifyPlaylists=data.profile.spotifyPlaylists||{};if(value)data.profile.spotifyPlaylists[key]=value;else delete data.profile.spotifyPlaylists[key];if(!persistSpotifyPlaylistPrefs()||!save())return;spotifyMusicCache={};if(syncConfig&&syncReady){clearTimeout(syncTimer);syncPush().catch(err=>console.warn("Playlist sync will retry",err))}return}
   if(e.target.matches("#musicPlaylistSort")){musicPlaylistSort=e.target.value;renderMusicPlaylistTracks(musicActiveTab);return}
