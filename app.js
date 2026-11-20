@@ -784,10 +784,10 @@ function spotifyInstrumentIndicators(trackId){
   const guitar=Boolean(spotifyMusicCache.guitar?.items?.some(t=>t.id===trackId));
   return '<span class="spotify-skill-icons" aria-label="'+(drums&&guitar?'Can play on drums and guitar':drums?'Can play on drums':guitar?'Can play on guitar':'No instrument selected')+'">'+(drums?'<i class="sq-icon" data-lucide="drum" title="Drums" aria-label="Drums"></i>':'')+(guitar?'<i class="sq-icon" data-lucide="guitar" title="Guitar" aria-label="Guitar"></i>':'')+'</span>';
  }
- function musicSongTagSelect(trackId,instrument,options){
+ function musicSongTagSelect(trackId,instrument,options,editable=true){
  const tags=data.musicSongTags?.[trackId]||{},value=tags[instrument]||"";
  const label=instrument==="guitar"?"Guitar":"Drums";
- if(!musicEditMode)return value?`<span class="music-song-tag-pill"><span>${label}</span> · ${value==="riff"?"Riff":value.charAt(0).toUpperCase()+value.slice(1)}</span>`:"";
+ if(!musicEditMode||!editable)return value?`<span class="music-song-tag-pill"><span>${label}</span> · ${value==="riff"?"Riff":value.charAt(0).toUpperCase()+value.slice(1)}</span>`:"";
  return `<label class="music-song-tag"><span>${label}</span><select data-song-tag="${esc(trackId)}" data-song-instrument="${instrument}" aria-label="${label} progress for song"><option value="">Not tagged</option>${options.map(tag=>`<option value="${tag}"${value===tag?" selected":""}>${tag==="riff"?"Riff":tag.charAt(0).toUpperCase()+tag.slice(1)}</option>`).join("")}</select></label>`;
 }
 function renderMusicPlaylistTracks(key){
@@ -797,7 +797,7 @@ function renderMusicPlaylistTracks(key){
  else if(musicPlaylistSort==="artist")items.sort((a,b)=>String(a.artists?.[0]?.name||"").localeCompare(String(b.artists?.[0]?.name||""),undefined,{sensitivity:"base"})||String(a.name||"").localeCompare(String(b.name||"")));
  else if(musicPlaylistSort==="newest")items.sort((a,b)=>String(b._addedAt||"").localeCompare(String(a._addedAt||"")));
  else if(musicPlaylistSort==="oldest")items.sort((a,b)=>String(a._addedAt||"").localeCompare(String(b._addedAt||"")));
- list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small><div class="music-song-tags">'+(key==="guitar"||key==="both"?musicSongTagSelect(t.id,"guitar",["riff","full","partial"]):"")+(key==="drums"||key==="both"?musicSongTagSelect(t.id,"drums",["full","partial"]):"")+'</div></div>'+(musicEditMode?'<button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button>':'')+'</article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
+ list.innerHTML=items.length?items.map(t=>{const cover=t.album?.images?.[1]?.url||t.album?.images?.[0]?.url||"";return '<article class="spotify-track"><img class="spotify-track-cover" src="'+esc(cover)+'" alt="Album artwork" loading="lazy"><div class="spotify-track-info"><div class="spotify-track-title-row"><strong>'+esc(t.name)+'</strong>'+spotifyInstrumentIndicators(t.id)+'</div><small>'+esc((t.artists||[]).map(a=>a.name).join(", "))+'</small><small class="spotify-album-name">'+esc(t.album?.name||"")+'</small><div class="music-song-tags">'+musicSongTagSelect(t.id,"guitar",["riff","full","partial"],key==="guitar"||key==="both")+musicSongTagSelect(t.id,"drums",["full","partial"],key==="drums"||key==="both")+'</div></div>'+(musicEditMode?'<button type="button" class="spotify-remove-track" data-spotify-remove="'+esc(t.id)+'" aria-label="Remove '+esc(t.name)+'">Remove</button>':'')+'</article>'}).join(""):'<p class="spotify-status">No songs in this playlist yet.</p>';
  if(window.lucide?.createIcons)window.lucide.createIcons();
 }
 async function spotifyRemoveTrack(trackId){
