@@ -851,3 +851,7 @@ body[data-theme="paper"] .brand-mark{border-color:var(--line)}
 /* v0.8.27 - per-song instrument progress tags */
 .music-song-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.music-song-tag{display:flex;align-items:center;gap:5px;min-width:0}.music-song-tag span{font-size:10px;color:var(--muted)}.music-song-tag select{max-width:112px;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--text);font:inherit;font-size:10px}.spotify-track-info{flex:1 1 auto}
 @media(max-width:520px){.music-song-tags{gap:5px}.music-song-tag{gap:4px}.music-song-tag select{max-width:104px}}
+
+/* v0.8.30 - music playlist edit mode */
+.playlist-sort-row{gap:7px}.music-edit-toggle{width:34px;height:34px;flex:0 0 34px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer}.music-edit-toggle .sq-icon{width:15px;height:15px}.music-edit-toggle.active{background:var(--music);border-color:var(--music);color:#171321}.music-song-tag-pill{display:inline-flex;align-items:center;gap:3px;padding:4px 7px;border:1px solid var(--line);border-radius:6px;background:var(--surface2);color:var(--text);font-size:10px;font-weight:750}.music-song-tag-pill>span{color:var(--muted);font-weight:600}
+@media(max-width:520px){.playlist-sort-row{gap:6px}.music-edit-toggle{width:34px;flex-basis:34px}}
