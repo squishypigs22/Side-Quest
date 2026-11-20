@@ -849,7 +849,7 @@ body[data-theme="paper"] .brand-mark{border-color:var(--line)}
 
 
 /* v0.8.27 - per-song instrument progress tags */
-.music-song-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.music-song-tag{display:flex;align-items:center;gap:5px;min-width:0}.music-song-tag span{font-size:10px;color:var(--muted)}.music-song-tag select{max-width:112px;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--text);font:inherit;font-size:10px}.spotify-track-info{flex:1 1 auto}
+.music-song-tags{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;margin-top:7px}.music-song-tag{display:flex;align-items:center;gap:5px;min-width:0}.music-song-tag span{font-size:10px;color:var(--muted)}.music-song-tag select{max-width:112px;min-width:0;padding:5px 6px;border:1px solid var(--line);border-radius:7px;background:var(--surface2);color:var(--text);font:inherit;font-size:10px}.spotify-track-info{flex:1 1 auto}
 @media(max-width:520px){.music-song-tags{gap:5px}.music-song-tag{gap:4px}.music-song-tag select{max-width:104px}}
 
 /* v0.8.30 - music playlist edit mode */
