@@ -787,7 +787,7 @@ function spotifyInstrumentIndicators(trackId){
  function musicSongTagSelect(trackId,instrument,options){
  const tags=data.musicSongTags?.[trackId]||{},value=tags[instrument]||"";
  const label=instrument==="guitar"?"Guitar":"Drums";
- return `<label class="music-song-tag"><span>${label}</span><select data-song-tag="${esc(trackId)}" data-song-instrument="${instrument}" aria-label="${label} progress for song"><option value="">Not tagged</option>${options.map(tag=>`<option value="${tag}"${value===tag?" selected":""}>${tag==="riff"?"Intro riff":tag.charAt(0).toUpperCase()+tag.slice(1)}</option>`).join("")}</select></label>`;
+ return `<label class="music-song-tag"><span>${label}</span><select data-song-tag="${esc(trackId)}" data-song-instrument="${instrument}" aria-label="${label} progress for song"><option value="">Not tagged</option>${options.map(tag=>`<option value="${tag}"${value===tag?" selected":""}>${tag==="riff"?"Riff":tag.charAt(0).toUpperCase()+tag.slice(1)}</option>`).join("")}</select></label>`;
 }
 function renderMusicPlaylistTracks(key){
  const list=$("musicPlaylistTracks");if(!list)return;
