@@ -1,4 +1,4 @@
-const CACHE="sidequest-2027-v231";
+const CACHE="sidequest-2027-v232";
 self.addEventListener("install",event=>event.waitUntil(self.skipWaiting()));
 self.addEventListener("activate",event=>event.waitUntil(
  caches.keys()
