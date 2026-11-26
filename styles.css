@@ -857,3 +857,5 @@ body[data-theme="paper"] .brand-mark{border-color:var(--line)}
 @media(max-width:520px){.playlist-sort-row{gap:6px}.music-edit-toggle{width:34px;flex-basis:34px}}
 
 .music-playlist-section .spotify-remove-track{display:none}.music-playlist-section.music-edit-mode .spotify-remove-track{display:inline-flex}
+
+.drago-avatar-icon{overflow:hidden;border-radius:50%!important;background:var(--surface2)!important;padding:0!important}.drago-avatar-icon img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
