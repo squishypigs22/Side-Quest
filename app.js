@@ -505,7 +505,7 @@ function questsPage(){
  (personal?mainQuestsPage():sideQuestsPage());
 }
 
-function profilePage(){
+let dragoAvatarRequested=false;function loadDragoAvatar(){const key="sq_drago_dev_channel_avatar_v1",img=$("dragoProfileAvatar");if(!img)return;try{const cached=localStorage.getItem(key);if(cached)img.src=cached}catch(e){}if(dragoAvatarRequested)return;dragoAvatarRequested=true;fetch("https://ests.sctools.org/api/get/channel/UCYNg8ImSywagnXQbGxegn6g?verbose=true").then(r=>{if(!r.ok)throw Error("Avatar unavailable");return r.json()}).then(ch=>{const url=ch.info?.avatar;if(!url)return;const current=$("dragoProfileAvatar");if(current)current.src=url;try{localStorage.setItem(key,url)}catch(e){}}).catch(()=>{dragoAvatarRequested=false})}function profilePage(){
  const totalMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).length,0);
  const completedMilestones=Object.values(data.mainQuestProgress||{}).reduce((n,q)=>n+(q.milestones||[]).filter(m=>m.done).length,0);
  const trickCount=tricks.length;
@@ -517,7 +517,7 @@ function profilePage(){
  ''+
  '<button class="profile-link" data-page="Tricks"><span class="profile-link-icon">'+appIcon("tricks")+'</span><span><strong>My tricks</strong><small>'+learntTricks+' / '+trickCount+' tricks learnt</small></span><span class="profile-chevron">›</span></button>'+
  '</div></section>'+
- '<section class="profile-section"><div class="section-head"><h2>Creator stats</h2><small>Public channel data</small></div><div class="profile-links"><a class="profile-link" href="./Youtube/"><span class="profile-link-icon"><i class="sq-icon" data-lucide="youtube" aria-hidden="true"></i></span><span><strong>YouTube</strong><small>Drago_Dev channel dashboard</small></span><span class="profile-chevron">›</span></a></div></section>'+
+ '<section class="profile-section"><div class="section-head"><h2>Creator stats</h2><small>Public channel data</small></div><div class="profile-links"><a class="profile-link" href="./Youtube/"><span class="profile-link-icon drago-avatar-icon"><img id="dragoProfileAvatar" alt="" src="" /></span><span><strong>YouTube</strong><small>Drago_Dev channel dashboard</small></span><span class="profile-chevron">›</span></a></div></section>'+
  '</div><div class="profile-column profile-column-spotify">'+spotifyProfilePanel()+
  '<section class="profile-section"><div class="section-head"><h2>Settings</h2><small>App and device</small></div><div class="profile-settings"><div class="profile-setting-row theme-setting-row"><span><strong>App theme</strong><small>Choose the colours and style used across Side Quest</small></span><select data-app-theme aria-label="App theme"><option value="midnight" '+((data.profile?.theme||"midnight")==="midnight"?"selected":"")+'>Midnight</option><option value="graphite" '+(data.profile?.theme==="graphite"?"selected":"")+'>Graphite</option></select></div><div class="profile-setting-row"><span><strong>Device sync</strong><small>'+(syncConfig?"Connected across devices":"Not connected")+'</small></span><button type="button" data-profile-action="connect">'+(syncConfig?"Manage":"Connect")+'</button></div><div class="profile-setting-row"><span><strong>Check for updates</strong><small>Current version v0.8.43</small></span><button type="button" data-profile-action="sync">Check</button></div></div></section>'+
  '</div></div>';
@@ -845,7 +845,7 @@ function render(){
  if(window.lucide?.createIcons)window.lucide.createIcons();
  if(page==="MusicLibrary"){if(spotifyTokens())spotifyLoadMusicPlaylist(musicActiveTab,true);else{const list=$("musicPlaylistTracks");if(list)list.innerHTML='<p class="spotify-status">Connect Spotify above to load your playlists.</p>'}}
  if(page==="Covers"&&spotifyTokens()&&(["drums","guitar"].some(k=>data.profile?.spotifyPlaylists?.[k]&&spotifyMusicCache[k]?.id!==data.profile.spotifyPlaylists[k])))spotifyEnsureSkillPlaylists().then(()=>{if(page==="Covers")render()});
- if(page==="Profile"&&spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();
+ if(page==="Profile"){loadDragoAvatar();if(spotifyTokens()&&!spotifyProfileLoaded)spotifyLoadAccount();}
 }
 function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
 document.addEventListener("submit",e=>{
